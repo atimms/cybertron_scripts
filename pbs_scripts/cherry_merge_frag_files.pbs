@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -N cherry_combine_
+#PBS -l mem=100gb,ncpus=5
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "tcherr"
+
+
+module load biobuilds
+
+
+##change to working dir
+cd /active/cherry_t/OrgManuscript_SingleCell_Data/human_scATAC/merge_fragments
+
+
+
+# decompress files and add the same cell prefix as was added to the Seurat object
+gzip -dc ../d53/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"d53_"$4,$5}' - > d53_fragments.tsv
+gzip -dc ../d74/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"d74_"$4,$5}' - > d74_fragments.tsv
+gzip -dc ../d78/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"d78_"$4,$5}' - > d78_fragments.tsv
+gzip -dc ../Hu5/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"Hu5_"$4,$5}' - > Hu5_fragments.tsv
+gzip -dc ../Hu7/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"Hu7_"$4,$5}' - > Hu7_fragments.tsv
+gzip -dc ../Hu8/outs/fragments.tsv.gz | awk 'BEGIN {FS=OFS="\t"} {print $1,$2,$3,"Hu8_"$4,$5}' - > Hu8_fragments.tsv
+
+# merge files (avoids having to re-sort)
+sort -m -k 1,1V -k2,2n d53_fragments.tsv d74_fragments.tsv d78_fragments.tsv Hu5_fragments.tsv Hu7_fragments.tsv Hu8_fragments.tsv  > fragments.tsv
+
+# block gzip compress the merged file
+bgzip -@ 4 fragments.tsv # -@ 4 uses 4 threads
+
+# index the bgzipped file
+tabix -p bed fragments.tsv.gz
+
+# remove intermediate files
+rm d53_fragments.tsv d74_fragments.tsv d78_fragments.tsv Hu5_fragments.tsv Hu7_fragments.tsv Hu8_fragments.tsv
+
+# then add these fragments to merged object
+

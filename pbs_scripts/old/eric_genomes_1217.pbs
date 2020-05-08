@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -N eric_genome
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "ealle2"
+
+echo 'work'
+eric_genomes_1217.py

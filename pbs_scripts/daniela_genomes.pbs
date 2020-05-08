@@ -1,0 +1,34 @@
+#!/bin/bash
+#PBS -N daniela_genomes
+#PBS -l mem=100gb,ncpus=5
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "dluque"
+
+echo 'work'
+module load java/1.8.0_121 
+module load biobuilds/2017.11
+module load vt/0.5772-60f436c3 
+# module load mono/5.10.1.47
+# module load Pisces/5.1.6.54
+
+
+#usually use: #PBS -l mem=200gb,ncpus=20
+
+##analysis 
+##maps data and calls variants
+# daniela_genomes_0719_cybertron.py
+##runs gemini
+# daniela_gemini_analysis_cybertron_v0.py
+##from uw vcf 0819
+# daniela_genomes_uw_vcf_0819_cybertron.py
+
+
+
+##exome analysis 1019
+# daniela_gemini_analysis_cybertron_v0.py
+
+##analysis from uw vcf 1119
+daniela_genomes_uw_1119_cybertron.py

@@ -1,0 +1,24 @@
+#!/bin/bash
+#PBS -N cherry_genomes
+#PBS -l mem=200gb,ncpus=20 
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "tcherr"
+
+echo 'work'
+module load java/1.8.0_121 
+module load biobuilds/2017.11
+module load vt/0.5772-60f436c3 
+# module load mono/5.10.1.47
+# module load Pisces/5.1.6.54
+
+
+#usually use: #PBS -l mem=200gb,ncpus=20
+
+
+##analysis 
+
+##analysis from uw vcf 1119
+cherry_stargardt_genomes_1119_cybertron.py

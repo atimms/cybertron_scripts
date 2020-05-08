@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -N sids_genome
+#PBS -l mem=200gb,ncpus=5
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "jrami1"
+
+echo 'work'
+module load java/1.8.0_121 
+module load biobuilds/2017.11
+
+
+##analysis 
+
+##for editing gvcf and cobining: #PBS -l mem=20gb,ncpus=1
+##for genotyping use: #PBS -l mem=200gb,ncpus=20
+
+sids_genomes_1119_cybertron.py

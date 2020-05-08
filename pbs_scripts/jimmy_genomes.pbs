@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N fetal_genome
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "jbenn1"
+
+echo 'work'
+module load java/1.8.0_121 
+module load biobuilds/2017.11
+module load vt/0.5772-60f436c3 
+module load mono/5.10.1.47
+module load Pisces/5.1.6.54
+
+##analysis 
+
+##for most use: #PBS -l mem=200gb,ncpus=20
+##for mutect split by chr and use #PBS -l mem=20gb,ncpus=20
+
+jimmy_fetal_genome_0819_cybertron.py

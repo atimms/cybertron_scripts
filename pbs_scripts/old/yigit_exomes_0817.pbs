@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -N yigit_exomes
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -A "wdobyn"
+#PBS -m abe
+
+echo 'work'
+yigit_aneurysm_exomes_0717.py

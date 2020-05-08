@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N salmon_analysis
+#PBS -l mem=200gb,ncpus=10
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "wdobyn"
+
+echo 'work'
+
+kim_salmon_auts2_hdbr_0619_cybertron.py

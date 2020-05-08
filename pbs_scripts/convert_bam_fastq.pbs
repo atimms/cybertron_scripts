@@ -1,0 +1,49 @@
+#!/bin/bash
+#PBS -N bam_to_fastq
+#PBS -l mem=1000gb,ncpus=40
+#PBS -o /home/atimms/pbs_logs
+
+
+##parameters will be passed in eventually
+working_dir=/home/atimms/ngs_data/genomes/LR16-302
+bamfile=8_0577.bam
+sample=8_0577
+
+##establisted parameters
+##changed for each test
+no_proc=40
+memory=20G
+
+bamfile=8_0577.bam
+sample=8_0577
+fq1=$sample'_r1'$test_no'.fq'
+fq2=$sample'_r2'$test_no'.fq'
+read_sorted_bam=$sample$test_no'n_sorted.bam'
+temp_bam_suffix=tempy$test_no
+
+cd $working_dir
+# time (samtools sort -nO bam -@ $no_proc -m $memory -T temp_one $bamfile | bedtools bamtofastq -i stdin -fq $fq1 -fq2 $fq2)
+
+
+# time(
+# samtools sort -nO bam -o $read_sorted_bam -@ $no_proc -m $memory -T $temp_bam_suffix $bamfile
+# bedtools bamtofastq -i $read_sorted_bam -fq $fq1 -fq2 $fq2
+# rm $read_sorted_bam
+# rm $temp_bam_suffix*bam
+# )
+
+sample=8_0577
+
+for sample in 
+do
+	bamfile=$sample'.bam'
+	fq1=$sample'_r1.fq'
+	fq2=$sample'_r2.fq'
+	read_sorted_bam=$sample'n_sorted.bam'
+	temp_bam_suffix=tempy
+
+	samtools sort -nO bam -o $read_sorted_bam -@ $no_proc -m $memory -T $temp_bam_suffix $bamfile
+	bedtools bamtofastq -i $read_sorted_bam -fq $fq1 -fq2 $fq2
+	rm $read_sorted_bam
+	rm $temp_bam_suffix*bam
+done

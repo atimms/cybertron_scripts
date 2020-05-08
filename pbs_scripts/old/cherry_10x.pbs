@@ -1,0 +1,30 @@
+#!/bin/bash
+#PBS -N 10x
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "cherryt"
+
+echo 'work'
+
+
+
+##analysis of atac 10x data using cell ranger 1.2 1119
+cd /home/atimms/ngs_data/misc/cherry_10x_atac_1119
+##count commands
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=20wk_c5_1 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/Organoid_timecourse_scATAC_rd1_Cherry_done/outs/fastq_path/HH73TDRXX/20wk_c5_1 --sample=20wk_c5_1
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=5wk_c5_1 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/Organoid_timecourse_scATAC_rd1_Cherry_done/outs/fastq_path/HH73TDRXX/5wk_c5_1 --sample=5wk_c5_1
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=IPSC_c5_1 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/Organoid_timecourse_scATAC_rd1_Cherry_done/outs/fastq_path/HH73TDRXX/IPSC_c5_1 --sample=IPSC_c5_1
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=20wk --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/20wk,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/20wk --sample=20wk
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=28-1 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/28-1,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/28-1 --sample=28-1
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=28-2 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/28-2,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/28-2 --sample=28-2
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=5wk --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/5wk,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/5wk --sample=5wk
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=Hu5 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/Hu5,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/Hu5 --sample=Hu5
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=Hu7 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/Hu7,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/Hu7 --sample=Hu7
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=Hu8 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/Hu8,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/Hu8 --sample=Hu8
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac count --id=IPSC_c4 --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_cherry_done/outs/fastq_path/HHCLGDRXX/IPSC_c4,/home/atimms/ngs_data/misc/cherry_10x_atac_1119/organoid_timecourse_scATAC_rd2_run2_done/outs/fastq_path/HHF2MDRXX/IPSC_c4 --sample=IPSC_c4
+
+##run aggr after making csv file (or using previoyus one)
+/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac aggr --id=organoid_atac_combined_cr12_1119 --csv=organoid_atac_combined_1119.csv --reference=/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0

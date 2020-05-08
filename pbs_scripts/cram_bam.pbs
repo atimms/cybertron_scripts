@@ -1,0 +1,30 @@
+#!/bin/bash
+#PBS -N cram_bam
+#PBS -l mem=100gb,ncpus=5
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "wdobyn"
+
+echo 'work'
+
+##sort environment
+module load biobuilds
+
+##ghayda 0320
+cd /home/atimms/ngs_data/genomes/ghayda_ucb_0320/crams
+#samtools view -b  -T <refgenome.fa> -o <file.bam> <file.cram>
+# for sample in UC1109008 UC1205034 UC1206006 UC1206140 UC1206141 UC1210009 UC1302036 UC1302037 UC1305007 UC1305008 UC1305009 UC1305096 UC1305097 UC1308074 UC1308075 UC1309021 UC1309030 UC1311084 UC1401004 UC1401005 UC1401007 UC1401013_2 UC1401017 UC1401039 UC1402089 UC1403115 UC1405044 UC1406080 UC1406081 UC1406082 UC1410166 UC1504075 UC1604151 UC1604152 UC1605024 UC1611012 UC1611017 UC1701038-2 UC1708005 UC1711032 UC1711033 UC1711041 UC1711046 UC1812014 UC1906025 UC1906037 UC1906038 UC1906039 UC1906053 UC1906054 UC1908020 UC1908021 UC1908029 UC1908030 UC1908031
+# do
+# 	samtools view -b -@ 20 -T /home/atimms/ngs_data/references/hg38_broad/hg38_v0_Homo_sapiens_assembly38.fasta -o $sample'.bam' $sample'.cram'
+# done
+
+##issue with UC1206141, repeat with less threadss
+for sample in UC1908020 UC1908021 UC1908029 UC1908030 UC1908031
+do
+	samtools view -b -T /home/atimms/ngs_data/references/hg38_broad/hg38_v0_Homo_sapiens_assembly38.fasta -o $sample'.bam' $sample'.cram'
+done
+
+##not done UC1206141 UC1305097 UC1401004
+##or UC1410166 UC1605024 UC1708005

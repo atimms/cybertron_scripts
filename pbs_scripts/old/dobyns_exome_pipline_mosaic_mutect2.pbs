@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -N dobyns_mosaic_analysis
+#PBS -l mem=500gb,ncpus=1
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -o andrew.timms@seattlechildrens.org
+echo 'work'
+run_dobyns_exomes_cybertron.py

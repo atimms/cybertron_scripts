@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N rnaseq_analysis
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "wdobyn"
+
+echo 'work'
+module load java/1.8.0_121
+module load biobuilds/2017.11
+
+rnaseq_pipeline_cybertron_v0.py

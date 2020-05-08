@@ -1,0 +1,26 @@
+#!/bin/bash
+#PBS -N cunn_rnaseq
+#PBS -l mem=100gb,ncpus=5
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "mcunni"
+
+echo 'work'
+
+module load biobuilds/2017.11
+module load STAR/2.6.0a
+module load java/1.8.0_121 
+
+cunn_rnaseq_redo_0419_cybertron.py
+
+
+
+##for mapping/gatk preprocessing
+## #PBS -l mem=120gb,ncpus=10
+##for gvcf creation
+#PBS -l mem=20gb,ncpus=2
+##for gvcf genotyping
+#PBS -l mem=100gb,ncpus=5
+

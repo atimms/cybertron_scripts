@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N sig_genome_test
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -A "at_grant_number"
+#PBS -o andrew.timms@seattlechildrens.org
+
+fasta=/home/atimms/ngs_data/references/hg19/human_g1k_v37.fasta
+rg='@RG\tID:$sample\tSM:$sample\tPL:ILLUMINA'
+
+cd ~/ngs_data/genomes/sig_test
+
+for sample in LR16-302 LR16-302f LR16-302m
+do
+	echo $sample
+	bwa mem -M -t 15 -R $rg $fasta $sample.r1.fastq.gz $sample.r2.fastq.gz | samtools view -b -@ 5 -o $sample.bwa.bam -
+done

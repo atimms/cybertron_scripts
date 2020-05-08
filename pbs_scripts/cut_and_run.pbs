@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N cut_n_run
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "dbeier"
+
+echo 'work'
+
+##make bedtools and R available
+module load biobuilds/2017.11
+
+
+##run scotts data
+scott_cut_and_run_0719_cybertron.py

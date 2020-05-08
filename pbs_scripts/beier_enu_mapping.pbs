@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N beier_enu_mapping
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "dbeier"
+
+echo 'work'
+# module load biobuilds/2017.11
+# module load biobuilds/2016.11
+module load java/1.8.0_121 
+module load biobuilds/2016.11
+module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
+
+##sophie ompa loompa 0419
+# sophie_ol_mapping_0419_cybertron.py
+
+##sergie 0519
+# sergei_enu_mapping_0519_cybertron.py
+
+##dave smo 0919
+# dave_smo_0919_cybertron.py
+# dave_smo_129ref_0919_cybertron.py
+
+##warman_0919
+# warman_enu_0919_cybertron.py
+
+##sophie ompa loompa 0919
+# sophie_ol_mapping_0919_cybertron.py
+
+
+##sergie 1019
+# sergei_enu_mapping_1019_cybertron.py
+
+##dave sm0 0120
+dave_smo_0120_cybertron.py

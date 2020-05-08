@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N cellranger
+#PBS -l mem=100gb,ncpus=10
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "tcherr"
+
+echo 'work'
+
+##started 0320
+cellranger_pipeline_cybertron_v0.py
+
+
