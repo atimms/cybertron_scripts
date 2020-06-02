@@ -28,6 +28,12 @@ manta_config = '/home/atimms/programs/manta-1.6.0.centos6_x86_64/bin/configManta
 fasta = '/home/atimms/ngs_data/references/mm10/mm10_alt.fa'
 pisces_fastq_dir = '/home/atimms/ngs_data/references/illumina_mm10_alt/'
 
+##sample dict 
+sample_dict = {'378561':'KRT_RBX_88s', '378562':'KRT_RBX_138s', '378563':'KRT_RBX_233s', '378564':'KRT_R7B_255s', 
+		'378565':'KRT_RKZ_66s', '378566':'KRT_RKZ_116s', '378567':'KRT_RKZ_156s', '378568':'KRT_R79_99s', 
+		'378569':'KRT_RBX_233t', '378570':'KRT_R7B_255t', '378571':'KRT_RKZ_66t', '378572':'KRT_R79_99t'}
+
+
 ##annovar parameters
 av_genome = 'mm10'
 av_buildver = ['-buildver', av_genome]
@@ -308,11 +314,11 @@ def genotype_vars_with_gatk(bamlist, combined_vcf, gatk_norm_vcf, sample_id):
 
 def annotate_filtered_pisces_vcf(in_vcf, sample_id):
 	##run_table_annovar
-	'''
+	# '''
 	command = [table_annovar] + av_buildver + [in_vcf] + av_ref_dir + av_protocol + av_operation + av_options_vcf + ['-out', sample_id]
 	annovar = subprocess.Popen(command)
 	annovar.wait()
-	'''
+	# '''
 	##reformat annotated
 	##get sample names
 	sample_file = sample_id + 'samples_temp.txt'
@@ -438,22 +444,21 @@ def filter_split_pisces_vars(in_file, out_suffix):
 						n_alleles_sum = sum([int(i) for i in normal_gatk_info.split(',')])
 						# print(normal_gatk_info)
 						n_alt = int(normal_gatk_info.split(',')[1])
+						t_alt = int(gatk_sample_info.split(',')[1])
 						func = line[5]
 						rmsk = line[10]
 						segdup = line[11]
 						# print(t_alleles_sum, n_alleles_sum, n_alt, func, rmsk, segdup)
 						##filter by coverage (10x in tumor and normal)
 						if t_alleles_sum >= 10 and n_alleles_sum >= 10:
-							##filter by having 0 or 1 reads in the normal sample
-							if n_alt <= 1:
+							##filter by having 0 or 1 reads in the normal sample and 1 or more alt reads in the tumor
+							if n_alt <= 1 and t_alt >=1:
 								line_out = line[:16] + [pisces_sample_info, gatk_sample_info, normal_gatk_info]
 								if func == 'intronic' or func == 'intergenic':
 									if rmsk == '.' and segdup == '.':
 										out_fh.write(delim.join(line_out) + '\n')
 								else:
 									out_fh.write(delim.join(line_out) + '\n')
-
-
 
 
 
@@ -523,6 +528,124 @@ def run_manta_on_all(all_bams):
 	manta_run = subprocess.Popen([outdir + '/runWorkflow.py', '-j', '8'])
 	manta_run.wait()
 
+def filter_tail_pisces_vcf(in_vcf, out_vcf, group_id):
+	vcf_temp1 = group_id + 'temp_11.vcf.gz'
+	vcf_temp2 = group_id + 'temp_12.vcf.gz'
+	##compress and index vcf
+	bgzip_run = subprocess.Popen(['bgzip', in_vcf])
+	bgzip_run.wait()
+	bcf_index = subprocess.Popen(['bcftools', 'index', in_vcf + '.gz'])
+	bcf_index.wait()		
+	##filter vcf i.e. passed, het, in main chr
+	bcftools_filter = subprocess.Popen(['bcftools', 'view', '-f', 'PASS', '-g', 'het', '-r', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,X,Y', '-o', vcf_temp1, '-O', 'z', in_vcf + '.gz'])
+	bcftools_filter.wait()
+
+
+	##split multi-allelic variants calls in separate lines, and left normalize indels
+	bcf_index2 = subprocess.Popen(['bcftools', 'index', vcf_temp1])
+	bcf_index2.wait()
+	bcf_norm1 = subprocess.Popen(['bcftools', 'norm', '-m-both', '-O', 'z', '-o', vcf_temp2, vcf_temp1])
+	bcf_norm1.wait()
+	bcf_norm2 = subprocess.Popen(['bcftools', 'norm', '-f', fasta, '-O', 'v', '-o', out_vcf, vcf_temp2])
+	bcf_norm2.wait()
+
+
+def filter_split_pisces_cnv_vars(in_file, out_suffix):
+	##first time just get samples
+	with open(in_file, "r") as in_fh:
+		line_count = 0
+		for line in in_fh:
+			line_count += 1
+			line = line.rstrip().split(delim)
+			if line_count == 1:
+				vcf_info = line[16:]
+				if len(vcf_info) == 3:
+					samples = [line[17]]
+				else:
+					samples = line[17:20]
+	print(samples)
+	##second time split and filter
+	sc = 0
+	for sample in samples:
+		sc += 1
+		out_file = sample_dict[sample] +  out_suffix
+		print(in_file, out_file)
+		with open(in_file, "r") as in_fh, open(out_file, "w") as out_fh:
+			line_count = 0
+			for line in in_fh:
+				line_count += 1
+				line = line.rstrip().split(delim)
+				vcf_info = line[16:]
+				pisces_sample_info = line[16]
+				normal_gatk_info = line[-1]
+				gatk_sample_info = line[16 + sc]
+
+				##get header
+				if line_count == 1:
+					header = line[:16] + [pisces_sample_info, gatk_sample_info, normal_gatk_info]
+					out_fh.write(delim.join(header) + '\n')
+				else:
+					# print(line)
+					##if var not genotyped it mean it is multiallelic, or no info for either sample don't use
+					# if gatk_sample_info != 'na' and normal_gatk_info != '.' and gatk_sample_info != '.':
+					if len(gatk_sample_info.split(',')) == 2  and len(normal_gatk_info.split(',')) == 2:
+						t_alleles_sum = sum([float(i) for i in gatk_sample_info.split(',')])
+						n_alleles_sum = sum([float(i) for i in normal_gatk_info.split(',')])
+						# print(normal_gatk_info)
+						n_alt = int(normal_gatk_info.split(',')[1])
+						t_alt = int(gatk_sample_info.split(',')[1])
+						if t_alt == 0:
+							t_af = 0
+						else:
+							t_af = t_alt/t_alleles_sum
+						if n_alt == 0:
+							n_af = 0
+						else:
+							n_af = n_alt/n_alleles_sum
+						func = line[5]
+						rmsk = line[10]
+						segdup = line[11]
+						# print(t_alleles_sum, n_alleles_sum, n_alt, func, rmsk, segdup)
+						##filter by coverage (10x in tumor and normal)
+						if t_alleles_sum >= 20 and n_alleles_sum >= 20:
+							##filter by having hom in tumor and het in tail (normal)
+							if t_af <= 0.1 or t_af >=0.9:
+								if n_af >= 0.3 and n_af <= 0.7:
+									if rmsk == '.' and segdup == '.':
+										line_out = line[:16] + [pisces_sample_info, gatk_sample_info, normal_gatk_info, str(t_af), str(n_af)]
+										out_fh.write(delim.join(line_out) + '\n')
+									# if func == 'intronic' or func == 'intergenic':
+									# 	if rmsk == '.' and segdup == '.':
+									# 		out_fh.write(delim.join(line_out) + '\n')
+									# else:
+									# 	out_fh.write(delim.join(line_out) + '\n')
+
+
+def pisces_cnv_hunt(ped_name, bam_files, tumor_bams, normal_bams):
+	print(ped_name, bam_files)
+	##merge tumor vcfs, then genotype on all samples and annotate
+	tail_vcf = ped_name + '_pisces/' + normal_bams[0].rsplit('.', 1)[0] + '.vcf'
+	pisces_filtered_vcf = ped_name + '.pisces_tail.filtered_het.vcf'
+	genotyped_var_vcf = ped_name + '.pisces_tail.gatk_geno.vcf'
+	ann_file = ped_name + '_tail.pisces.annotated.xls'
+	ann_plus_geno_file = ped_name + '.pisces_tail.annotated_genos.xls'
+	filtered_file_suffix =  '.pisces.het_tail_not_het_tumor.xls'
+	bamlist = 'bams.list'
+	'''
+	##filter tail vcf, get passed het vars
+	filter_tail_pisces_vcf(tail_vcf, pisces_filtered_vcf, ped_name)
+	##genotype all vars on parents after filtering for passed
+	make_list_of_bams(bam_files, bamlist)
+	genotype_vars_with_gatk(bamlist, pisces_filtered_vcf, genotyped_var_vcf, ped_name)
+	##annotate
+	annotate_filtered_pisces_vcf(pisces_filtered_vcf, ped_name + '_tail')
+	##add genotype data to annotation
+	add_allele_counts_to_annotation(genotyped_var_vcf, ann_file, ann_plus_geno_file)
+	'''
+	##filter and split i.e. get all vars that are hom in the tumor
+	filter_split_pisces_cnv_vars(ann_plus_geno_file, filtered_file_suffix)
+
+
 ##master method
 def run_analysis(working_dir, analysis_file):
 	os.chdir(working_dir)
@@ -544,7 +667,9 @@ def run_analysis(working_dir, analysis_file):
 		##ran individually
 		# variant_calling_mutect2_ind(normal_bams, tumor_bams, working_dir)
 		##call pisces
-		variant_calling_pisces(group, all_bams, tumor_bams, normal_bams)
+		# variant_calling_pisces(group, all_bams, tumor_bams, normal_bams)
+		##use pisces results to look for CNV
+		pisces_cnv_hunt(group, all_bams, tumor_bams, normal_bams)
 		##call manta on tumor normal pairs
 		# call_manta_somatic(group, tumor_bams, normal_bams)
 	##run manta on all the bams in gl

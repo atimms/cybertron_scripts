@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N ghayda_ucb_genomes
-#PBS -l mem=100gb,ncpus=5
+#PBS -l mem=100gb,ncpus=20
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -22,8 +22,17 @@ ghayda_ucb_genomes_germline_0320_cybertron.py
 '''
 
 ##mosaic analysis
+'''
 module load mono/5.10.1.47
 module load biobuilds
 ##analysis
 ##switch between #PBS -l mem=200gb,ncpus=20 and #PBS -l mem=100gb,ncpus=5 (mutect2)
 ghayda_ucb_genomes_mosaic_0320_cybertron.py
+'''
+
+##cnv analysis
+'''
+for manta: #PBS -l mem=100gb,ncpus=20
+'''
+
+ghayda_ucb_genomes_cnv_0520_cybertron.py

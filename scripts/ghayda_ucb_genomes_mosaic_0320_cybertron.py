@@ -38,6 +38,19 @@ av_protocol = ['-protocol', 'refGene,rmsk,genomicSuperDups,dbnsfp35a,dbnsfp31a_i
 av_operation = ['-operation', 'g,r,r,f,f,f,f,f,f,f,f,f']
 av_options = ['-otherinfo', '-remove', '-nastring', '.', '-vcfinput']
 
+##sample dict
+sample_dict = {'UC1402089': 'LR13-282_UC1402089', 'UC1309030': 'LR13-282_UC1309030', 'UC1403115': 'LR13-282f_UC1403115', 
+		'UC1309021': 'LR13-282m_UC1309021', 'UC1405044': 'LR14-155_UC1405044', 'UC1406081': 'LR14-155_UC1406081', 
+		'UC1406080': 'LR14-155f_UC1406080', 'UC1406082': 'LR14-155m_UC1406082', 'UC1711041': 'LR17-408_UC1711041', 
+		'UC1711046': 'LR17-408_UC1711046', 'UC1711032': 'LR17-408f_UC1711032', 'UC1711033': 'LR17-408m_UC1711033', 
+		'UC1210009': 'LR12-123_UC1210009', 'UC1401004': 'LR12-123_UC1401004', 'UC1410166': 'LR12-123f_UC1410166', 
+		'UC1205034': 'LR12-123m_UC1205034', 'UC1401017': 'LR12-269_UC1401017', 'UC1109008': 'LR12-269_UC1109008', 
+		'UC1305096': 'LR12-269f_UC1305096', 'UC1305097': 'LR12-269m_UC1305097', 'UC1401005': 'LR12-257_UC1401005', 
+		'UC1906025': 'LR12-257_UC1906025', 'UC1906053': 'LR12-257f_UC1906053', 'UC1906054': 'LR12-257m_UC1906054', 
+		'UC1812014': 'LR16-432a1_UC1812014', 'UC1611017': 'LR16-432a1_UC1611017', 'UC1908020': 'LR16-432f_UC1908020', 
+		'UC1908021': 'LR16-432m_UC1908021', 'UC1401007': 'LR12-259_UC1401007', 'UC1305007': 'LR12-259_UC1305007', 'UC1305008': 'LR12-259f_UC1305008', 'UC1305009': 'LR12-259m_UC1305009', 'UC1401013_2': 'LR12-265_UC1401013', 'UC1311084': 'LR12-265_UC1311084', 'UC1302036': 'LR12-265f_UC1302036', 'UC1302037': 'LR12-265m_UC1302037', 'UC1701038-2': 'LR12-101_UC1701038', 'UC1206006': 'LR12-101_UC1206006', 'UC1206140': 'LR12-101f_UC1206140', 'UC1206141': 'LR12-101m_UC1206141', 'UC1401039': 'LR12-249_UC1401039', 'UC1908029': 'LR12-249_UC1908029', 'UC1908030': 'LR12-249f_UC1908030', 'UC1908031': 'LR12-249m_UC1908031', 'UC1708005': 'LR17-337_UC1708005', 'UC1906037': 'LR17-337_UC1906037', 'UC1906038': 'LR17-337f_UC1906038', 'UC1906039': 'LR17-337m_UC1906039', 'UC1308074': 'LR10-246_UC1308074', 'UC1504075': 'LR10-246f_UC1504075', 'UC1308075': 'LR10-246m_UC1308075', 'UC1604151': 'LR16-214_UC1604151', 'UC1605024': 'LR16-214f_UC1605024', 'UC1604152': 'LR16-214m_UC1604152'}
+
+
 ##methods
 def make_analysis_dict(input_file):
 	analysis_dict = {}
@@ -189,6 +202,60 @@ def add_allele_counts_to_annotation(genotyped_var_vcf, in_file, outfile):
 					out_fh.write(delim.join(line + nas) + '\n')
 	# '''
 
+def filter_pisces_vars(infile, outfile, sample_name):
+	##filter the txt file and add new header
+	with open(infile, "r") as in_fh, open(outfile, "w") as out_fh:
+		# out_fh.write(delim.join(head) + '\n')
+		line_count = 0
+		for line in in_fh:
+			line_count += 1
+			line = line.rstrip().split(delim)
+			if line_count == 1:
+				s_names = line[151:]
+				header = line[:12] + [line[15], line[18], line[53], line[67]] + line[83:138] + ['format', 'pisces_vcf_info'] + s_names
+				out_fh.write(delim.join(header) + '\n')
+
+			else:
+				func = line[5]
+				ex_func = line[8]
+				rmsk = line[10]
+				segdup = line[11]
+				gnomad_afs = [line[84], line[101], line[118]]
+				gnomad_afs_format = []
+				##change . to zero and make into floats
+				for af in gnomad_afs:
+					if af == '.':
+						new_af = 0
+					else:
+						new_af = float(af)
+					gnomad_afs_format.append(new_af)
+				# print(gnomad_afs, gnomad_afs_format)
+				##get all alleles
+				# all_alleles = line[151:]
+				all_alleles = [i.split(',') for i in line[151:]]
+				allele_counts = len(sum(all_alleles, []))
+				# print(all_alleles, allele_counts)
+				##only keep if have 2 alleles per sample
+				if allele_counts == 6:
+					##turn into ints
+					alleles_int = [[int(i) for i in j] for j in all_alleles]
+					##get sums
+					alleles_sum = [sum(i) for i in alleles_int]
+					# print(alleles_int, alleles_sum)
+					##get pro and parents alleles
+					pro_alleles = alleles_int.pop(s_names.index(sample_name))
+					pro_alt = pro_alleles[1]
+					parent_alleles = alleles_int
+					parent_max_alt = max(parent_alleles[0][1], parent_alleles[1][1])
+					# print(pro_alleles,parent_alleles,parent_max_alt)
+					##coverage >=10 in all samples and <=1% in gnomad (3 versions)
+					if min(alleles_sum) >= 10 and max(gnomad_afs_format) <= 0.01:
+						if parent_max_alt <= 1 and pro_alt >= 2:
+							##get exonic/splicing but not silent
+							if func == 'exonic' or func == 'splicing':
+								if ex_func != 'synonymous SNV':
+									line_out = line[:12] + [line[15], line[18], line[53], line[67]] + line[83:138] + line[149:]
+									out_fh.write(delim.join(line_out) + '\n')
 
 def format_pisces_results_per_proband(ped, sample, parents, id_dict):
 	sample_parents_bamfiles = [sample + '.bam'] + [p + '.bam' for p in parents]
@@ -198,17 +265,17 @@ def format_pisces_results_per_proband(ped, sample, parents, id_dict):
 	genotyped_var_vcf = sample + '.pisces.gatk_genotyes.vcf'
 	ann_file = sample + '.pisces.hg38_multianno.txt'
 	ann_plus_geno_file = sample + '.pisces.hg38_annotated.xls'
-	filtered_file = sample + '.pisces.hg38_filtered.xls'
+	filtered_file = sample_dict[sample] + '.pisces.hg38.exonic_filtered.xls'
 	##genotype all vars on parents after filtering for passed
-	make_list_of_bams(sample_parents_bamfiles, bamlist)
+	# make_list_of_bams(sample_parents_bamfiles, bamlist)
 	# filter_norm_pisces_vcf(pisces_vcf,pisces_filtered_vcf, sample)
-	genotype_vars_with_gatk(bamlist, pisces_filtered_vcf, genotyped_var_vcf, sample)
+	# genotype_vars_with_gatk(bamlist, pisces_filtered_vcf, genotyped_var_vcf, sample)
 	##annotate
 	# annotate_filtered_pisces_vcf(pisces_filtered_vcf, sample + '.pisces')
 	##add genotype data to annotation --- missing genotypes? and 
 	# add_allele_counts_to_annotation(genotyped_var_vcf, ann_file, ann_plus_geno_file)
 	##filter vars
-	# filter_split_pisces_vars(ann_plus_geno_file, filtered_file_suffix)
+	filter_pisces_vars(ann_plus_geno_file, filtered_file, sample)
 
 def variant_calling_pisces(ped_dict, bam_suffix):
 	for ped in ped_dict:
@@ -263,6 +330,52 @@ def call_mutect2_sample_parents(sample, parents, bam_suffix, working_dir):
 	bcf_index.wait()
 	# '''
 	
+def filter_mt2_vars(infile, in_vcf, outfile):
+	##get vcf samples from vcf file
+	with open(in_vcf, "r") as vcf_fh:
+		for line in vcf_fh:
+			if line.startswith('#CHROM'):
+				samples = line.rstrip().split(delim)[9:]
+	print(infile, in_vcf, outfile, samples)
+	##filter the txt file and add new header
+	with open(infile, "r") as in_fh, open(outfile, "w") as out_fh:
+		# out_fh.write(delim.join(head) + '\n')
+		line_count = 0
+		for line in in_fh:
+			line_count += 1
+			line = line.rstrip().split(delim)
+			if line_count == 1:
+				header = line[:12] + [line[15], line[18], line[53], line[67]] + line[83:138] + ['format'] + samples
+				out_fh.write(delim.join(header) + '\n')
+			else:
+				func = line[5]
+				ex_func = line[8]
+				rmsk = line[10]
+				segdup = line[11]
+				gnomad_afs = [line[84], line[101], line[118]]
+				gnomad_afs_format = []
+				##change . to zero and make into floats
+				for af in gnomad_afs:
+					if af == '.':
+						new_af = 0
+					else:
+						new_af = float(af)
+					gnomad_afs_format.append(new_af)
+				# print(gnomad_afs, gnomad_afs_format)
+				##get all alleles
+				alleles = [i.split(':')[1].split(',') for i in line[150:]]
+				##turn into ints
+				alleles_int = [[int(i) for i in j] for j in alleles]
+				##get sums
+				alleles_sum = [sum(i) for i in alleles_int]
+				# print(alleles, alleles_sum)
+				##coverage >=10 in all samples and <=1% in gnomad (3 versions)
+				if min(alleles_sum) >= 10 and max(gnomad_afs_format) <= 0.01:
+					##get exonic/splicing but not silent
+					if func == 'exonic' or func == 'splicing':
+						if ex_func != 'synonymous SNV':
+							line_out = line[:12] + [line[15], line[18], line[53], line[67]] + line[83:138] + line[149:]
+							out_fh.write(delim.join(line_out) + '\n')
 
 
 def variant_calling_mutect2(ped_dict, bam_suffix, work_dir):
@@ -272,10 +385,19 @@ def variant_calling_mutect2(ped_dict, bam_suffix, work_dir):
 		parent_ids = ped_dict[ped][2]
 		new_id_dict = ped_dict[ped][0]
 		for affected_sample in affected_samples:
+			mt2_vcf = affected_sample + '.mt2.final.vcf.gz'
+			multianno = affected_sample +  '.mt2.hg38_multianno.txt'
+			multianno_vcf = affected_sample +  '.mt2.hg38_multianno.vcf'
+			filtered_file = sample_dict[affected_sample] + '.mt2.hg38.exonic_filtered.xls'
 			##get filtered mutect calls
-			call_mutect2_sample_parents(affected_sample, parent_ids, bam_suffix, work_dir)
+			# call_mutect2_sample_parents(affected_sample, parent_ids, bam_suffix, work_dir)
+			# print(affected_sample, parent_ids, bam_suffix, work_dir)
 			##annotate mutect results
+			# annotate_filtered_pisces_vcf(mt2_vcf, affected_sample + '.mt2')
+			##filter mutect results
+			filter_mt2_vars(multianno, multianno_vcf, filtered_file)
 
+			
 ##master method
 def run_analysis(working_dir, analysis_file):
 	os.chdir(working_dir)
@@ -298,11 +420,11 @@ def run_analysis(working_dir, analysis_file):
 ##run methods
 work_dir = '/home/atimms/ngs_data/genomes/ghayda_ucb_0320'
 ##test on two peds
-sample_file = 'ghayda_ucb_0320_1.txt'
+# sample_file = 'ghayda_ucb_0320_1.txt'
 ##all samples
-# sample_file = 'ghayda_ucb_0320_all.txt'
+sample_file = 'ghayda_ucb_0320_all.txt'
 ##run master method
-# run_analysis(work_dir, sample_file)
+run_analysis(work_dir, sample_file)
 
 
 ##run mutect and pisces steps by ped
@@ -324,6 +446,10 @@ sample_file = 'ghayda_ucb_0320_1.txt'
 # sample_file = 'LR17-408.txt'
 ##run master method
 # run_analysis(work_dir, sample_file)
+##run UC1206006 indivdually
+# os.chdir(work_dir)
+# call_mutect2_sample_parents('UC1206006', ['UC1206140', 'UC1206141'], '.bam', work_dir)
+
 
 ##for pisces formatting
 ##273267
@@ -367,7 +493,20 @@ sample_file = 'ghayda_ucb_0320_1.txt'
 ##273489
 # sample_file = 'LR12-269.txt'
 # run_analysis(work_dir, sample_file)
+##273490
+# sample_file = 'LR12-101.txt'
+# run_analysis(work_dir, sample_file)
+##273509
+# sample_file = 'LR12-123.txt'
+# run_analysis(work_dir, sample_file)
 ##
-sample_file = 'LR12-101.txt'
-run_analysis(work_dir, sample_file)
+# sample_file = 'LR17-408.txt'
+# run_analysis(work_dir, sample_file)
+
+
+
+
+
+
+
 

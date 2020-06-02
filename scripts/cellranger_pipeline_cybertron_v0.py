@@ -60,6 +60,14 @@ def cellranger_scrnaseq_master(work_dir, infile, suffix_for_aggr, ref_dir):
 	make_aggr_csv(info_dict, suffix_for_aggr, work_dir)
 	run_cellranger_aggr(suffix_for_aggr)
 
+def cellranger_scrnaseq_master_no_aggr(work_dir, infile, ref_dir):
+	os.chdir(work_dir)
+	info_dict = make_dict_from_info_file(infile)
+	for s in info_dict:
+		print(s, info_dict[s])
+	run_cellranger_count(info_dict, ref_dir)
+
+
 def run_cellranger_atac_count(infodict, refdir):
 	for sample in infodict:
 		fqs = infodict[sample][0]
@@ -162,7 +170,7 @@ combined_suffix = 'human_retina_scATACseq_combined_0320'
 transciptome_ref = grc38_atac_ref
 # cellranger_scatac_master(working_dir, info_file, combined_suffix, transciptome_ref)
 ##issue with mwthods just run aggr
-cellranger_scatac_just_aggr(working_dir, info_file, combined_suffix, transciptome_ref)
+# cellranger_scatac_just_aggr(working_dir, info_file, combined_suffix, transciptome_ref)
 ##redo an analysis looking at all the organoid scATAC
 working_dir = '/home/atimms/ngs_data/cellranger/cherry_org_scATAC_reanalysis_0320'
 ##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
@@ -173,4 +181,15 @@ transciptome_ref = grc38_atac_ref
 ##issue with mwthods just run aggr
 # cellranger_scatac_just_aggr(working_dir, info_file, combined_suffix, transciptome_ref)
 
+##new data 0620
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_scRNASeq_0620'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group
+info_file = '28wkorg_scRNAseq_0620.txt'
+combined_suffix = 'organoid_28wk_scATACseq_0620'
+transciptome_ref = grc38_prerna_ref
+# cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
+
+info_file = 'extra_human_scRNAseq_0620.txt'
+transciptome_ref = grc38_prerna_ref
+cellranger_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref)
 

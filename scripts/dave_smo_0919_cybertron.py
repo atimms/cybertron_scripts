@@ -29,6 +29,7 @@ gatk = '/cm/shared/apps/GATK/GenomeAnalysisTK.jar'
 convert_2_annovar = '/home/atimms/programs/annovar/convert2annovar.pl'
 table_annovar = '/home/atimms/programs/annovar/table_annovar.pl'
 fasta = '/home/atimms/ngs_data/references/mm10/mm10.fa'
+vcf_bed = '/home/atimms/programs/svtools/vcfToBedpe'
 ##first 2 columns of fasta.fai file
 bedtools_genome_file  = '/home/atimms/ngs_data/references/mm10/mm10.fa.genome'
 bwa = 'bwa'
@@ -295,6 +296,39 @@ def run_manta_svs(samples):
 	manta_run = subprocess.Popen(['./runWorkflow.py'])
 	manta_run.wait()
 
+def filter_manta_results(in_vcf, out_file, bedfile):
+	temp_bed = 'temp.bed'
+	temp2_bed = 'temp2.bed'
+	final_header = ['CHROM_A', 'START_A', 'END_A', 'CHROM_B', 'START_B', 'END_B', 'ID', 'QUAL', 'STRAND_A', 'STRAND_B', 'TYPE', 'FILTER', 'INFO', 'FORMAT', 'smo_unaffected', 'smo_affected', 'chr_gene', 'tx_start', 'tx_end', 'gene_name', 'overlaps']
+	##make vcf into bed
+	manta_config = subprocess.Popen([vcf_bed, '-i', in_vcf, '-o', temp_bed])
+	manta_config.wait()	
+	##use bedtools to add genename
+	with open(temp2_bed, "w") as out_fh:
+		manta_config = subprocess.Popen(['bedtools', 'intersect', '-a', temp_bed, '-b', bedfile, '-wao'], stdout=out_fh)
+		manta_config.wait()		
+
+
+	with open(temp2_bed, "r") as in_fh, open(out_file, "w") as out_fh:
+		out_fh.write(delim.join(final_header) + '\n')
+		for line in in_fh:
+			line = line.split(delim)
+			c1 = line[0]
+			c2 = line[3]
+			start = int(line[1])
+			if c1 == c2:
+				end = int(line[5])
+			else:
+				end = int(line[2])
+			if (c1 == 'chr9' and end > 60000000 and start < 123000000) or (c1 == 'chr11' and end > 10000000 and start < 58000000):
+			# if c1 == 'chr9' and end > 60000000 and start < 123000000:
+				out_fh.write(delim.join(line))
+
+
+
+
+
+
 ##call methods
 ##parameters
 project_name = 'dave_smo_0919'
@@ -344,6 +378,13 @@ comb_fq_dict = {'smo_unaffected': ['smo_unaffected.r1.fq.gz', 'smo_unaffected.r2
 # align_with_bwa(comb_fq_dict)
 # run_sve_from_singularity(comb_fq_dict)
 # run_manta_svs(comb_fq_dict)
+##filter and add genes to manta results, if called in affected in regions
+manta_vcf = './results/variants/diploidSV.vcf'
+manta_filter_file = 'smo.manta_svs.in_regions.0620.xls'
+refgene_bed = '/home/atimms/ngs_data/references/mm10/mm10.refGene_genes.bed'
+filter_manta_results(manta_vcf, manta_filter_file,refgene_bed)
+
+
 
 ##filter and graphing data
 ##parameters
@@ -472,7 +513,7 @@ def make_table_of_genotypes(samples, file_suffix, all_snp_suffix, out_file):
 			outfh.write(delim.join(line_out) + '\n')
 
 ##then combine those files
-make_table_of_genotypes(affected, '.chr3_region.snps.xls','.annotated.txt' , 'genotypes.chr3_region.snps.xls')
+# make_table_of_genotypes(affected, '.chr3_region.snps.xls','.annotated.txt' , 'genotypes.chr3_region.snps.xls')
 
 
 

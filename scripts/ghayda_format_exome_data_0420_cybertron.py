@@ -248,6 +248,40 @@ def get_var_info(info_file, var_file, std_analysis_file_dir, pisces_analysis_fil
 	print(ped_count,var_count)
 
 
+def get_single_var_ar_genes(infiles, outfile):
+	with open(outfile, "w") as out_fh:
+		fc = 0
+		for infile in infiles:
+			ped = infile.rsplit('/', 1)[1].split('.')[0]
+			print(infile, ped)
+			with open(infile, "r") as in_fh:
+				lc = 0
+				fc += 1
+				
+				for line in in_fh:
+					lc += 1
+					line = line.rstrip().split(delim)
+					if lc ==1:
+						if fc == 1:
+							header = ['ped'] + line[:47]
+							out_fh.write(delim.join(header) + '\n')
+					else:
+						gnomad_exome_af = line[33]
+						gnomad_genome_af = line[41]
+						biotype = line[7]
+						clinsig = line[18]
+						dbdb_inh = line[21]
+
+						if gnomad_exome_af == 'na' or gnomad_exome_af == '.':
+							gnomad_exome_af = '0'
+						if gnomad_genome_af == 'na' or gnomad_genome_af == '.':
+							gnomad_genome_af = '0'
+						if float(gnomad_exome_af) <= 0.01 and float(gnomad_genome_af) <= 0.01 and biotype == 'protein_coding':
+							if 'Pathogenic' in clinsig or 'Likely_pathogenic' in clinsig or 'AR' in dbdb_inh:
+								line_out = [ped] + line[:47]
+								out_fh.write(delim.join(line_out) + '\n')
+
+
 ##run methods
 working_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20'
 os.chdir(working_dir)
@@ -277,8 +311,13 @@ var_info_file = 'variant_info_0420.xls'
 ##filter mosaic
 # filter_mosaic(ped_info_file, project_name, candidate_gene_dict, pisces_file_dir, dx_groups_wanted)
 
+##step2b. get all AR single vars - use auto dom files and filter on clinvar/dbdb
+auto_dom_files = glob.glob('/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/auto_dom/*xls')
+get_single_var_ar_genes(auto_dom_files, project_name + '.auto_dom.clinvar_dbdb.xls')
+
+
 
 ##step3. get var info including solved by other methods
-get_var_info(ped_info_file, var_info_file, std_anal_file_dir, pisces_file_dir, dx_groups_wanted)
+# get_var_info(ped_info_file, var_info_file, std_anal_file_dir, pisces_file_dir, dx_groups_wanted)
 
 
