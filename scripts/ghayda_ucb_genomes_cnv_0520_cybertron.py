@@ -171,6 +171,7 @@ def filter_denovo_manta_vcf(in_vcf, all_file, exonic_file, no_of_as):
 					all_fh.write(delim.join(line[:22]) + '\n')
 					if exon_name != '.':
 						ex_fh.write(delim.join(line[:22]) + '\n')
+
 def run_manta_looking_for_denovo_svs(ped_dict):
 	##go through ped by ped
 	for ped in ped_dict:
@@ -229,7 +230,80 @@ def run_manta_looking_for_denovo_svs(ped_dict):
 		'''
 
 
+def filter_somatic_manta_vcf(sample_name, mom_vcf, dad_vcf, all_file, exonic_file, no_of_as):
+	temp_vcf = 'temp.vcf'
+	mom_temp_bed = sample_name + 'mom_temp.bed'
+	dad_temp_bed = sample_name + 'dad_temp.bed'
+	mom_temp_bed2 = sample_name + 'mom_temp2.bed'
+	dad_temp_bed2 = sample_name + 'dad_temp2.bed'
+	intersect_temp_bed = sample_name + 'intersect_temp.bed'
+	# all_temp = sample_name + 'temp_all.txt'
+	# ex_temp = sample_name + 'temp_ex.txt'
+	##make vcfs into bed
+	mom_uncomp = subprocess.Popen(['gunzip', '-d', mom_vcf])
+	mom_uncomp.wait()
+	dad_uncomp = subprocess.Popen(['gunzip', '-d', dad_vcf])
+	dad_uncomp.wait()
+	mom_vcf_bed = subprocess.Popen([vcf_bed, '-i', mom_vcf.rsplit('.',1)[0], '-o', mom_temp_bed])
+	mom_vcf_bed.wait()
+	dad_vcf_bed = subprocess.Popen([vcf_bed, '-i', dad_vcf.rsplit('.',1)[0], '-o', dad_temp_bed])
+	dad_vcf_bed.wait()
+	##use bedtools to add genename
+	with open(mom_temp_bed2, "w") as out_fh:
+		manta_config = subprocess.Popen(['bedtools', 'intersect', '-a', mom_temp_bed, '-b', hg38_refgene_exons, '-wao', '-header'], stdout=out_fh)
+		manta_config.wait()		
+	with open(dad_temp_bed2, "w") as out_fh:
+		manta_config = subprocess.Popen(['bedtools', 'intersect', '-a', dad_temp_bed, '-b', hg38_refgene_exons, '-wao', '-header'], stdout=out_fh)
+		manta_config.wait()	
 
+	##use bedtools to SVs in mom and dad
+	with open(intersect_temp_bed, "w") as out_fh:
+		manta_config = subprocess.Popen(['bedtools', 'intersect', '-a', mom_temp_bed2, '-b', dad_temp_bed2, '-wo'], stdout=out_fh)
+		manta_config.wait()		
+
+
+	##get header from bed files
+	header = []
+	with open(mom_temp_bed2, "r") as m_fh, open(dad_temp_bed2, "r") as d_fh:
+		mlc, dlc = 0, 0
+		for line in m_fh:
+			mlc += 1
+			if mlc == 1:
+				h1 = line.rstrip().split(delim) + ['chr_exon', 'exon_start', 'exon_end', 'exon_name']
+				header.extend(h1)
+		for line in d_fh:
+			dlc += 1
+			if dlc == 1:
+				h2 = line.rstrip().split(delim) + ['chr_exon', 'exon_start', 'exon_end', 'exon_name']
+				header.extend(h2)
+	header = header + ['bp_intesect']
+
+
+	##filter etc
+	with open(intersect_temp_bed, "r") as in_fh, open(all_file, "w") as all_fh, open(exonic_file, "w") as ex_fh:
+		all_fh.write(delim.join(header) + '\n')
+		ex_fh.write(delim.join(header) + '\n')
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			pass_filter = [line[11], line[34]]
+			if pass_filter[0] == 'PASS' and pass_filter[1] == 'PASS':
+				exon_name = [line[19], line[42]]
+				line_out = line[:20] + line[23:43] + [line[46]]
+				# print(intersect_temp_bed, exon_name)
+				all_fh.write(delim.join(line) + '\n')
+				if exon_name[0] != '.' or exon_name[1] != '.':
+					ex_fh.write(delim.join(line) + '\n')
+	##remove duplicate lines
+	# with open(all_file, "w") as all_fh:
+	# 	#sort garbage.txt | uniq -u
+	# 	rm_dup1 = subprocess.Popen(['sort', all_temp], stdout=subprocess.PIPE)
+	# 	rm_dup2 = subprocess.Popen(['uniq', '-u'], stdin=rm_dup1.stdout, stdout=all_fh)
+	# 	rm_dup2.wait()
+	# with open(exonic_file, "w") as ex_fh:
+	# 	#sort garbage.txt | uniq -u
+	# 	rm_dup1 = subprocess.Popen(['sort', ex_temp], stdout=subprocess.PIPE)
+	# 	rm_dup2 = subprocess.Popen(['uniq', '-u'], stdin=rm_dup1.stdout, stdout=ex_fh)
+	# 	rm_dup2.wait()		
 
 def run_manta_looking_for_somatic_svs(ped_dict):
 	##go through ped by ped
@@ -237,29 +311,30 @@ def run_manta_looking_for_somatic_svs(ped_dict):
 		##call variants individually
 		affected_samples = ped_dict[ped][1]
 		parent_ids = ped_dict[ped][2]
-		# ##get all normal bams
-		# mom_bams = []
-		# for sample in parent_ids:
-		# 	nbam = ['--normalBam', sample + '.bam']
-		# 	nbams.extend(nbam)
 		##get all proband bams
-		tbams = []
 		for sample in affected_samples:
 			tbam = ['--tumorBam', sample + '.bam']
-			tbams.extend(tbam)
-		##call SVs in dad
-		outdir = ped + '.manta_somatic/' + 'dad_analysis'
-		make_manta_config = subprocess.Popen([manta_config, '--normalBam', parent_ids[0] + '.bam'] + tbam + ['--referenceFasta', fasta, '--runDir', outdir, '--callRegions', hg38_chr_bed])
-		make_manta_config.wait()
-		manta_run = subprocess.Popen([outdir + '/runWorkflow.py', '-j', '20'])
-		manta_run.wait()
-		##call SVs in mom
-		outdir = ped + '.manta_somatic/' + 'mom_analysis'
-		make_manta_config = subprocess.Popen([manta_config, '--normalBam', parent_ids[1] + '.bam'] + tbam + ['--referenceFasta', fasta, '--runDir', outdir, '--callRegions', hg38_chr_bed])
-		make_manta_config.wait()
-		manta_run = subprocess.Popen([outdir + '/runWorkflow.py', '-j', '20'])
-		manta_run.wait()
-
+			sample_out_dir = sample_dict[sample] + '.manta_somatic/'
+			##call SVs in dad
+			outdir = sample_out_dir + 'dad_analysis'
+			'''
+			make_manta_config = subprocess.Popen([manta_config, '--normalBam', parent_ids[0] + '.bam'] + tbam + ['--referenceFasta', fasta, '--runDir', outdir, '--callRegions', hg38_chr_bed])
+			make_manta_config.wait()
+			manta_run = subprocess.Popen([outdir + '/runWorkflow.py', '-j', '20'])
+			manta_run.wait()
+			##call SVs in mom
+			outdir = sample_out_dir + 'mom_analysis'
+			make_manta_config = subprocess.Popen([manta_config, '--normalBam', parent_ids[1] + '.bam'] + tbam + ['--referenceFasta', fasta, '--runDir', outdir, '--callRegions', hg38_chr_bed])
+			make_manta_config.wait()
+			manta_run = subprocess.Popen([outdir + '/runWorkflow.py', '-j', '20'])
+			manta_run.wait()
+			'''
+			##filter and add genes/exons to somatic vcf
+			mom_manta_vcf = sample_out_dir + 'mom_analysis/results/variants/somaticSV.vcf.gz'
+			dad_manta_vcf = sample_out_dir + 'dad_analysis/results/variants/somaticSV.vcf.gz'
+			all_somatic = sample_dict[sample] + '.manta_sv.somatic.xls'
+			exonic_somatic = sample_dict[sample] + '.manta_sv.somatic_exonic.xls'
+			filter_somatic_manta_vcf(sample_dict[sample], mom_manta_vcf, dad_manta_vcf, all_somatic, exonic_somatic, len(affected_samples))
 
 
 ##master method
@@ -274,10 +349,9 @@ def run_analysis(working_dir, analysis_file, canvas_ref_dir):
 	##run canvas small pedigree (de novo cnvs)
 	# run_canvas_sp_wgs(analysis_dict, canvas_ref_dir)
 	##run manta for de novo analysis
-	run_manta_looking_for_denovo_svs(analysis_dict)
+	# run_manta_looking_for_denovo_svs(analysis_dict)
 	##run manta for somatic analysis
-	# run_manta_looking_for_somatic_svs(analysis_dict)
-	##annotate filter SVs
+	run_manta_looking_for_somatic_svs(analysis_dict)
 
 
 

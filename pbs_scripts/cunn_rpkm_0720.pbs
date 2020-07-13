@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N cunn_rnaseq
+#PBS -l mem=20gb,ncpus=2
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -A "mcunni"
+
+echo 'work'
+
+##for mapping etc
+#PBS -l mem=200gb,ncpus=20
+# module load java/1.8.0_121 ##? needed
+# module load biobuilds/2017.11 ##needed for star/picard, but can't be used for rnaseqc
+
+cunn_rnaseq_calculate_rpkm_0720_cybertron.py
+
+
+##for rnaseqc
+#PBS -l mem=20gb,ncpus=2
+

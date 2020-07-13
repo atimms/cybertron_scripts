@@ -26,6 +26,7 @@ table_annovar = '/home/atimms/programs/annovar_1019/table_annovar.pl'
 ann_var = '/home/atimms/programs/annovar_1019/annotate_variation.pl'
 convert_2_annovar = '/home/atimms/programs/annovar_1019/convert2annovar.pl'
 manta_config = '/home/atimms/programs/manta-1.6.0.centos6_x86_64/bin/configManta.py'
+vcf_bed = '/home/atimms/programs/svtools/vcfToBedpe'
 
 ##unique for this project
 fasta = ref_dir + 'hs37d5.fa'
@@ -565,17 +566,37 @@ def run_manta_svs(bam_files, project_name, working_dir):
 
 def get_manta_result_around_abca4(peds, out_file, vcf_suffix):
 	with open(out_file, 'w') as out_fh:
-		header = ['PED','CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT','GTs', '\n']
+		header = ['#CHROM_A', 'START_A', 'END_A', 'CHROM_B', 'START_B', 'END_B', 'ID', 'QUAL', 'STRAND_A', 'STRAND_B', 'TYPE', 'FILTER', 'INFO', 'FORMAT', 'VCF_format', 'VCF_info', '\n']
 		out_fh.write(delim.join(header))
 		for ped in peds:
 			print ped
 			in_vcf = 'manta_' + ped + vcf_suffix
-			with gzip.open(in_vcf, 'rb') as vcf_fh:
-				for line in vcf_fh:
-					line = line.split(delim)
-					##abca4 gene +- 100k
-					if line[0] == '1' and int(line[1]) >= 94358393 and int(line[1]) <= 94686705:
-						out_fh.write(delim.join([ped] + line))
+			bed_file = ped + '.manta_svs.bed'
+			'''
+			uncomp = subprocess.Popen(['gunzip', '-d', in_vcf])
+			uncomp.wait()
+			run_vcf_bed = subprocess.Popen([vcf_bed, '-i', in_vcf.rsplit('.',1)[0], '-o', bed_file])
+			run_vcf_bed.wait()
+			'''
+			with open(bed_file, 'rb') as bed_fh:
+				lc = 0
+				for line in bed_fh:
+					lc += 1
+					if lc > 1:
+						line = line.split(delim)
+						##abca4 gene +- 100k
+
+						c1 = line[0]
+						c2 = line[3]
+						start = int(line[1])
+						if c1 == c2:
+							end = int(line[5])
+						else:
+							end = int(line[2])
+						#	if (c1 == 'chr9' and end > 60000000 and start < 123000000)
+						if c1 == '1' and end > 94358393 and start < 94686705:
+						# if c1 == 'chr9' and end > 60000000 and start < 123000000:
+							out_fh.write(delim.join([ped] + line))
 
 
 
@@ -612,7 +633,8 @@ def run_analysis(working_dir, analysis_file, combined_vcf, reg_bed, bam_dict ):
 	'''
 	manta_vcf_suffix = '/results/variants/diploidSV.vcf.gz'
 	get_manta_result_around_abca4(bam_dict, manta_results_file, manta_vcf_suffix)
-##run methods
+#
+#run methods
 
 ##run all at once
 work_dir = '/home/atimms/ngs_data/genomes/cherry_genomes_1119'

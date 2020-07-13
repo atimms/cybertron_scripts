@@ -38,9 +38,14 @@ def make_windows(working_dir, genome_fai, window_size, step_size):
 	genome_window_bed = genome + '_' + str(window_size / 1000) + 'kb_' + str(step_size / 1000) + 'kb' + '.bed'
 	print 'bed file %s created from file: %s with window size %r and step size %r' % (genome_window_bed, genome_fai, window_size, step_size)
 	print ''
+	if step_size == 0:
 	##run bedtools makewindows without pybedtools installed
-	command = bedtools + ' makewindows -g ' + genome_fai + ' -w ' + str(window_size) + ' -s ' + str(step_size) + ' > ' + 'bed.temp'
-	subprocess.call(command, shell=True)
+		command = bedtools + ' makewindows -g ' + genome_fai + ' -w ' + str(window_size) + ' > ' + 'bed.temp'
+		subprocess.call(command, shell=True)
+	else:		
+		##run bedtools makewindows without pybedtools installed
+		command = bedtools + ' makewindows -g ' + genome_fai + ' -w ' + str(window_size) + ' -s ' + str(step_size) + ' > ' + 'bed.temp'
+		subprocess.call(command, shell=True)
 	##filters chromosomes if required
 	remove_nonStd_chr('bed.temp', genome_window_bed)
 	##if you don't require any filtering

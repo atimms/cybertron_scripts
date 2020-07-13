@@ -109,6 +109,14 @@ def cellranger_scatac_just_aggr(work_dir, infile, suffix_for_aggr, ref_dir):
 	make_aggr_atac_csv(info_dict, suffix_for_aggr, work_dir)
 	run_cellranger_atac_aggr(suffix_for_aggr, ref_dir)
 
+def cellranger_scatac_no_aggr_master(work_dir, infile, ref_dir):
+	os.chdir(work_dir)
+	info_dict = make_dict_from_info_file(infile)
+	for s in info_dict:
+		print(s, info_dict[s])
+	run_cellranger_atac_count(info_dict, ref_dir)
+
+
 ##run methods
 
 ##cherry organoid analysis 0320
@@ -188,8 +196,29 @@ info_file = '28wkorg_scRNAseq_0620.txt'
 combined_suffix = 'organoid_28wk_scATACseq_0620'
 transciptome_ref = grc38_prerna_ref
 # cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
-
 info_file = 'extra_human_scRNAseq_0620.txt'
 transciptome_ref = grc38_prerna_ref
-cellranger_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref)
+# cellranger_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref)
+##even more data 12 wk orgaoid rna and 3 embryonic atac
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_extra_atac_rna_0620/scRNA_timcherry_done'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group
+info_file = '12wkorg_scRNAseq_0620.txt'
+combined_suffix = '12wkorg_scRNAseq_0620'
+transciptome_ref = grc38_prerna_ref
+# cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
+
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_extra_atac_rna_0620/scATAC_timcherry_done'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
+info_file = 'extra_human_scATACseq_0620.txt'
+transciptome_ref = grc38_atac_ref
+# cellranger_scatac_no_aggr_master(working_dir, info_file, transciptome_ref)
+
+
+##new data 0720 - Jenn Chao Tims collabarator
+working_dir = '/home/atimms/ngs_data/cellranger/jchao_rna_0720'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group
+info_file = 'SFD_CRISPR_SFD_snRNAseq_0720.txt'
+combined_suffix = 'SFD_CRISPR_SFD_snRNAseq_0720'
+transciptome_ref = grc38_prerna_ref
+cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
 

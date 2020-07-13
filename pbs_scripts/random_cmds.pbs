@@ -12,6 +12,48 @@ echo 'work'
 
 
 ##copy files
+# cd /home/atimms/ngs_data/enu_mapping
+# cp sergei_enu_*/*ba? /archive/beier_d/non_center_data/off_campus_data/sergei_bams_0120/
 
-cd /home/atimms/ngs_data/enu_mapping
-cp sergei_enu_*/*ba? /archive/beier_d/non_center_data/off_campus_data/sergei_bams_0120/
+
+##0620
+cd /home/atimms/ngs_data/exomes/working/kim_welsh_exomes_0620
+
+cat TAM012-11-11-17A/clean_data/*_1.fq.gz > TAM012-11-11-17A_1.fq.gz
+cat TAM012-dad-11-11-17A/clean_data/*_1.fq.gz > TAM012-dad-11-11-17A_1.fq.gz
+cat TAM012-mom-11-11-17A/clean_data/*_1.fq.gz > TAM012-mom-11-11-17A_1.fq.gz
+cat TAM020-child-12-7-17A/clean_data/*_1.fq.gz > TAM020-child-12-7-17A_1.fq.gz
+cat TAM020-dad-12-7-17A/clean_data/*_1.fq.gz > TAM020-dad-12-7-17A_1.fq.gz
+cat TAM020-mom-12-7-17A/clean_data/*_1.fq.gz > TAM020-mom-12-7-17A_1.fq.gz
+cat TAM039-child-12-1-17A/clean_data/*_1.fq.gz > TAM039-child-12-1-17A_1.fq.gz
+cat TAM039-dad-12-7-17A/clean_data/*_1.fq.gz > TAM039-dad-12-7-17A_1.fq.gz
+cat TAM039-mom-12-1-17A/clean_data/*_1.fq.gz > TAM039-mom-12-1-17A_1.fq.gz
+cat TAM041-child-1-12-19A/clean_data/*_1.fq.gz > TAM041-child-1-12-19A_1.fq.gz
+cat TAM041-dad-1-12-19A/clean_data/*_1.fq.gz > TAM041-dad-1-12-19A_1.fq.gz
+cat TAM041-mom-1-12-19A/clean_data/*_1.fq.gz > TAM041-mom-1-12-19A_1.fq.gz
+cat TAM066-child-1-13-18A/clean_data/*_1.fq.gz > TAM066-child-1-13-18A_1.fq.gz
+cat TAM066-dad-1-13-18A/clean_data/*_1.fq.gz > TAM066-dad-1-13-18A_1.fq.gz
+cat TAM066-mom-1-13-18A/clean_data/*_1.fq.gz > TAM066-mom-1-13-18A_1.fq.gz
+cat TAM070-child-11-18-17A/clean_data/*_1.fq.gz > TAM070-child-11-18-17A_1.fq.gz
+cat TAM070-dad-11-18-17A/clean_data/*_1.fq.gz > TAM070-dad-11-18-17A_1.fq.gz
+cat TAM070-mom-11-18-17A/clean_data/*_1.fq.gz > TAM070-mom-11-18-17A_1.fq.gz
+
+cat TAM012-11-11-17A/clean_data/*_2.fq.gz > TAM012-11-11-17A_2.fq.gz
+cat TAM012-dad-11-11-17A/clean_data/*_2.fq.gz > TAM012-dad-11-11-17A_2.fq.gz
+cat TAM012-mom-11-11-17A/clean_data/*_2.fq.gz > TAM012-mom-11-11-17A_2.fq.gz
+cat TAM020-child-12-7-17A/clean_data/*_2.fq.gz > TAM020-child-12-7-17A_2.fq.gz
+cat TAM020-dad-12-7-17A/clean_data/*_2.fq.gz > TAM020-dad-12-7-17A_2.fq.gz
+cat TAM020-mom-12-7-17A/clean_data/*_2.fq.gz > TAM020-mom-12-7-17A_2.fq.gz
+cat TAM039-child-12-1-17A/clean_data/*_2.fq.gz > TAM039-child-12-1-17A_2.fq.gz
+cat TAM039-dad-12-7-17A/clean_data/*_2.fq.gz > TAM039-dad-12-7-17A_2.fq.gz
+cat TAM039-mom-12-1-17A/clean_data/*_2.fq.gz > TAM039-mom-12-1-17A_2.fq.gz
+cat TAM041-child-1-12-19A/clean_data/*_2.fq.gz > TAM041-child-1-12-19A_2.fq.gz
+cat TAM041-dad-1-12-19A/clean_data/*_2.fq.gz > TAM041-dad-1-12-19A_2.fq.gz
+cat TAM041-mom-1-12-19A/clean_data/*_2.fq.gz > TAM041-mom-1-12-19A_2.fq.gz
+cat TAM066-child-1-13-18A/clean_data/*_2.fq.gz > TAM066-child-1-13-18A_2.fq.gz
+cat TAM066-dad-1-13-18A/clean_data/*_2.fq.gz > TAM066-dad-1-13-18A_2.fq.gz
+cat TAM066-mom-1-13-18A/clean_data/*_2.fq.gz > TAM066-mom-1-13-18A_2.fq.gz
+cat TAM070-child-11-18-17A/clean_data/*_2.fq.gz > TAM070-child-11-18-17A_2.fq.gz
+cat TAM070-dad-11-18-17A/clean_data/*_2.fq.gz > TAM070-dad-11-18-17A_2.fq.gz
+cat TAM070-mom-11-18-17A/clean_data/*_2.fq.gz > TAM070-mom-11-18-17A_2.fq.gz
+

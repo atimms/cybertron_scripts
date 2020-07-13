@@ -10,9 +10,9 @@
 echo 'work'
 # module load biobuilds/2017.11
 # module load biobuilds/2016.11
-module load java/1.8.0_121 
-module load biobuilds/2016.11
-module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
+# module load java/1.8.0_121 
+# module load biobuilds/2016.11
+# module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
 
 ##sophie ompa loompa 0419
 # sophie_ol_mapping_0419_cybertron.py
@@ -34,5 +34,16 @@ module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
 ##sergie 1019
 # sergei_enu_mapping_1019_cybertron.py
 
-##dave sm0 0120
-dave_smo_0120_cybertron.py
+##dave smo 0120
+# dave_smo_0120_cybertron.py
+
+##sergie 0620
+module load biobuilds/2017.11
+module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
+# sergei_enu_mapping_0620_cybertron.py
+
+##kenny 0620
+module load biobuilds/2017.11
+module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
+kenny_wgs_analysis_0620_cybertron.py
+

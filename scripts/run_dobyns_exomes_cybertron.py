@@ -2711,9 +2711,22 @@ working_dir = '/home/atimms/ngs_data/exomes/working/kim_0220/extra'
 working_dir = '/home/atimms/ngs_data/exomes/working/LR15-121'
 # dobyns_exome_pipeline_cybertron_v11.call_just_coverage(working_dir, "LR15-121", "bam", {'LR15-121': 'LR15-121.bwa_gatk.bam', 'LR15-121f': 'LR15-121f.bwa_gatk.bam','LR15-121m': 'LR15-121m.bwa_gatk.bam' }, "trio")
 
-
 working_dir = '/home/atimms/ngs_data/exomes/working/LR06-231'
-dobyns_exome_pipeline_cybertron_v11.call_just_gemini(working_dir, "LR06-231", "bam", {'LR06-231': 'LR06-231.bwa_gatk.bam', 'LR06-231f': 'LR06-231f.bwa_gatk.bam','LR06-231m': 'LR06-231m.bwa_gatk.bam' }, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_just_gemini(working_dir, "LR06-231", "bam", {'LR06-231': 'LR06-231.bwa_gatk.bam', 'LR06-231f': 'LR06-231f.bwa_gatk.bam','LR06-231m': 'LR06-231m.bwa_gatk.bam' }, "trio")
 
+##6 trios for kim
+working_dir = '/home/atimms/ngs_data/exomes/working/kim_welsh_exomes_0620'
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM012", "fastq", {'TAM012-11-11-17A': ['TAM012-11-11-17A_1.fq.gz', 'TAM012-11-11-17A_2.fq.gz'], 'TAM012-dad-11-11-17A': ['TAM012-dad-11-11-17A_1.fq.gz', 'TAM012-dad-11-11-17A_2.fq.gz'], 'TAM012-mom-11-11-17A': ['TAM012-mom-11-11-17A_1.fq.gz', 'TAM012-mom-11-11-17A_2.fq.gz']}, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM020", "fastq", {'TAM020-child-12-7-17A': ['TAM020-child-12-7-17A_1.fq.gz', 'TAM020-child-12-7-17A_2.fq.gz'], 'TAM020-dad-12-7-17A': ['TAM020-dad-12-7-17A_1.fq.gz', 'TAM020-dad-12-7-17A_2.fq.gz'], 'TAM020-mom-12-7-17A': ['TAM020-mom-12-7-17A_1.fq.gz', 'TAM020-mom-12-7-17A_2.fq.gz']}, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM039", "fastq", {'TAM039-child-12-1-17A': ['TAM039-child-12-1-17A_1.fq.gz', 'TAM039-child-12-1-17A_2.fq.gz'], 'TAM039-dad-12-7-17A': ['TAM039-dad-12-7-17A_1.fq.gz', 'TAM039-dad-12-7-17A_2.fq.gz'], 'TAM039-mom-12-1-17A': ['TAM039-mom-12-1-17A_1.fq.gz', 'TAM039-mom-12-1-17A_2.fq.gz']}, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM041", "fastq", {'TAM041-child-1-12-19A': ['TAM041-child-1-12-19A_1.fq.gz', 'TAM041-child-1-12-19A_2.fq.gz'], 'TAM041-dad-1-12-19A': ['TAM041-dad-1-12-19A_1.fq.gz', 'TAM041-dad-1-12-19A_2.fq.gz'], 'TAM041-mom-1-12-19A': ['TAM041-mom-1-12-19A_1.fq.gz', 'TAM041-mom-1-12-19A_2.fq.gz']}, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM066", "fastq", {'TAM066-child-1-13-18A': ['TAM066-child-1-13-18A_1.fq.gz', 'TAM066-child-1-13-18A_2.fq.gz'], 'TAM066-dad-1-13-18A': ['TAM066-dad-1-13-18A_1.fq.gz', 'TAM066-dad-1-13-18A_2.fq.gz'], 'TAM066-mom-1-13-18A': ['TAM066-mom-1-13-18A_1.fq.gz', 'TAM066-mom-1-13-18A_2.fq.gz']}, "trio")
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "TAM070", "fastq", {'TAM070-child-11-18-17A': ['TAM070-child-11-18-17A_1.fq.gz', 'TAM070-child-11-18-17A_2.fq.gz'], 'TAM070-dad-11-18-17A': ['TAM070-dad-11-18-17A_1.fq.gz', 'TAM070-dad-11-18-17A_2.fq.gz'], 'TAM070-mom-11-18-17A': ['TAM070-mom-11-18-17A_1.fq.gz', 'TAM070-mom-11-18-17A_2.fq.gz']}, "trio")
+
+##renalyze quad as 2 trios for kim
+working_dir = '/home/atimms/ngs_data/exomes/working/kim_LR12-308_redo_0720'
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, 'LR12-308a1', 'fastq', {'LR12-308a1':['LR12-308a1_S11_R1_001.fastq.gz', 'LR12-308a1_S11_R2_001.fastq.gz'], 'LR12-308f':['LR12-308f_S12_R1_001.fastq.gz', 'LR12-308f_S12_R2_001.fastq.gz'], 'LR12-308m':['LR12-308m_S13_R1_001.fastq.gz', 'LR12-308m_S13_R2_001.fastq.gz']}, 'trio')
+# dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, 'LR12-308s1', 'fastq', {'LR12-308s1':['LR12-308s1_S14_R1_001.fastq.gz', 'LR12-308s1_S14_R2_001.fastq.gz'], 'LR12-308f':['LR12-308f_S12_R1_001.fastq.gz', 'LR12-308f_S12_R2_001.fastq.gz'], 'LR12-308m':['LR12-308m_S13_R1_001.fastq.gz', 'LR12-308m_S13_R2_001.fastq.gz']}, 'trio')
+dobyns_exome_pipeline_cybertron_v11.call_just_gemini(working_dir, 'LR12-308s1', 'fastq', {'LR12-308s1':['LR12-308s1_S14_R1_001.fastq.gz', 'LR12-308s1_S14_R2_001.fastq.gz'], 'LR12-308f':['LR12-308f_S12_R1_001.fastq.gz', 'LR12-308f_S12_R2_001.fastq.gz'], 'LR12-308m':['LR12-308m_S13_R1_001.fastq.gz', 'LR12-308m_S13_R2_001.fastq.gz']}, 'trio')
 
 

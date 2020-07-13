@@ -850,9 +850,40 @@ working_dir = '/home/atimms/ngs_data/rnaseq/cunn_rnaseq_0220'
 # ##rpt this one
 # count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_all.txt', 'GRCh38', ['sample'])
 ##by gene group
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_AXL.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_CTRL.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNA.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNB.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNC.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_PIEZO1.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_AXL.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_CTRL.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNA.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNB.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_FLNC.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'strain_rnaseq_0220_PIEZO1.txt', 'GRCh38', ['sample'])
+
+##kenny 2x experiments 0620
+working_dir = '/home/atimms/ngs_data/misc/kenny_mouse_0620/rnaseq'
+conditions_to_use = []
+##call all methods, so align, count and make files for deseq
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'wegner_0620.txt', 'mm10', ['sample'])
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'eucomm_0620.txt', 'mm10', ['sample'])
+
+
+##vishal data 0620
+working_dir = '/home/atimms/ngs_data/rnaseq/vishal_rnaseq_0620'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'dHL60_0620.txt', 'GRCh38', ['sample'])
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'U118_0620.txt', 'GRCh38', ['sample'])
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'dSY5Y_0620.txt', 'GRCh38', ['sample'])
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'WTC11_0620.txt', 'GRCh38', ['sample'])
+
+##kim new bunch of rnaseq 0720 
+working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_Bulk_vs_CTL_Bulk.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_PCL_vs_CTL_PCL.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_RL_vs_CTL_RL.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_vs_CTL.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_EGL_vs_CTL_EGL.txt', 'GRCh38', ['sample'])
+
+
+
+
+
+
