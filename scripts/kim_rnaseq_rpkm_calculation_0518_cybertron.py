@@ -23,6 +23,7 @@ os.chdir(working_dir)
 rnaseqc = '/home/atimms/programs/RNA-SeQC_v1.1.8.jar'
 ##ref files etc
 genome_name = 'hg19'
+# genome_name = 'GRCh38'
 fa_file = '/home/atimms/ngs_data/references/igenomes/' + genome_name + '/genome.fa'
 gtf_file = '/home/atimms/ngs_data/references/igenomes/' + genome_name +  '/genes.gtf'
 rrna_gtf = 'hg19_rRNA.gtf'
@@ -44,6 +45,12 @@ def run_rnaseqc(sample_file, out_dir):
 	# module_rm = subprocess.Popen(['module', 'rm', 'java/1.8.0_121'])
 	# module_rm.wait()
 	rnaseqc_cmd = subprocess.Popen(['java', '-jar', rnaseqc, '-s', sample_file, '-t', gtf_file, '-r', fa_file, '-o', out_dir, '-rRNA', rrna_gtf])
+	rnaseqc_cmd.wait()
+
+def run_rnaseqc_no_rrna_gtf(sample_file, out_dir):
+	# module_rm = subprocess.Popen(['module', 'rm', 'java/1.8.0_121'])
+	# module_rm.wait()
+	rnaseqc_cmd = subprocess.Popen(['java', '-jar', rnaseqc, '-s', sample_file, '-t', gtf_file, '-r', fa_file, '-o', out_dir])
 	rnaseqc_cmd.wait()
 
 def combine_rqc_rpkm_files(sample_names, outfile, results_dir):
@@ -80,6 +87,17 @@ def combine_rqc_rpkm_files(sample_names, outfile, results_dir):
 			if g != "":
 				print g, gene_super_dict[g]
 				out_fh.write(delim.join([g] + gene_super_dict[g] + ['\n']))
+
+
+def add_rg_index_bam(sample_names, in_bam_suffix, out_bam_suffix):
+	for sample_name in sample_names:
+		in_bam = sample_name + in_bam_suffix
+		out_bam = sample_name + out_bam_suffix
+		picard_arg = subprocess.Popen(['picard', 'AddOrReplaceReadGroups', 'INPUT=' + in_bam, 'OUTPUT=' + out_bam, 'SO=coordinate', 'RGID=' + sample_name, 'RGLB=' + sample_name, 'RGPL=Illumina', 'RGPU=machine1', 'RGSM=' + sample_name ])
+		picard_arg.wait()
+		samtools_index = subprocess.Popen(['samtools', 'index', out_bam])
+		samtools_index.wait()
+
 ##run methods
 ##parameters
 
@@ -155,7 +173,7 @@ rnaseqc_rpkm_file = 'kim_rnaseq_1018.rpkm.txt'
 
 
 ##1018 kim new set of rnaseq sample
-# '''
+'''
 ##setup working directory where results will be
 working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_hb_1018'
 os.chdir(working_dir)
@@ -177,5 +195,31 @@ rnaseqc_rpkm_file = 'kim_rnaseq_hb_1018.rpkm.txt'
 ##run rna-seqc on bam to get rpkm (can't use java 8)
 run_rnaseqc(sample_info, outdir)
 combine_rqc_rpkm_files(samples, rnaseqc_rpkm_file, outdir)
+'''
+
+##0720 kim new set of rnaseq samples
+##setup working directory where results will be
+working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720/hg19_alignment'
+os.chdir(working_dir)
+
+samples = ['Ctrl_13086_Sec', 'Ctrl_13086_Gr', 'Ctrl_13086_PK', 'Ctrl_13086_RL', 'DW22840EE_Sec', 'DW22840EE_Gr', 
+		'DW22840EE_RL', 'DW05950_Sec', 'DW05950_CP', 'DW05950_Gr', 'DW05950_Mes', 'DW05950_PK', 'DW05950_RL', 
+		'Ctrl_H26074_Sec', 'Ctrl_H26074_RL']
+
+sample_info = 'kim_0720.rnaseqc_sample_info.txt'
+outdir = 'rnaseqc_results_kim_0720/'
+star_bam_suffix = '.Aligned.sortedByCoord.out.bam'
+sorted_bam_suffix = '.rg_sorted.bam'
+rnaseqc_rpkm_file = 'kim_rnaseq_0720_b6.rpkm.txt'
+
+##sort and add read group -- must have java 8
+# add_rg_sort_index_bam(samples, star_bam_suffix, sorted_bam_suffix)
+
+##manually make rna-seqc sample file, 3 column sample name, bam, notes
+
+##run rna-seqc on bam to get rpkm (can't use java 8)
+# run_rnaseqc_no_rrna_gtf(sample_info, outdir)
+combine_rqc_rpkm_files(samples, rnaseqc_rpkm_file, outdir)
+
 
 

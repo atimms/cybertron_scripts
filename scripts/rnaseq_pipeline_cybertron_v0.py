@@ -876,14 +876,18 @@ working_dir = '/home/atimms/ngs_data/rnaseq/vishal_rnaseq_0620'
 working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720'
 # call_rnaseq_methods_for_deseq_analysis(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_Bulk_vs_CTL_Bulk.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_PCL_vs_CTL_PCL.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_RL_vs_CTL_RL.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_vs_CTL.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_EGL_vs_CTL_EGL.txt', 'GRCh38', ['sample'])
-
-
-
-
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_Bulk_vs_CTL_Bulk.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_PCL_vs_CTL_PCL.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_RL_vs_CTL_RL.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_vs_CTL.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_EGL_vs_CTL_EGL.txt', 'GRCh38', ['sample'])
+##just use batch6
+map_with_star_and_sort_index_bams(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_all.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_bulk.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_rl.txt', 'GRCh38', ['sample'])
+##align to hg19 for rpkm
+working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720/hg19_alignment'
+# map_with_star_and_sort_index_bams(working_dir, 'kim_rnaseq_0720_b6_all.txt', 'hg19', ['sample'])
 
 
