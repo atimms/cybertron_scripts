@@ -376,6 +376,43 @@ def make_bigwig_files(samples, tissues):
 			bgbw.wait()			
 			
 
+def make_bigwig_files_combined_tissues(samples, tissues):
+	for tissue in tissues:
+		combined_bam = tissue + '.combined.bam'
+		bams_to_combine = []
+		for sample in samples:
+			bam = sample + '/' + tissue + '.bam'
+			bams_to_combine.append(bam)
+		print(bams_to_combine, combined_bam)
+		# st_merge = subprocess.Popen(['samtools', 'merge', '-O', 'bam', '-@', '4', combined_bam] + bams_to_combine)
+		# st_merge.wait()
+		bedgraph1 = tissue + '.temp1.bedgraph'
+		bedgraph2 = tissue + '.temp2.bedgraph'
+		out_bw = tissue + '.combined.bigwig'
+		##make bedgraph from bam
+		# '''
+		with open(bedgraph1, 'w') as out_fh:
+			bedtools_gc = subprocess.Popen(['bedtools', 'genomecov', '-g', chrom_sizes,  '-bg', '-ibam', combined_bam], stdout=subprocess.PIPE)
+			bedtools_sort = subprocess.Popen(['bedtools', 'sort', '-i', 'stdin'], stdin=bedtools_gc.stdout, stdout=out_fh)
+			bedtools_sort.wait()
+		# '''
+		##get mapped and total read calculation
+		# total_reads = subprocess.check_output(['samtools', 'view', '-c', combined_bam])
+		# total_reads.wait()
+		# total_reads = total_reads.rstrip()
+		# '''
+		mapped_reads = subprocess.check_output(['samtools', 'view', '-c', '-F', '4', combined_bam])
+		mapped_reads = int(mapped_reads.rstrip())
+		print(combined_bam, mapped_reads)
+		
+		##normalize read count
+		# mapped_reads = 25000000
+		make_norm_bedgraph(bedgraph1, bedgraph2, mapped_reads)
+		# '''
+		##make bigwig
+		bgbw = subprocess.Popen([bg_to_bw, bedgraph2, chrom_sizes, out_bw])
+		bgbw.wait()		
+
 def call_macs2_on_bams_second(samples, tissues):
 	'''
 	##run macs2
@@ -581,6 +618,57 @@ def get_correlation_info_homer(samples, tissues, d_values, size_values, bed_suff
 			##make file to use in r for heatmaps etc
 			compute_correlation(annotate_prefix, merge_file_suffix, d, size_values, correlation_prefix)
 
+
+def filter_correlation_files(d_values, size_values, bed_suffixes, count_numbers_to_filter):
+	for d_value in d_values:
+		for bed_suffix in bed_suffixes:
+			for size_req in size_values:
+				file_suffix = bed_suffix.rsplit('.', 1)[0]
+				if size_req == 'none':
+					infile = 'corr_files/correlation.' + d_value + 'd' + file_suffix + '.txt'
+				else:
+					infile = 'corr_files/correlation.' + d_value + 'd.' + size_req + 'size' + file_suffix + '.txt'
+				print(infile)
+				for count_req in count_numbers_to_filter:
+					if size_req == 'none':
+						outfile = 'correlation.' + d_value + 'd.' + str(count_req) + 'filter' + file_suffix + '.txt'
+					else:
+						outfile = 'correlation.' + d_value + 'd.' + size_req + 'size.' + str(count_req) + 'filter' + file_suffix + '.txt'
+					with open(outfile, 'w') as out_fh, open(infile, 'r') as in_fh:
+						lc = 0
+						for line in in_fh:
+							lc += 1
+							line = line.strip().split(delim)
+							if lc == 1:
+								out_fh.write(delim.join(line) + '\n')		
+							else:
+								# print(line[1:])
+								counts = [float(i) for i in line[1:]]	
+								if sum(counts) >= count_req:
+									out_fh.write(delim.join(line) + '\n')
+
+
+def homer_find_motifs_from_macs2_idr(tissues, bed_suffix):
+	for tissue in tissues:
+		in_bed_file = tissue + bed_suffix
+		# homer_bed_file = ''
+		# make_homer_bed(in_bed_file, homer_bed_file)
+		out_dir = tissue + '.macs2_idr_find_motifs'
+		#findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+		find_motifs = subprocess.Popen(['findMotifsGenome.pl', in_bed_file, 'hg38', out_dir, '-size', 'given', '-preparsedDir', './temp'])
+		find_motifs.wait()
+
+def homer_find_motifs_from_macs2_summit_beds(samples, tissues, bed_suffix):
+	sizes = ['100', '200']
+	for tissue in tissues:
+		for sample in samples:
+			for size in sizes:
+				in_bed_file = tissue + '_' + sample + bed_suffix
+				out_dir = tissue + '_' + sample + '.macs2_summit_size' + size + '_find_motifs'
+				#findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+				find_motifs = subprocess.Popen(['findMotifsGenome.pl', in_bed_file, 'hg38', out_dir, '-size', '100', '-preparsedDir', './temp'])
+				find_motifs.wait()
+
 ##run methods
 working_dir = '/home/atimms/ngs_data/misc/cherry_human_scatac_call_peaks_0720'
 os.chdir(working_dir)
@@ -595,19 +683,25 @@ hu8_bam = '/active/cherry_t/OrgManuscript_SingleCell_Data/human_scATAC/Hu8/outs/
 ##samples and tissue
 sample_names = ['hu5', 'hu7', 'hu8']
 tissue_names = ['Amacrines', 'Bipolars', 'Cones', 'Ganglions', 'Horizontals', 'Mullers', 'Rods']
+
 ##homer values
 d_values = ['100', '200', '500']
 size_values = ['500', '2000']
+size_values_plus = ['500', '2000', 'none']
 ind_gr_narrowpeak_suffices = ['.gr.default.p1e3.narrowPeak', '.gr.default.p1e4.narrowPeak',
 		'.gr.default.p1e5.narrowPeak', '.gr.default.p1e6.narrowPeak']
 peak_bed_suffices = ['.macs2.bampe_p1e-10_keepdups_summits.bed', '.macs2.bampe_p1e-2_keepdups_summits.bed', 
 	'.macs2.bampe_p1e-5_keepdups_summits.bed', '.macs2.bampe_q0.01_keepdups_summits.bed',
 	'.gr.default.p1e3.bed', '.gr.default.p1e4.bed', '.gr.default.p1e5.bed', '.gr.default.p1e6.bed']
-
+macs2_idr_bed_suffix = '.macs2.bampe_p0.01_keepdups.idr_combined.bed'
+macs2_summit_bed_suffix = '.macs2.bampe_q0.01_keepdups_summits.bed'
+peak_bed_suffices_to_filter = ['.macs2.bampe_p1e-10_keepdups_summits.bed', '.macs2.bampe_q0.01_keepdups_summits.bed']
+total_counts_to_filter = [100, 200, 500, 1000]
 
 ##temp
 # sample_names = ['hu5']
-# tissue_names = ['Amacrines']
+# tissue_names = ['Ganglions']
+tissue_names = ['Rods']
 
 ##make bams per tissue type
 ##need python3 and sinto conda env
@@ -617,6 +711,7 @@ peak_bed_suffices = ['.macs2.bampe_p1e-10_keepdups_summits.bed', '.macs2.bampe_p
 
 ##make bigwig files from each bam
 # make_bigwig_files(sample_names, tissue_names)
+make_bigwig_files_combined_tissues(sample_names, tissue_names)
 
 ##run tests on genrich and macs2 to call peaks on bams
 # call_genrich_on_bams_first(sample_names, tissue_names)
@@ -634,5 +729,12 @@ peak_bed_suffices = ['.macs2.bampe_p1e-10_keepdups_summits.bed', '.macs2.bampe_p
 # call_macs2_on_bams_third(sample_names, tissue_names)
 
 ##use homer to look for correlation
-get_correlation_info_homer(sample_names, tissue_names, d_values, size_values, peak_bed_suffices)
+# get_correlation_info_homer(sample_names, tissue_names, d_values, size_values, peak_bed_suffices)
+##to make correlation files better remove
+# filter_correlation_files( d_values, size_values_plus, peak_bed_suffices_to_filter, total_counts_to_filter)
+
+
+##use homer to find motifs
+# homer_find_motifs_from_macs2_idr(tissue_names, macs2_idr_bed_suffix)
+# homer_find_motifs_from_macs2_summit_beds(sample_names, tissue_names, macs2_summit_bed_suffix)
 

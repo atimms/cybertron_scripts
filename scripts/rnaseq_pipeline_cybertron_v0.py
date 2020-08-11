@@ -23,7 +23,7 @@ gtf_file_path = ['/home/atimms/ngs_data/references/igenomes/', '/genes.gtf']
 # gtf_file_path = ['/home/atimms/ngs_data/references/igenomes/', '/genes_temp.gtf']
 ens_hg19_gtf_file = '/home/atimms/ngs_data/references/ensembl/hg19/Homo_sapiens.GRCh37.75.gtf'
 deseq_r_template = ''
-# star_bam_suffix = '.Aligned.out.bam'
+unsorted_star_bam_suffix = '.Aligned.out.bam'
 star_bam_suffix = 'Aligned.sortedByCoord.out.bam'
 sorted_bam_suffix = '.sorted.bam'
 
@@ -251,7 +251,7 @@ def count_and_make_files_for_deseq(work_dir, info_file, genome, covariates):
 
 
 def sort_index_bam(sample_name, genome):
-	in_bam = sample_name + star_bam_suffix
+	in_bam = sample_name + unsorted_star_bam_suffix
 	out_bam = sample_name + sorted_bam_suffix
 	fa_file = fa_file_path[0] + genome + fa_file_path[1]
 	# picard_rs = subprocess.Popen(['java', '-Xmx100g', '-jar', picard, 'ReorderSam', 'INPUT=' + in_bam, 'OUTPUT=' + out_bam, 'CREATE_INDEX=true', 'REFERENCE=' + fa_file])
@@ -882,12 +882,23 @@ working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720'
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_vs_CTL.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_DWM_EGL_vs_CTL_EGL.txt', 'GRCh38', ['sample'])
 ##just use batch6
-map_with_star_and_sort_index_bams(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
+# map_with_star_and_sort_index_bams(working_dir, 'kim_rnaseq_0720_all.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_all.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_bulk.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'kim_rnaseq_0720_b6_rl.txt', 'GRCh38', ['sample'])
 ##align to hg19 for rpkm
 working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_0720/hg19_alignment'
 # map_with_star_and_sort_index_bams(working_dir, 'kim_rnaseq_0720_b6_all.txt', 'hg19', ['sample'])
+##align to hg19 for rpkm
+working_dir = '/home/atimms/ngs_data/rnaseq/kim_index_bams_0820'
+# sort_index_bams_from_txt_file(working_dir, 'kim_index_bams_0820.txt', 'hg19')
 
+
+##eric rnaseq 0720 
+working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE131411'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'GSE131411_all.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_all.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t1.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t2.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t3.txt', 'GRCh38', ['sample'])
 

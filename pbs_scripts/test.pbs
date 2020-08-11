@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N test_exomes
+#PBS -l mem=200gb,ncpus=20
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -P 19833a08-f6fb-4bea-8526-8a79069da878
+echo 'work'
+
+module load biobuilds
+# rich_lymphoma_exomes_0720.py
+eric_rnaseq_genotyping_0820_cyb.py

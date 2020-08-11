@@ -5,7 +5,8 @@
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
 #PBS -m abe
-#PBS -A "wdobyn"
+# Pick your appropriate project ID for ‘-P’ below: 
+#PBS -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
 
 echo 'work'
 module load java/1.8.0_121

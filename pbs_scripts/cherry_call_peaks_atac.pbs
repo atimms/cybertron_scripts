@@ -11,9 +11,20 @@
 ##run on cdbrmq queue i.e. qsub -q cdbrmq cherry_call_peaks_atac.pbs
 
 ##for homer section
-module load biobuilds
-module load homer/4.9.1
+##PBS -l mem=100gb,ncpus=5
+# module load biobuilds
+# module load homer/4.9.1
 
+##for macs2
+# module load local_python/3.7.6 
+# source activate macs2
+
+##for making bigwigs
+##PBS -l mem=100gb,ncpus=5
+module load biobuilds
 
 ##looking at adult scATAC and doing lots of test
 cherry_human_scatac_call_peaks_0720_cyb.py
+
+##running a bunch of ways for correlation
+# cherry_scatac_call_peaks_0820_cyb.py

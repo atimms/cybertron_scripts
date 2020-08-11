@@ -106,15 +106,17 @@ def annotate_vcf(vcf, av_prefix):
 
 ##new hg38 files
 # ftds = ['clinvar_20190305', 'dbnsfp31a_interpro']
-ftds = ['gnomad211_genome', 'gnomad211_exome', 'gnomad30_genome']
+# ftds = ['gnomad211_genome', 'gnomad211_exome', 'gnomad30_genome']
+ftds = ['clinvar_20200316']
 for ftd in ftds:
 	download_annovar_db_from_annovar(ftd)
 
-##make cosmic db
-
-##download latest verion (88) i.e. 4 files from cosmic and de compress
-##run commands
-#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicMutantExport.tsv -vcf CosmicCodingMuts.vcf > hg19_cosmic88_coding.txt
-#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicNCV.tsv -vcf CosmicNonCodingVariants.vcf > hg19_cosmic88_noncoding.txt
-
+##make cosmic dbs - 0320
+##download latest verion (90) i.e. 4 files from cosmic and de compress (make sure you have correct version)
+##run commands - hg38
+#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicMutantExport.tsv -vcf CosmicCodingMuts.vcf > hg38_cosmic90_coding.txt
+#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicNCV.tsv -vcf CosmicNonCodingVariants.vcf > hg38_cosmic90_noncoding.txt
+##run commands - hg19
+#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicMutantExport.tsv -vcf CosmicCodingMuts.vcf > hg19_cosmic90_coding.txt
+#/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicNCV.tsv -vcf CosmicNonCodingVariants.vcf > hg19_cosmic90_noncoding.txt
 

@@ -1,15 +1,20 @@
 #!/bin/bash
-#PBS -N eric_exomes
-#PBS -l mem=100gb,ncpus=10
+#PBS -N rich_exomes
+#PBS -l mem=200gb,ncpus=20
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
 #PBS -m abe
-#PBS -A "rjame2"
-
+#PBS -P cd0a5c69-0cde-481a-8656-c980c090ab66
 echo 'work'
 
 ##run scripts
+# module load biobuilds/2016.11
+##for mapping etc
+###PBS -l mem=200gb,ncpus=20
+##otherwise
+###PBS -l mem=50gb,ncpus=2
+
 module load biobuilds
 rich_lymphoma_exomes_0720.py
 
