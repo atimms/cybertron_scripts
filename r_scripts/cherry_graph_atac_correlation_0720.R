@@ -39,6 +39,9 @@ for(i in 1:length(filename)){
   corr_res <- round(cor(corr_data, method="spearman"),3)
   ##graph
   pheatmap(corr_res)
+  ##write files
+  corr_csv <- gsub(".txt",".csv",filename[i])
+  write.csv(corr_res, file=corr_csv)
   corr_pdf <- gsub(".txt",".pdf",filename[i])
   dev.copy2pdf(file=corr_pdf, width = 7, height = 5)
 }

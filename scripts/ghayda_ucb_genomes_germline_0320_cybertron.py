@@ -349,6 +349,24 @@ def filter_by_popfreq_comphet(in_file, out_file, aaf_req, aaf_cols, genename_col
 					out_fh.write(delim.join(line[:74]) + '\n')
 
 
+def make_ad_files(ped, in_ped, out_ped, in_db, out_db):
+	normalized_vcf = ped + '.int.norm.vcf'
+	##make ad ped, so convert 1's to 0's in ped
+	with open(out_ped, "w") as out_fh, open(in_ped, "r") as in_fh:
+		for line in in_fh:
+			line = line.strip('\n').split(delim)
+			pheno = line[5]
+			the_rest = line[:5]
+			if pheno == '1':
+				pheno = '0'
+			out_fh.write(delim.join(the_rest + [pheno]) + '\n')
+	##cp gemini database then add ad ped file -- doesn't work with vcf2db dbds
+	# cp_gemini_db(in_db, out_db)
+	# add_new_ped_file_to_gemini_db(out_ped, out_db)
+	##load into db
+	gemini_load = subprocess.Popen(['python', vcf2db, normalized_vcf + '.gz', out_ped, out_db])
+	gemini_load.wait()
+
 def gemini_denovo(ped, gem_db_name, max_aaf, coverage):
 	outfile = ped + '.cov' + str(coverage) + '.maf'+ str(max_aaf) + '.de_novo.xls'
 	temp1_file = ped + '.de_novo_temp1.xls'
@@ -521,32 +539,32 @@ def gemini_protocol(pedigree_dict):
 		load_vcf_into_gemini(pedigree, gemini_db, in_vcf, std_ped_file)
 		'''
 		##make auto dom ped and gemini db for duo and trio analysis
-		#make_ad_files(pedigree, std_ped_file, ad_ped_file, gemini_db, ad_db)
+		make_ad_files(pedigree, std_ped_file, ad_ped_file, gemini_db, ad_db)
 		##run queries and get files to combine
 		files_to_combine = []
 		if ped_type == 'singleton':
 			print('pedigree %s is a singleton'%pedigree)
-			files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_dominant(pedigree, gemini_db, freq_req, coverage_req))
+			# files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_dominant(pedigree, gemini_db, freq_req, coverage_req))
 		elif ped_type == 'duo':
 			print('pedigree %s is a duo'%pedigree)
-			files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_dominant(pedigree, ad_db, freq_req, coverage_req))
+			# files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_dominant(pedigree, ad_db, freq_req, coverage_req))
 		elif ped_type == 'trio' or ped_type == 'quad':
 			print('pedigree %s is a trio or quad'%pedigree)
-			files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_denovo(pedigree, gemini_db, freq_req, coverage_req))
-			files_to_combine.append(gemini_xlinked(pedigree, gemini_db, freq_req_recessive, coverage_req))
-			files_to_combine.append(gemini_xlinked_de_novo(pedigree, gemini_db, freq_req, coverage_req))
+			# files_to_combine.append(gemini_comp_het(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_recessive(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_denovo(pedigree, gemini_db, freq_req, coverage_req))
+			# files_to_combine.append(gemini_xlinked(pedigree, gemini_db, freq_req_recessive, coverage_req))
+			# files_to_combine.append(gemini_xlinked_de_novo(pedigree, gemini_db, freq_req, coverage_req))
 			##not used right now
-			#gemini_dominant(pedigree, ad_db, freq_req, coverage_req)
+			gemini_dominant(pedigree, ad_db, freq_req, coverage_req)
 		else:
 			print('ped type %s not recognized'%ped_type)
 		##combine results
-		combine_gemini_results(files_to_combine, std_out_file)
+		# combine_gemini_results(files_to_combine, std_out_file)
 		
 
 

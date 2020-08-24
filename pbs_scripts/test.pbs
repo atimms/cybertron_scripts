@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N test_exomes
+#PBS -N test
 #PBS -l mem=200gb,ncpus=20
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
@@ -8,6 +8,11 @@
 #PBS -P 19833a08-f6fb-4bea-8526-8a79069da878
 echo 'work'
 
-module load biobuilds
+# module load biobuilds
 # rich_lymphoma_exomes_0720.py
-eric_rnaseq_genotyping_0820_cyb.py
+# eric_rnaseq_genotyping_0820_cyb.py
+module load java/1.8.0_121
+module load local_python/2.7.14
+source activate hg38_genomes
+
+ghayda_ucb_genomes_germline_0320_cybertron.py
