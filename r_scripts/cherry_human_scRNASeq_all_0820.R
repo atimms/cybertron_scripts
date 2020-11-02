@@ -17,6 +17,8 @@ options(future.globals.maxSize = 8000 * 1024^2)
 
 ##known markers
 markers <- c('RCVRN', 'RHO', 'CRX', 'ARR3', 'GNAT2', 'VSX2', 'LHX4', 'TRPM1', 'GRM6', 'SLC1A3', 'RLBP1', 'PAX6', 'LHX1', 'ONECUT2', 'TFAP2B', 'GAD1', 'SLC6A9', 'RBPMS', 'NEFM', 'GFAP', 'CD74', 'P2RY12', 'BEST1', 'RPE65', 'SFRP2')
+markers2 <- c('KCNQ5', 'PRDM1', 'DCT', 'SLC35F3', 'NOL4', 'MPPED2', 'WDR72', 'NLK', 'PDE1C', 'PEX5L')
+
 
 #Import 10x data and convert each dataset to Seurat object (take from individual sample outputs, not cellranger's aggr output). Define sample with project= "samplename"
 d53.data = Read10X(data.dir = './d53/outs/filtered_feature_bc_matrix/')
@@ -152,6 +154,9 @@ write.csv(counts_cluster_time, file='./seurat_analysis/all/human_scrnaseq_all_06
 #Dot plot - the size of the dot = % of cells and color represents the average expression
 DotPlot(human_harmony, features = markers) + RotatedAxis()
 dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.harmony.res0.4.known_markers.dotplot.pdf", width = 20)
+DotPlot(human_harmony, features = markers2) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.harmony.res0.4.new_markers.dotplot.pdf", width = 20)
+
 #Find all markers that define each cluster
 human_harmony.markers <- FindAllMarkers(human_harmony, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 write.csv(human_harmony.markers, file='./seurat_analysis/all/human_scrnaseq_all_0620.harmony.markers.res0.4.csv')
@@ -162,14 +167,56 @@ Idents(human_harmony_time) <- 'time'
 human_harmony.diffexp <- FindAllMarkers(human_harmony_time, min.pct=0.1, logfc.threshold = 0.25)
 write.csv(human_harmony.diffexp, file='./seurat_analysis/all/human_scrnaseq_all_0620.harmony.DE.res0.4.csv')
 
-
 #Save object to avoid needing to re-run previous computations
 saveRDS(human_harmony, file = "./seurat_analysis/all/human_harmony.rds")
 
+
+
+##add cluster names and then extract cells and cluster ids
+
+##load object
+human_harmony <- readRDS(file = "./seurat_analysis/all/human_harmony.rds")
+##remove cluster 5, and check umap
+human_harmony_subset <- subset(human_harmony, subset = seurat_clusters == 5, invert = TRUE)
+DimPlot(human_harmony, reduction = "umap", pt.size = 0.1, label = TRUE)
+DimPlot(human_harmony_subset, reduction = "umap", pt.size = 0.1, label = TRUE)
+
+##make marked umap
+new.cluster.ids <- c('Rods', 'Progenitors', 'Ganglions', 'Amacrines', 'Ganglions', 'Progenitors', 'Horizontals', 'Cones', 'Mullers', 'Progenitors', 'Ganglions', 'Ganglion precursors', 'BC/Photoreceptor precursors', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Progenitors', 'Progenitors', 'Ganglions', 'Amacrines', 'Astrocytes', 'Microglia', 'Progenitors')
+names(new.cluster.ids) <- levels(human_harmony_subset)
+human_harmony_subset <- RenameIdents(human_harmony_subset, new.cluster.ids)
+DimPlot(human_harmony_subset, reduction = "umap", pt.size = 0.1, label = TRUE)
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.harmony.UMAP_celltypes.res0.4.pdf", width=20, height=20)
+
+##get barcode info for each cluster
+WhichCells(object = human_harmony_subset, idents = c('Rods', 'Progenitors', 'Ganglions', 'Amacrines', 'Horizontals', 'Cones', 'Mullers', 'Ganglion precursors', 'BC/Photoreceptor precursors', 'Bipolars', 'Astrocytes', 'Microglia'))
+human_harmony_subset$celltype <- plyr::mapvalues(
+  x = human_harmony_subset$seurat_clusters, 
+  from = c('0', '1', '2', '3', '4', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25'), 
+  to = c('Rods', 'Progenitors', 'Ganglions', 'Amacrines', 'Ganglions', 'Progenitors', 'Horizontals', 'Cones', 'Mullers', 'Progenitors', 'Ganglions', 'Ganglion precursors', 'BC/Photoreceptor precursors', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Progenitors', 'Progenitors', 'Ganglions', 'Amacrines', 'Astrocytes', 'Microglia', 'Progenitors')
+)
+head(human_harmony_subset$celltype)
+colnames(human_harmony_subset)
+cell.info = human_harmony_subset$celltype
+write.csv(cell.info, file='./seurat_analysis/all/human_scrnaseq_all_0620.harmony.res0.4.cellinfo.csv')
+
+##get counts per sample/cell class
+sample.celltype.info = table(human_harmony_subset$celltype, human_harmony_subset$orig.ident)
+write.csv(sample.celltype.info, file='./seurat_analysis/all/human_scrnaseq_all_0620.harmony.res0.4.sample_cell_info.csv')
+
+#Save object to avoid needing to re-run previous computations
+saveRDS(human_harmony_subset, file = "./seurat_analysis/all/human_harmony_clusters_defined.rds")
+
+
+
+
+
+
+
+#>>>>>>>>>>>>>> egs
+#Add celltype info for RNASeq analysis..... done 0820
 ##add cluster names and then extract cells and cluster ids
 human_harmony <- readRDS(file = "./seurat_analysis/all/human_harmony.rds")
-
-#Add celltype info
 ##make marked umap
 new.cluster.ids <- c('Rods', 'Early Primary Progenitors', 'Ganglions', 'Amacrines', 'Ganglions', 'high mito rods', 'Amacrines', 'Cycling progenitors', 'Cones', 'Horizontals', 'Mullers', 'Cycling progenitors', 'Ganglions', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Amacrines', 'Ganglions', 'Early Primary Progenitors', 'Transitional 1', 'Ganglions', 'Astrocytes', 'Bipolars', 'bipolar/photoreceptor cell precursors', 'Microglia')
 names(new.cluster.ids) <- levels(human_harmony)
@@ -194,4 +241,4 @@ sample.celltype.info = table(human_harmony$celltype, human_harmony$orig.ident)
 write.csv(sample.celltype.info, file='./seurat_analysis/all/human_scrnaseq_all_0620.harmony.res0.4.sample_cell_info.csv')
 
 #Save object to avoid needing to re-run previous computations
-saveRDS(human_harmony, file = "./seurat_analysis/all/human_harmony.rds")
+#saveRDS(human_harmony, file = "./seurat_analysis/all/human_harmony.rds")

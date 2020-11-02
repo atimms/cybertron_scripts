@@ -4,9 +4,11 @@ import os
 
 ##parameters
 delim = '\t'
-cellranger = '/home/atimms/programs/cellranger-3.1.0/cellranger'
+# cellranger = '/home/atimms/programs/cellranger-3.1.0/cellranger'
+cellranger = '/home/atimms/programs/cellranger-4.0.0/cellranger'
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
 grc38_prerna_ref = '/home/atimms/ngs_data/references/10x/GRCh38-3.0.0_premrna_new'
+grc38_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
 mm10_prerna_ref = '/gpfs/home/atimms/ngs_data/references/10x/mm10-3.0.0_premrna'
 grc38_atac_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0'
 
@@ -220,5 +222,14 @@ working_dir = '/home/atimms/ngs_data/cellranger/jchao_rna_0720'
 info_file = 'SFD_CRISPR_SFD_snRNAseq_0720.txt'
 combined_suffix = 'SFD_CRISPR_SFD_snRNAseq_0720'
 transciptome_ref = grc38_prerna_ref
+# cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
+
+
+##kim data 0920
+working_dir = '/archive/millen_k/kims_data/kim_10Xv3_RNA_DSbrain'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group
+info_file = 'kim_10Xv3_RNA_DSbrain_0920.txt'
+combined_suffix = 'kim_10Xv3_RNA_DSbrain_0920'
+transciptome_ref = grc38_ref
 cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
 

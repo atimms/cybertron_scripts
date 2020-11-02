@@ -35,7 +35,7 @@ def make_star_index_files(star_genome_dir, genome_fas, genome_gtf, threads_to_us
 	star_index.wait()
 
 def star_align_paired_end_2_pass(sample_name, star_genome_dir, threads_to_use, r1_fq, r2_fq):
-	print sample_name, r1_fq, r2_fq
+	print(sample_name, r1_fq, r2_fq)
 	# star_align = subprocess.Popen([star,'--genomeDir', star_genome_dir, '--readFilesIn', r1_fq, r2_fq, '--outSAMtype', 'BAM', 'Unsorted', '--outSAMmapqUnique', '60', '--readFilesCommand', 'zcat', '--twopassMode', 'Basic', '--outFileNamePrefix', sample_name + '.', '--runThreadN', threads_to_use])
 	star_align = subprocess.Popen([star,'--genomeDir', star_genome_dir, '--readFilesIn', r1_fq, r2_fq, '--outSAMtype', 'BAM', 'SortedByCoordinate', '--outSAMmapqUnique', '60', '--readFilesCommand', 'zcat', '--twopassMode', 'Basic', '--outFileNamePrefix', sample_name + '.', '--runThreadN', threads_to_use])
 	star_align.wait()
@@ -65,10 +65,10 @@ def proccess_bam_files(sample_name):
 	gatk_pr.wait()
 	##remove intermeidate files
 	files_to_go = glob.glob('*with_rg.bam') + glob.glob('*mkdup.bam') + glob.glob('*mkdup.bai') + glob.glob('*metrics') + glob.glob('*reorder.bam')+ glob.glob('*reorder.bai') + glob.glob('*split.bam') + glob.glob('*split.bai')
-	print 'removing files:'
+	print('removing files:')
 	for f in files_to_go:
 		os.remove(f)
-		print f
+		print(f)
 
 
 def add_rg_to_bam(sample_name):
@@ -97,8 +97,8 @@ def make_patient_fq_dict(in_file):
 	return(patient_dict)
 
 def combine_fq_file(r1_to_combine, r2_to_combine, r1_fq, r2_fq):
-	print r1_fq, r1_to_combine
-	print r2_fq, r2_to_combine
+	print(r1_fq, r1_to_combine)
+	print(r2_fq, r2_to_combine)
 	with open(r1_fq, 'w') as r1_fh:
 		cat_files = subprocess.Popen(['cat'] + r1_to_combine, stdout=r1_fh)
 		cat_files.wait()
@@ -115,7 +115,9 @@ def make_list_of_bams(sample_dict, bam_suffix, bamlist_file):
 
 def get_vars_around_rs3184504(bam_list, name_prefix):
 	final_vcf = name_prefix + '.gatkHC.vcf.gz'
-	gatk_hc = subprocess.Popen(['java', '-Xmx100g', '-jar', gatk, '-T', 'HaplotypeCaller', '-R', fa_file, '-L', rs3184504_bed, '-I', bam_list, '-dontUseSoftClippedBases', '-stand_call_conf', '20', '--filter_reads_with_N_cigar', '-o', final_vcf])
+	# gatk_hc = subprocess.Popen(['java', '-Xmx100g', '-jar', gatk, '-T', 'HaplotypeCaller', '-R', fa_file, '-L', rs3184504_bed, '-I', bam_list, '-dontUseSoftClippedBases', '-stand_call_conf', '20', '--filter_reads_with_N_cigar', '-o', final_vcf])
+	gatk_hc = subprocess.Popen(['java', '-Xmx100g', '-jar', gatk, '-T', 'HaplotypeCaller', '-R', fa_file, '-L', rs3184504_bed, '-I', bam_list, '--filter_reads_with_N_cigar', '-o', final_vcf])
+
 	gatk_hc.wait()
 
 def genotype_rs3184504_pipeline(info_file):
@@ -139,13 +141,56 @@ def genotype_rs3184504_pipeline(info_file):
 	make_list_of_bams(patient_fq_dict, '.with_rg.bam', bamlist)
 	get_vars_around_rs3184504(bamlist, project)
 
+def make_patient_fq_dict_2(in_file):
+	patient_dict = {}
+	with open(in_file, "r") as in_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc > 1:
+				patient = line[2]
+				srr_id = line[0]
+				fq1 = srr_id + '.sra_1.fastq.gz'
+				fq2 = srr_id + '.sra_2.fastq.gz'
+				if patient in patient_dict:
+					patient_dict[patient][0].append(fq1)
+					patient_dict[patient][1].append(fq2)
+				else:
+					patient_dict[patient] = [[fq1], [fq2]]
+	return(patient_dict)
 
+def genotype_rs3184504_pipeline_2(info_file):
+	patient_fq_dict = make_patient_fq_dict_2(info_file)
+	project = info_file.split('_')[0] + '_0820'
+	print(project)
+	'''
+	for patient in patient_fq_dict:
+		print(patient, patient_fq_dict[patient])
+		fq1 = patient_fq_dict[patient][0]
+		fq2 = patient_fq_dict[patient][1]
+
+		##align with star
+		star_align_paired_end_2_pass(patient, star_index_dir, thread_number, fq1[0], fq2[0])
+		##just add rg so haplotype caller works
+		add_rg_to_bam(patient)
+	'''
+	##call variants
+	make_list_of_bams(patient_fq_dict, '.with_rg.bam', bamlist)
+	get_vars_around_rs3184504(bamlist, project)
 
 ##run methods
+##GSE131411
 working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE131411'
 os.chdir(working_dir)			
 GSE131411_info_file = 'GSE131411_info.txt'
+# genotype_rs3184504_pipeline(GSE131411_info_file)
 
-genotype_rs3184504_pipeline(GSE131411_info_file)
+
+##GSE118165
+working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE118165'
+os.chdir(working_dir)			
+GSE118165_info_file = 'GSE118165_info.txt'
+genotype_rs3184504_pipeline_2(GSE118165_info_file)
 
 

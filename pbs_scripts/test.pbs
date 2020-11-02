@@ -11,8 +11,16 @@ echo 'work'
 # module load biobuilds
 # rich_lymphoma_exomes_0720.py
 # eric_rnaseq_genotyping_0820_cyb.py
-module load java/1.8.0_121
-module load local_python/2.7.14
-source activate hg38_genomes
+# module load java/1.8.0_121
+# module load local_python/2.7.14
+# source activate hg38_genomes
+# ghayda_ucb_genomes_germline_0320_cybertron.py
 
-ghayda_ucb_genomes_germline_0320_cybertron.py
+##testing exome pipleine
+module load java/1.8.0_121 
+module load biobuilds/2016.11
+module load vt/0.5772-60f436c3 
+module load mono/5.10.1.47
+module load Pisces/5.1.6.54
+run_dobyns_exomes_cybertron.py
+# single_core_test_1020.py 

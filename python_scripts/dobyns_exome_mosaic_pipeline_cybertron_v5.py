@@ -37,10 +37,10 @@ vardict_maf_req = '0.01'
 av_genome = 'hg19'
 av_buildver = ['-buildver', av_genome]
 av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
-av_protocol_pisces = ['-protocol', 'refGene,rmsk,genomicSuperDups,dbnsfp30a,popfreq_all_20150413,avsnp147,clinvar_20170905,cosmic83_noncoding,cosmic83_coding,vcf', '-vcfdbfile']
+av_protocol_pisces = ['-protocol', 'refGene,rmsk,genomicSuperDups,dbnsfp30a,popfreq_all_20150413,avsnp147,clinvar_20170905,cosmic90_noncoding,cosmic90_coding,vcf', '-vcfdbfile']
 av_operation_pisces = ['-operation', 'g,r,r,f,f,f,f,f,f,f']
 av_options_vcf_pisces = ['-otherinfo', '-remove', '-nastring', '.', '-vcfinput','-arg', '-splicing 10 ,,,,,,,,,']
-av_protocol_pisces_no_parents = ['-protocol', 'refGene,rmsk,genomicSuperDups,dbnsfp30a,popfreq_all_20150413,avsnp147,clinvar_20170905,cosmic83_noncoding,cosmic83_coding']
+av_protocol_pisces_no_parents = ['-protocol', 'refGene,rmsk,genomicSuperDups,dbnsfp30a,popfreq_all_20150413,avsnp147,clinvar_20170905,cosmic90_noncoding,cosmic90_coding']
 av_operation_pisces_no_parents = ['-operation', 'g,r,r,f,f,f,f,f,f']
 av_options_vcf_pisces_no_parents = ['-otherinfo', '-remove', '-nastring', '.', '-vcfinput','-arg', '-splicing 10 ,,,,,,,,']
 

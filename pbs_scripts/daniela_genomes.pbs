@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N daniela_genomes
-#PBS -l mem=100gb,ncpus=5
+#PBS -l mem=60gb,ncpus=2
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -34,4 +34,7 @@ module load vt/0.5772-60f436c3
 # daniela_genomes_uw_1119_cybertron.py
 
 ##new genomes with analysis from uw vcf 0620
-daniela_genomes_0620_cybertron.py
+# daniela_genomes_0620_cybertron.py
+
+##calculate exome coverage 1020
+daniela_genomes_0219_uw_coverage_1020_cyb.py

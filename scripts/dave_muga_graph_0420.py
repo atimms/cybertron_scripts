@@ -19,7 +19,7 @@ def get_files_to_graph(ten_counts, window_size, step_size, fai):
 	for ws in window_size:
 		#make bed file with windows and returns genome name and window size variable
 		genome_and_window = homozygosity_mapping_cybertron.make_windows(working_dir, fai, ws, step_size).split('.')[0]
-		print genome_and_window
+		print(genome_and_window)
 		window_bed = genome_and_window + '.bed'
 		##count tens per window
 		out_bed = ten_counts.rsplit('.', 1)[0] + '.' + genome_and_window + '.bed'
@@ -52,13 +52,16 @@ os.chdir(working_dir)
 genome_fai = '/home/atimms/ngs_data/references/mm10/mm10.fa.fai'
 het_count_bed = 'smo_het_count.bed'
 ten_bed = 'smo_tens.bed'
+fifteen_bed = 'smo_15s.bed'
 window_sizes = [1000000,5000000,2000000,10000000]
 step_sizes = 1000000
 
-##make grahs
-get_files_to_graph(ten_bed, window_sizes, step_sizes, genome_fai)
+##make graphs
+# get_files_to_graph(ten_bed, window_sizes, step_sizes, genome_fai)
 
+get_files_to_graph(fifteen_bed, window_sizes, step_sizes, genome_fai)
 ##copy whole dir to /archive/beier_d/dave_data so can graph in R
+
 
 
 

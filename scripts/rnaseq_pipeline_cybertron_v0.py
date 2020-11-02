@@ -897,8 +897,17 @@ working_dir = '/home/atimms/ngs_data/rnaseq/kim_index_bams_0820'
 ##eric rnaseq 0720 
 working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE131411'
 # call_rnaseq_methods_for_deseq_analysis(working_dir, 'GSE131411_all.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_all.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t1.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t2.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t3.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_all.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t1.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t2.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'GSE131411_ss_hom_t3.txt', 'GRCh38', ['sample'])
+
+##dave 0920
+working_dir = '/home/atimms/ngs_data/rnaseq/dave_es_cell_rnaseq_0920'
+conditions_to_use = []
+##call all methods, so align, count and make files for deseq
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'dave_esc_0920.txt', 'mm10', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'dave_esc_d0_0920.txt', 'mm10', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'dave_esc_d4_0920.txt', 'mm10', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'dave_esc_d8_0920.txt', 'mm10', ['sample'])
 

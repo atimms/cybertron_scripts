@@ -25,7 +25,8 @@ prep_ann = '/home/atimms/programs/annovar/prepare_annovar_user.pl'
 
 ##annovar parameters
 # av_genome = 'hg19'
-av_genome = 'hg38'
+# av_genome = 'hg38'
+av_genome = 'danRer11'
 av_buildver = ['-buildver', av_genome]
 av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
 av_protocol = ['-protocol', 'refGene,kaviar_20150923,gnomad_genome,popfreq_all_20150413']
@@ -107,9 +108,9 @@ def annotate_vcf(vcf, av_prefix):
 ##new hg38 files
 # ftds = ['clinvar_20190305', 'dbnsfp31a_interpro']
 # ftds = ['gnomad211_genome', 'gnomad211_exome', 'gnomad30_genome']
-ftds = ['clinvar_20200316']
-for ftd in ftds:
-	download_annovar_db_from_annovar(ftd)
+# ftds = ['clinvar_20200316']
+# for ftd in ftds:
+# 	download_annovar_db_from_annovar(ftd)
 
 ##make cosmic dbs - 0320
 ##download latest verion (90) i.e. 4 files from cosmic and de compress (make sure you have correct version)
@@ -119,4 +120,17 @@ for ftd in ftds:
 ##run commands - hg19
 #/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicMutantExport.tsv -vcf CosmicCodingMuts.vcf > hg19_cosmic90_coding.txt
 #/home/atimms/programs/annovar/prepare_annovar_user.pl -dbtype cosmic CosmicNCV.tsv -vcf CosmicNonCodingVariants.vcf > hg19_cosmic90_noncoding.txt
+
+
+##zebrafish annotations
+ftds = ['refGene', 'rmsk', 'ensGene']
+# ftds = ['rmsk', 'ensGene']
+ftds = ['ensGene']
+for ftd in ftds:
+	download_annovar_db_not_from_annovar(ftd)
+
+
+
+
+
 
