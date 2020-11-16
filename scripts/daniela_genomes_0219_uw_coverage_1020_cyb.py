@@ -86,6 +86,7 @@ def calculate_genome_coverage(samples, bam_suffix, output_file):
 			print 'calculating coverge for bam file', bam
 			##get temp coverage files
 			coverage_histogram = sample + '.hist.temp'
+			'''
 			hist_fh = open(coverage_histogram, 'w')
 			##just the file
 			# bedtools_cov = subprocess.Popen([bedtools, 'genomecov', '-ibam', bam, '-g', genome_file], stdout=hist_fh)
@@ -94,6 +95,7 @@ def calculate_genome_coverage(samples, bam_suffix, output_file):
 			grep_cmd = subprocess.Popen(['grep', '^genome'], stdin=bedtools_cov.stdout, stdout=hist_fh)
 			grep_cmd.wait()
 			hist_fh.close()
+			'''
 			##calculate numbers from histogram
 			with open(coverage_histogram, "r") as cov_temp:
 				seq_total = 0
@@ -160,6 +162,8 @@ sample_names = ['CFM-MOS-11-01.338865', 'CFM-MOS-12-01.338868', 'CFM-MOS-12-11.3
 		'PM107001903.338849', 'PM107002001.338850', 'PM107002002.338851', 'PM107002003.338852', 'PM401000101.338853', 'PM401000102.338854', 
 		'PM401000103.338855', 'PM401000301.338856', 'PM401000302.338857', 'PM401000303.338858', 'PM401000401.338859', 'PM401000402.338860', 
 		'PM401000403.338861', 'PM401000501.338862', 'PM401000502.338863', 'PM401000503.338864']
+
+# sample_names = ['CFM-MOS-11-01.338865']
 
 ##params etc
 working_dir = '/home/atimms/ngs_data/genomes/daniela_genomes_0219/daniela_svs_1020'
