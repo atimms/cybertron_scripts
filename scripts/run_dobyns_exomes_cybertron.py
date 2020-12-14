@@ -2769,7 +2769,7 @@ working_dir = '/home/atimms/ngs_data/exomes/working/kim_LR12-308_redo_0720'
 # dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR18-532", "bam", {'LR18-532': 'HDs2001010.bam', 'LR18-532f': 'HDs2001052.bam', 'LR18-532m': 'HDs2001053.bam'}, "trio")
 # dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR18-532", ['LR18-532.bwa_gatk.bam'], ['LR18-532f.bwa_gatk.bam', 'LR18-532m.bwa_gatk.bam'], "", "", "pisces_v2")
 # dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR18-545", "bam", {'LR18-545': 'HD1901009.bam', 'LR18-545f': 'HD1901010.bam', 'LR18-545m': 'HD1901011.bam', 'LR18-545s1': 'HD1901012.bam'}, "trio")
-dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920", "LR18-545", ['LR18-545.bwa_gatk.bam'], ['LR18-545f.bwa_gatk.bam', 'LR18-545m.bwa_gatk.bam', 'LR18-545s1.bwa_gatk.bam'], "", "", "pisces_v2")
+# dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920", "LR18-545", ['LR18-545.bwa_gatk.bam'], ['LR18-545f.bwa_gatk.bam', 'LR18-545m.bwa_gatk.bam', 'LR18-545s1.bwa_gatk.bam'], "", "", "pisces_v2")
 # dobyns_exome_pipeline_cybertron_v11.call_just_mapping("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR19-005", "bam", {'LR19-005': 'HD1905031.bam', 'LR19-005f': 'HD1905127.bam', 'LR19-005m': 'HD1905128.bam'}, "trio")
 # dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR19-005", ['LR19-005.bwa_gatk.bam'], ['LR19-005f.bwa_gatk.bam', 'LR19-005m.bwa_gatk.bam'], "", "", "pisces_v2")
 # dobyns_exome_pipeline_cybertron_v11.call_just_mapping("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920/b3", "LR19-356", "bam", {'LR19-356': 'HD1905121.bam', 'LR19-356f': 'HD1906013.bam', 'LR19-356m': 'HD1905122.bam'}, "trio")
@@ -2778,6 +2778,10 @@ dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atim
 # dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920", "LR13-388", "bam", {'LR13-388': 'HD1312075.bam', 'LR13-388f': 'HD1312015.bam', 'LR13-388m': 'HD1312054.bam'}, "trio")
 # dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling("/home/atimms/ngs_data/exomes/working/ghayda_broad_exomes_0920", "LR13-388", ['LR13-388.bwa_gatk.bam'], ['LR13-388f.bwa_gatk.bam', 'LR13-388m.bwa_gatk.bam'], "", "", "pisces_v2")
 
+##single quad for michael i.e. 2 samples and parents
+working_dir = '/home/atimms/ngs_data/exomes/working/cunn_exome_1120'
+dobyns_exome_pipeline_cybertron_v11.call_all_exome_methods_inc_gemini(working_dir, "AK-01-111", "fastq", {'AK-01-111-01a': ['EB59-01a_R1.fastq.gz', 'EB59-01a_R2.fastq.gz'], 'AK-01-111-01u': ['EB59-01u_R1.fastq.gz', 'EB59-01u_R2.fastq.gz'], 'AK-01-111-03u': ['4514387594_AAGGACAC_L006_r1.fq.gz', '4514387594_AAGGACAC_L006_r2.fq.gz'], 'AK-01-111-02u': ['1707461686_ACTATGCA_L006_r1.fq.gz', '1707461686_ACTATGCA_L006_r2.fq.gz']}, "trio")
+dobyns_exome_mosaic_pipeline_cybertron_v5.run_mosaic_variant_calling(working_dir, "AK-01-111", ['AK-01-111-01a.bwa_gatk.bam', 'AK-01-111-01u.bwa_gatk.bam'], ['AK-01-111-03u.bwa_gatk.bam', 'AK-01-111-02u.bwa_gatk.bam'], "", "", "pisces_v2")
 
 
 

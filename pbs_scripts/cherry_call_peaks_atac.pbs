@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N cherry_call_peaks
-#PBS -l mem=200gb,ncpus=20
+#PBS -l mem=200gb,ncpus=15
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -50,4 +50,8 @@ source activate deeptools
 # cherry_scatac_collapse_corr_1020_cyb.py
 
 ##make bigwig from archr 1020
-cherry_archr_make_bigwigs_1020_cyb.py
+# cherry_archr_make_bigwigs_1020_cyb.py
+
+##make bigwig from scrnaseq 1220
+cherry_scrna_bigwigs_1220_cyb.py
+

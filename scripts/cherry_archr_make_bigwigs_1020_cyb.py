@@ -30,7 +30,7 @@ bedtools = '/home/atimms/programs/bedtools2.28/bin/bedtools'
 bg_to_bw = '/home/atimms/programs/bedGraphToBigWig'
 
 
-def make_bigwig_files(in_file):
+def make_bigwig_files_rpkm(in_file):
 	with open(in_file, "r") as in_fh:
 		for line in in_fh:
 			line = line.rstrip('\n').rstrip('\r').split(delim)
@@ -50,6 +50,25 @@ def make_bigwig_files(in_file):
 				print("bam file doesn't exist", bam)
 
 
+def make_bigwig_files_cpm(in_file):
+	with open(in_file, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip('\n').rstrip('\r').split(delim)
+			sample = line[0]
+			bam = line[1]
+			out_bw = sample + '.bigwig'
+			print(sample, bam)
+			if os.path.exists(bam):
+				##index file
+				samtools_index = subprocess.Popen(['samtools', 'index', bam])
+				samtools_index.wait()
+				##get bigwigs
+				bc_f = subprocess.Popen(['bamCoverage', '-b', bam, '-o', out_bw, '-p', '18', '--normalizeUsing', 'CPM'])
+				bc_f.wait()
+
+			else:
+				print("bam file doesn't exist", bam)
+
 ##run methods, 3x sets of data
 pb_working_dir = '/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_make_archr_bigwigs_1020/pseudobulk'
 pb_info = 'pseudobulk.info.txt'
@@ -64,14 +83,14 @@ tc_info = 'timepoint_cellclass.info.txt'
 
 
 ##pseudobulk
-# os.chdir(pb_working_dir)
-# make_bigwig_files(pb_info)
+os.chdir(pb_working_dir)
+# make_bigwig_files_cpm(pb_info)
 ##sample_cellclass
-# os.chdir(sc_working_dir)
-# make_bigwig_files(sc_info)
+os.chdir(sc_working_dir)
+# make_bigwig_files_cpm(sc_info)
 ##timepoint_cellclass
 os.chdir(tc_working_dir)
-make_bigwig_files(tc_info)
+make_bigwig_files_cpm(tc_info)
 
 
 

@@ -207,6 +207,15 @@ write.csv(sample.celltype.info, file='./seurat_analysis/all/human_scrnaseq_all_0
 #Save object to avoid needing to re-run previous computations
 saveRDS(human_harmony_subset, file = "./seurat_analysis/all/human_harmony_clusters_defined.rds")
 
+##get gene expression by cell class i.e. cluster
+human_harmony <- readRDS(file = "./seurat_analysis/all/human_harmony_clusters_defined.rds")
+cluster.averages <- AverageExpression(human_harmony)
+head(cluster.averages)
+head(cluster.averages[["RNA"]])
+write.csv(cluster.averages[["RNA"]], file='./seurat_analysis/all/human_scrnaseq_all_0620.cell_class_gene_matrix_112420.csv')
+
+
+
 
 
 

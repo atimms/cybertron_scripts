@@ -907,7 +907,17 @@ working_dir = '/home/atimms/ngs_data/rnaseq/dave_es_cell_rnaseq_0920'
 conditions_to_use = []
 ##call all methods, so align, count and make files for deseq
 # call_rnaseq_methods_for_deseq_analysis(working_dir, 'dave_esc_0920.txt', 'mm10', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'dave_esc_d0_0920.txt', 'mm10', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'dave_esc_d4_0920.txt', 'mm10', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'dave_esc_d8_0920.txt', 'mm10', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'dave_esc_d0_0920.txt', 'mm10', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'dave_esc_d4_0920.txt', 'mm10', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'dave_esc_d8_0920.txt', 'mm10', ['sample'])
+
+
+
+##sophie rnaseq 1220
+working_dir = '/home/atimms/ngs_data/rnaseq/sophie_splotch_1220'
+conditions_to_use = []
+##call all methods, so align, count and make filees for deseq -- for all time points
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'sophie_splotch_1220.txt', 'mm10', ['sample'])
+##remove 2 sample and add sex
+count_and_make_files_for_deseq(working_dir, 'sophie_splotch_2_1220.txt', 'mm10', ['sample'])
 
