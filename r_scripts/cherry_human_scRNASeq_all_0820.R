@@ -214,8 +214,26 @@ head(cluster.averages)
 head(cluster.averages[["RNA"]])
 write.csv(cluster.averages[["RNA"]], file='./seurat_analysis/all/human_scrnaseq_all_0620.cell_class_gene_matrix_112420.csv')
 
+##get dotplots for marker genes 0121
+human_harmony <- readRDS(file = "./seurat_analysis/all/human_harmony_clusters_defined.rds")
 
-
+#Dot plot - the size of the dot = % of cells and color represents the average expression
+##do 5x version with different genes
+markers_a = c('PCK2', 'PCK1', 'PC', 'G6PC1', 'G6PC2', 'G6PC3', 'FBP1', 'FBP2', 'ME1', 'ME2', 'ME3')
+DotPlot(human_harmony, features = markers_a) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121a.dotplot.pdf", width = 12, height = 6)
+markers_b = c('SLC16A1', 'SLC16A7', 'SLC16A8', 'SLC16A3', 'SLC13A2', 'SLC13A3', 'SLC13A5', 'SLC25A10')
+DotPlot(human_harmony, features = markers_b) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121b.dotplot.pdf", width = 12, height = 6)
+markers_c = c('SLC1A3', 'GFAP', 'RHO', 'C1QA', 'GAD1', 'CABP5', 'OPN1LW', 'OPN1MW', 'RBPMS', 'THY1')
+DotPlot(human_harmony, features = markers_c) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121c.dotplot.pdf", width = 12, height = 6)
+markers_d = c('PGM1', 'PGM2', 'PGM3', 'PGM5', 'PYGM', 'PYGB', 'PYGL')
+DotPlot(human_harmony, features = markers_d) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121d.dotplot.pdf", width = 12, height = 6)
+markers_e = c('SLC25A31', 'SLC25A4', 'SLC25A5', 'SLC25A6', 'NDUFS1', 'NDUFS4', 'NDUFS8', 'SDHA', 'SDHB', 'SDHC', 'SDHD', 'COX4I1', 'COX4I2', 'COX7C', 'COX6B1', 'COX6B2', 'COX6A1', 'COX6A2', 'MT-ATP6', 'MT-ATP8', 'ATP5IF1', 'ATP5PO')
+DotPlot(human_harmony, features = markers_e) + RotatedAxis()
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121e.dotplot.pdf", width = 12, height = 6)
 
 
 

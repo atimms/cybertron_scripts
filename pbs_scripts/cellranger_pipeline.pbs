@@ -5,7 +5,8 @@
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
 #PBS -m abe
-#PBS -A "tcherr"
+# Pick your appropriate project ID for ‘-P’ below: 
+#PBS -P 0f241fcd-0dd3-491c-acac-15c6cff1c880
 
 echo 'work'
 

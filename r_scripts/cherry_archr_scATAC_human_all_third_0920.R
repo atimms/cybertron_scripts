@@ -230,9 +230,11 @@ heatmapPeaks <- plotMarkerHeatmap(seMarker = markersPeaks,
                   cutOff = "FDR <= 0.1 & Log2FC >= 0.5",transpose = TRUE)
 draw(heatmapPeaks, heatmap_legend_side = "bot", annotation_legend_side = "bot")
 plotPDF(heatmapPeaks, name = "heatmap_cell_class_marker_peaks.macs2_q0.01.pdf", width = 8, height = 6, ArchRProj = proj1, addDOC = FALSE)
+##instead of drawing plot make a matrix
 heatmap.matrix <- plotMarkerHeatmap(seMarker = markersPeaks, 
         cutOff = "FDR <= 0.1 & Log2FC >= 0.5",transpose = TRUE, returnMat = TRUE)
-
+##get csv file from matrix
+write.csv(heatmap.matrix, file='heatmap_cell_class_marker_peaks.matrix.csv')
 
 
 ##get tracks for marker genes and then print
@@ -268,6 +270,17 @@ color_for_hm = colorRamp2(seq(min(heatmapEM_new_matrix), max(heatmapEM_new_matri
 Heatmap(heatmapEM_new_matrix, cluster_rows = F, cluster_columns = F, col = color_for_hm,
         name = "Norm. Enrichment −log10(P−adj) [0−Max]")
 dev.copy2pdf(file="heatmap_enriched_motifs_markers.modified.pdf", width = 20)
+
+##tim modified the order, so we can redraw
+heatmapEM_new = read.csv('motif_heatmap_matrix.modified_TC.csv', header=T, row.names=1)
+heatmapEM_new_matrix = data.matrix(heatmapEM_new)
+#pheatmap(heatmapEM_new, cluster_cols = F, cluster_rows = F)
+color_for_hm = colorRamp2(seq(min(heatmapEM_new_matrix), max(heatmapEM_new_matrix), length = 3), c("grey", "blue", "black"))
+Heatmap(heatmapEM_new_matrix, cluster_rows = F, cluster_columns = F, col = color_for_hm,
+        name = "Norm. Enrichment −log10(P−adj) [0−Max]")
+dev.copy2pdf(file="heatmap_enriched_motifs_markers.modified_TC.pdf", width = 20)
+dev.copy2pdf(file="heatmap_enriched_motifs_markers.modified_TC2.pdf", width = 16, height = 8)
+
 
 
 ##ChromVAR Deviatons Enrichment -- different way of looking at motif enrichment
@@ -465,6 +478,17 @@ rnaidx.info = metadata(p2g)[[2]]
 rnaidx.df = data.frame(rnaidx.info)
 write.table(rnaidx.df, '/active/cherry_t/OrgManuscript_SingleCell_Data/human_scATAC/archr_analysis/all/co_acc_analysis_0920/human_all.min_cell20.m2_q0.01.rnaseq_info.txt', row.names = T, sep="\t", quote = FALSE)
 
+##gene score matrix and gene integration UMAPS for LINC00461 
+genesToPlot  <- c('LINC00461')
+p1 <- plotEmbedding(ArchRProj = proj1, colorBy = "GeneScoreMatrix", name = genesToPlot, 
+                    embedding = "UMAP",imputeWeights = getImputeWeights(proj1))
+p2 <- plotEmbedding(ArchRProj = proj1, colorBy = "GeneIntegrationMatrix", name = genesToPlot, 
+                    embedding = "UMAP",imputeWeights = getImputeWeights(proj1), log2Norm = T)
+
+plotPDF(p1, p2, name = "LINC00461.gene_expression.UMAP.pdf", width = 5, height = 5, ArchRProj = proj1, addDOC = FALSE)
+
+
+
 
 ##trajectory analysis
 
@@ -592,7 +616,7 @@ ht1 + ht2
 plotPDF(ht1, ht2, name = "cone_trajectory.C20_6_7_8.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
 ##looking at the horizontals during development
-horizontal_trajectory <- c("C20", "C5", "C15", "C3")
+horizontal_trajectory <- c("C20", "C5", "C15", "C13")
 horizontal_trajectory
 proj1 <- addTrajectory(ArchRProj = proj1, name = "horizontalU", 
                        groupBy = "Clusters",trajectory = horizontal_trajectory, 
@@ -600,7 +624,7 @@ proj1 <- addTrajectory(ArchRProj = proj1, name = "horizontalU",
 ##each cell has a pseudotime value between 0 and 100
 head(proj1$horizontalU[!is.na(proj1$horizontalU)])
 p <- plotTrajectory(proj1, trajectory = "horizontalU", colorBy = "cellColData", name = "horizontalU")
-plotPDF(p, name = "plot_horizontal_traj_UMAP.C20_5_15_3.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
+plotPDF(p, name = "plot_horizontal_traj_UMAP.C20_5_15_13.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
 ##horizontal pseudo-time heatmaps, comparing to motifs, gene score and peak accessibility
 trajMM  <- getTrajectory(ArchRProj = proj1, name = "horizontalU", useMatrix = "MotifMatrix", log2Norm = FALSE)
 p1 <- plotTrajectoryHeatmap(trajMM, pal = paletteContinuous(set = "solarExtra"))
@@ -610,7 +634,7 @@ trajGIM <- getTrajectory(ArchRProj = proj1, name = "horizontalU", useMatrix = "G
 p3 <- plotTrajectoryHeatmap(trajGIM,  pal = paletteContinuous(set = "blueYellow"))
 trajPM  <- getTrajectory(ArchRProj = proj1, name = "horizontalU", useMatrix = "PeakMatrix", log2Norm = TRUE)
 p4 <- plotTrajectoryHeatmap(trajPM, pal = paletteContinuous(set = "solarExtra"))
-plotPDF(p1, p2, p3, p4, name = "horizontal_trajectory_comparison_heatmaps.C20_5_15_3.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
+plotPDF(p1, p2, p3, p4, name = "horizontal_trajectory_comparison_heatmaps.C20_5_15_13.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
 ##Integrative pseudo-time analyses
 corGSM_MM <- correlateTrajectories(trajGSM, trajMM)
 corGSM_MM[[1]]$matchname1
@@ -623,7 +647,7 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGSM2))
 ht1 <- plotTrajectoryHeatmap(trajGSM2,  pal = paletteContinuous(set = "horizonExtra"),  varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht2 <- plotTrajectoryHeatmap(trajMM2,  pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "horizontal_trajectory.C20_5_15_3.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "horizontal_trajectory.C20_5_15_13.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 corGIM_MM <- correlateTrajectories(trajGIM, trajMM)
 corGIM_MM[[1]]
 trajGIM2 <- trajGIM[corGIM_MM[[1]]$name1, ]
@@ -635,7 +659,7 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGIM2))
 ht1 <- plotTrajectoryHeatmap(trajGIM2,  pal = paletteContinuous(set = "blueYellow"),  varCutOff = 0, rowOrder = rowOrder)
 ht2 <- plotTrajectoryHeatmap(trajMM2, pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "horizontal_trajectory.C20_5_15_3.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "horizontal_trajectory.C20_5_15_13.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
 ##looking at the cone_bipolars during development
 cone_bipolar_trajectory <- c("C20", "C6", "C11", "C10")
@@ -775,26 +799,26 @@ ht2 <- plotTrajectoryHeatmap(trajMM2, pal = paletteContinuous(set = "solarExtra"
 ht1 + ht2
 plotPDF(ht1, ht2, name = "muller_trajectory.C19_20_12.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
-##looking at the amacrines during development
-amacrine_trajectory <- c("C20", "C5", "C16", "C4")
-amacrine_trajectory
-proj1 <- addTrajectory(ArchRProj = proj1, name = "amacrineU", 
-                       groupBy = "Clusters",trajectory = amacrine_trajectory, 
+##looking at the mullers during development - take 2
+muller_trajectory <- c("C20", "C12")
+muller_trajectory
+proj1 <- addTrajectory(ArchRProj = proj1, name = "mullerU", 
+                       groupBy = "Clusters",trajectory = muller_trajectory, 
                        reducedDims = "Harmony", embedding = "UMAP", force = TRUE)
 ##each cell has a pseudotime value between 0 and 100
-head(proj1$amacrineU[!is.na(proj1$amacrineU)])
-p <- plotTrajectory(proj1, trajectory = "amacrineU", colorBy = "cellColData", name = "amacrineU")
-plotPDF(p, name = "plot_amacrine_traj_UMAP.C20_5_16_4.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
-##amacrine pseudo-time heatmaps, comparing to motifs, gene score and peak accessibility
-trajMM  <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "MotifMatrix", log2Norm = FALSE)
+head(proj1$mullerU[!is.na(proj1$mullerU)])
+p <- plotTrajectory(proj1, trajectory = "mullerU", colorBy = "cellColData", name = "mullerU")
+plotPDF(p, name = "plot_muller_traj_UMAP.C20_12.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
+##muller pseudo-time heatmaps, comparing to motifs, gene score and peak accessibility
+trajMM  <- getTrajectory(ArchRProj = proj1, name = "mullerU", useMatrix = "MotifMatrix", log2Norm = FALSE)
 p1 <- plotTrajectoryHeatmap(trajMM, pal = paletteContinuous(set = "solarExtra"))
-trajGSM <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "GeneScoreMatrix", log2Norm = TRUE)
+trajGSM <- getTrajectory(ArchRProj = proj1, name = "mullerU", useMatrix = "GeneScoreMatrix", log2Norm = TRUE)
 p2 <- plotTrajectoryHeatmap(trajGSM,  pal = paletteContinuous(set = "horizonExtra"))
-trajGIM <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "GeneIntegrationMatrix", log2Norm = TRUE)
+trajGIM <- getTrajectory(ArchRProj = proj1, name = "mullerU", useMatrix = "GeneIntegrationMatrix", log2Norm = TRUE)
 p3 <- plotTrajectoryHeatmap(trajGIM,  pal = paletteContinuous(set = "blueYellow"))
-trajPM  <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "PeakMatrix", log2Norm = TRUE)
+trajPM  <- getTrajectory(ArchRProj = proj1, name = "mullerU", useMatrix = "PeakMatrix", log2Norm = TRUE)
 p4 <- plotTrajectoryHeatmap(trajPM, pal = paletteContinuous(set = "solarExtra"))
-plotPDF(p1, p2, p3, p4, name = "amacrine_trajectory_comparison_heatmaps.C20_5_16_4.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
+plotPDF(p1, p2, p3, p4, name = "muller_trajectory_comparison_heatmaps.C20_12.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
 ##Integrative pseudo-time analyses
 corGSM_MM <- correlateTrajectories(trajGSM, trajMM)
 corGSM_MM[[1]]$matchname1
@@ -807,7 +831,7 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGSM2))
 ht1 <- plotTrajectoryHeatmap(trajGSM2,  pal = paletteContinuous(set = "horizonExtra"),  varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht2 <- plotTrajectoryHeatmap(trajMM2,  pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "amacrine_trajectory.C20_5_16_4.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "muller_trajectory.C20_12.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 corGIM_MM <- correlateTrajectories(trajGIM, trajMM)
 corGIM_MM[[1]]
 trajGIM2 <- trajGIM[corGIM_MM[[1]]$name1, ]
@@ -819,7 +843,55 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGIM2))
 ht1 <- plotTrajectoryHeatmap(trajGIM2,  pal = paletteContinuous(set = "blueYellow"),  varCutOff = 0, rowOrder = rowOrder)
 ht2 <- plotTrajectoryHeatmap(trajMM2, pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "amacrine_trajectory.C20_5_16_4.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "muller_trajectory.C20_12.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+
+
+
+##looking at the amacrines during development
+amacrine_trajectory <- c("C20", "C5", "C16", "C14")
+amacrine_trajectory
+proj1 <- addTrajectory(ArchRProj = proj1, name = "amacrineU", 
+                       groupBy = "Clusters",trajectory = amacrine_trajectory, 
+                       reducedDims = "Harmony", embedding = "UMAP", force = TRUE)
+##each cell has a pseudotime value between 0 and 100
+head(proj1$amacrineU[!is.na(proj1$amacrineU)])
+p <- plotTrajectory(proj1, trajectory = "amacrineU", colorBy = "cellColData", name = "amacrineU")
+plotPDF(p, name = "plot_amacrine_traj_UMAP.C20_5_16_14.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
+##amacrine pseudo-time heatmaps, comparing to motifs, gene score and peak accessibility
+trajMM  <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "MotifMatrix", log2Norm = FALSE)
+p1 <- plotTrajectoryHeatmap(trajMM, pal = paletteContinuous(set = "solarExtra"))
+trajGSM <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "GeneScoreMatrix", log2Norm = TRUE)
+p2 <- plotTrajectoryHeatmap(trajGSM,  pal = paletteContinuous(set = "horizonExtra"))
+trajGIM <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "GeneIntegrationMatrix", log2Norm = TRUE)
+p3 <- plotTrajectoryHeatmap(trajGIM,  pal = paletteContinuous(set = "blueYellow"))
+trajPM  <- getTrajectory(ArchRProj = proj1, name = "amacrineU", useMatrix = "PeakMatrix", log2Norm = TRUE)
+p4 <- plotTrajectoryHeatmap(trajPM, pal = paletteContinuous(set = "solarExtra"))
+plotPDF(p1, p2, p3, p4, name = "amacrine_trajectory_comparison_heatmaps.C20_5_16_14.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
+##Integrative pseudo-time analyses
+corGSM_MM <- correlateTrajectories(trajGSM, trajMM)
+corGSM_MM[[1]]$matchname1
+trajGSM2 <- trajGSM[corGSM_MM[[1]]$name1, ]
+trajMM2 <- trajMM[corGSM_MM[[1]]$name2, ]
+trajCombined <- trajGSM2
+assay(trajCombined) <- t(apply(assay(trajGSM2), 1, scale)) + t(apply(assay(trajMM2), 1, scale))
+combinedMat <- plotTrajectoryHeatmap(trajCombined, returnMat = TRUE, varCutOff = 0)
+rowOrder <- match(rownames(combinedMat), rownames(trajGSM2))
+ht1 <- plotTrajectoryHeatmap(trajGSM2,  pal = paletteContinuous(set = "horizonExtra"),  varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
+ht2 <- plotTrajectoryHeatmap(trajMM2,  pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
+ht1 + ht2
+plotPDF(ht1, ht2, name = "amacrine_trajectory.C20_5_16_14.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+corGIM_MM <- correlateTrajectories(trajGIM, trajMM)
+corGIM_MM[[1]]
+trajGIM2 <- trajGIM[corGIM_MM[[1]]$name1, ]
+trajMM2 <- trajMM[corGIM_MM[[1]]$name2, ]
+trajCombined <- trajGIM2
+assay(trajCombined) <- t(apply(assay(trajGIM2), 1, scale)) + t(apply(assay(trajMM2), 1, scale))
+combinedMat <- plotTrajectoryHeatmap(trajCombined, returnMat = TRUE, varCutOff = 0)
+rowOrder <- match(rownames(combinedMat), rownames(trajGIM2))
+ht1 <- plotTrajectoryHeatmap(trajGIM2,  pal = paletteContinuous(set = "blueYellow"),  varCutOff = 0, rowOrder = rowOrder)
+ht2 <- plotTrajectoryHeatmap(trajMM2, pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder)
+ht1 + ht2
+plotPDF(ht1, ht2, name = "amacrine_trajectory.C20_5_16_14.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
 ##looking at the ganglions during development
 ganglion_trajectory <- c("C19", "C4", "C3")
@@ -868,7 +940,7 @@ ht1 + ht2
 plotPDF(ht1, ht2, name = "ganglion_trajectory.C19_4_3.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
 ##looking at the ganglions during development with different clusters
-ganglion_trajectory2 <- c("C19", "C4", "C3", "C18")
+ganglion_trajectory2 <- c("C19", "C4", "C3", "C17", "C18")
 ganglion_trajectory2
 proj1 <- addTrajectory(ArchRProj = proj1, name = "ganglion2U", 
                        groupBy = "Clusters",trajectory = ganglion_trajectory2, 
@@ -876,7 +948,7 @@ proj1 <- addTrajectory(ArchRProj = proj1, name = "ganglion2U",
 ##each cell has a pseudotime value between 0 and 100
 head(proj1$ganglion2U[!is.na(proj1$ganglion2U)])
 p <- plotTrajectory(proj1, trajectory = "ganglion2U", colorBy = "cellColData", name = "ganglion2U")
-plotPDF(p, name = "plot_ganglion_traj_UMAP.C19_4_3_18.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
+plotPDF(p, name = "plot_ganglion_traj_UMAP.C19_4_3_17_18.pdf", ArchRProj = proj1, addDOC = FALSE, width = 5, height = 5)
 ##ganglion pseudo-time heatmaps, comparing to motifs, gene score and peak accessibility
 trajMM  <- getTrajectory(ArchRProj = proj1, name = "ganglion2U", useMatrix = "MotifMatrix", log2Norm = FALSE)
 p1 <- plotTrajectoryHeatmap(trajMM, pal = paletteContinuous(set = "solarExtra"))
@@ -886,7 +958,7 @@ trajGIM <- getTrajectory(ArchRProj = proj1, name = "ganglion2U", useMatrix = "Ge
 p3 <- plotTrajectoryHeatmap(trajGIM,  pal = paletteContinuous(set = "blueYellow"))
 trajPM  <- getTrajectory(ArchRProj = proj1, name = "ganglion2U", useMatrix = "PeakMatrix", log2Norm = TRUE)
 p4 <- plotTrajectoryHeatmap(trajPM, pal = paletteContinuous(set = "solarExtra"))
-plotPDF(p1, p2, p3, p4, name = "ganglion_trajectory2_comparison_heatmaps.C19_4_3_18.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
+plotPDF(p1, p2, p3, p4, name = "ganglion_trajectory2_comparison_heatmaps.C19_4_3_17_18.pdf", ArchRProj = proj1, addDOC = FALSE, width = 6, height = 8)
 ##Integrative pseudo-time analyses
 corGSM_MM <- correlateTrajectories(trajGSM, trajMM)
 corGSM_MM[[1]]$matchname1
@@ -899,7 +971,7 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGSM2))
 ht1 <- plotTrajectoryHeatmap(trajGSM2,  pal = paletteContinuous(set = "horizonExtra"),  varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht2 <- plotTrajectoryHeatmap(trajMM2,  pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder, labelTop = 100)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "ganglion_trajectory2.C19_4_3_18.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "ganglion_trajectory2.C19_4_3_17_18.GSM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 corGIM_MM <- correlateTrajectories(trajGIM, trajMM)
 corGIM_MM[[1]]
 trajGIM2 <- trajGIM[corGIM_MM[[1]]$name1, ]
@@ -911,7 +983,7 @@ rowOrder <- match(rownames(combinedMat), rownames(trajGIM2))
 ht1 <- plotTrajectoryHeatmap(trajGIM2,  pal = paletteContinuous(set = "blueYellow"),  varCutOff = 0, rowOrder = rowOrder)
 ht2 <- plotTrajectoryHeatmap(trajMM2, pal = paletteContinuous(set = "solarExtra"), varCutOff = 0, rowOrder = rowOrder)
 ht1 + ht2
-plotPDF(ht1, ht2, name = "ganglion_trajectory2.C19_4_3_18.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
+plotPDF(ht1, ht2, name = "ganglion_trajectory2.C19_4_3_17_18.GIM_MM.1.pdf", ArchRProj = proj1, addDOC = FALSE, width = 8, height = 12)
 
 
 

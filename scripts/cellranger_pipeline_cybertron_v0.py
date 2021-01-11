@@ -5,7 +5,8 @@ import os
 ##parameters
 delim = '\t'
 # cellranger = '/home/atimms/programs/cellranger-3.1.0/cellranger'
-cellranger = '/home/atimms/programs/cellranger-4.0.0/cellranger'
+# cellranger = '/home/atimms/programs/cellranger-4.0.0/cellranger'
+cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger'
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
 grc38_prerna_ref = '/home/atimms/ngs_data/references/10x/GRCh38-3.0.0_premrna_new'
 grc38_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
@@ -14,14 +15,15 @@ grc38_atac_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-G
 
 
 ##methods
-
 def make_dict_from_info_file(in_file):
+	# print(in_file)
 	idict = {}
 	with open(in_file, "r") as in_fh:
 		lc = 0
 		for line in in_fh:
 			lc += 1
 			if lc > 1:
+				# print(line)
 				line = line.rstrip().split(delim)
 				sample = line[0]
 				fqs = line[1]
@@ -37,6 +39,15 @@ def run_cellranger_count(infodict, refdir):
 		ec = infodict[sample][1]
 		print(cellranger, 'count', '--id=', sample, '--transcriptome=', refdir, '--fastqs=', fqs, '--sample=', sample, '--expect-cells=', ec)
 		cr_count = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--expect-cells=' + ec])
+		cr_count.wait()
+
+def run_cellranger_count_5prime(infodict, refdir):
+	for sample in infodict:
+		#cellranger count --id=Mut2-6 --transcriptome=/gpfs/home/atimms/ngs_data/references/10x/refdata-cellranger-GRCh38-3.0.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_organoid_wk5_rerun_done/outs/fastq_path/HHT75BGXC/Mut2-6,/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_Organoid_5wk_done/outs/fastq_path/HFLF2BGXC/Mut2-6 --sample=Mut2-6 --expect-cells=1000
+		fqs = infodict[sample][0]
+		ec = infodict[sample][1]
+		print(cellranger, 'count', '--id=', sample, '--transcriptome=', refdir, '--fastqs=', fqs, '--sample=', sample, '--expect-cells=', ec)
+		cr_count = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--expect-cells=' + ec, '--chemistry=fiveprime' ])
 		cr_count.wait()
 
 def make_aggr_csv(infodict, out_suffix, w_dir):
@@ -61,6 +72,16 @@ def cellranger_scrnaseq_master(work_dir, infile, suffix_for_aggr, ref_dir):
 	run_cellranger_count(info_dict, ref_dir)
 	make_aggr_csv(info_dict, suffix_for_aggr, work_dir)
 	run_cellranger_aggr(suffix_for_aggr)
+
+def cellranger_scrnaseq_5prime_master(work_dir, infile, suffix_for_aggr, ref_dir):
+	os.chdir(work_dir)
+	info_dict = make_dict_from_info_file(infile)
+	for s in info_dict:
+		print(s, info_dict[s])
+	run_cellranger_count_5prime(info_dict, ref_dir)
+	make_aggr_csv(info_dict, suffix_for_aggr, work_dir)
+	run_cellranger_aggr(suffix_for_aggr)
+
 
 def cellranger_scrnaseq_master_no_aggr(work_dir, infile, ref_dir):
 	os.chdir(work_dir)
@@ -231,5 +252,19 @@ working_dir = '/archive/millen_k/kims_data/kim_10Xv3_RNA_DSbrain'
 info_file = 'kim_10Xv3_RNA_DSbrain_0920.txt'
 combined_suffix = 'kim_10Xv3_RNA_DSbrain_0920'
 transciptome_ref = grc38_ref
-cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
+# cellranger_scrnaseq_master(working_dir, info_file, combined_suffix, transciptome_ref)
 
+
+##dana/jimmy data 1220
+working_dir = '/home/atimms/ngs_data/cellranger/dana_scrna_1220/hg38'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
+info_file = '201112_Bennett_scRNAseq.txt'
+combined_suffix = '201112_Bennett_scRNAseq_hg38'
+transciptome_ref = grc38_ref
+cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)
+working_dir = '/home/atimms/ngs_data/cellranger/dana_scrna_1220/hg38_premrna'
+##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
+info_file = '201112_Bennett_scRNAseq.txt'
+combined_suffix = '201112_Bennett_scRNAseq_hg38_premrna'
+transciptome_ref = grc38_prerna_ref
+cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)

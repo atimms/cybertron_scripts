@@ -120,8 +120,11 @@ ghayda_genes = 'genelist_ghayda_1120.txt'
 ghayda_results_prefix = 'exome_data.ghayda_genes.1120'
 centrosome_list_1220 = 'centrosome_list_1220.txt'
 centrosome_results_prefix = 'exome_data.centrosome_genes_1220'
+genes_0121 = 'gene_check_0121.txt'
+genes_0121_results_prefix = 'exome_data.gene_check_0121'
+
 # filter_by_gene(std_files, kim_results_prefix, kims_genes, incomplete_peds)
 # filter_by_gene(std_files, ghayda_results_prefix, ghayda_genes, incomplete_peds)
-filter_by_gene(std_files, centrosome_results_prefix, centrosome_list_1220, incomplete_peds)
-
+# filter_by_gene(std_files, centrosome_results_prefix, centrosome_list_1220, incomplete_peds)
+filter_by_gene(std_files, genes_0121_results_prefix, genes_0121, incomplete_peds)
 
