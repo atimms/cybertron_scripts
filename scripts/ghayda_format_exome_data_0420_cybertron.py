@@ -24,7 +24,7 @@ mosaic_anal_header = ['Chr', 'Start', 'End', 'Ref', 'Alt', 'Func.refGene', 'Gene
 		'DANN_score', 'fathmm-MKL_coding_score', 'fathmm-MKL_coding_pred', 'MetaSVM_score', 'MetaSVM_pred', 'MetaLR_score', 'MetaLR_pred', 'integrated_fitCons_score', 'integrated_confidence_value', 
 		'GERP++_RS', 'phyloP7way_vertebrate', 'phyloP20way_mammalian', 'phastCons7way_vertebrate', 'phastCons20way_mammalian', 'SiPhy_29way_logOdds', 'PopFreqMax', '1000G_ALL', '1000G_AFR', '1000G_AMR', 
 		'1000G_EAS', '1000G_EUR', '1000G_SAS', 'ExAC_ALL', 'ExAC_AFR', 'ExAC_AMR', 'ExAC_EAS', 'ExAC_FIN', 'ExAC_NFE', 'ExAC_OTH', 'ExAC_SAS', 'ESP6500siv2_ALL', 'ESP6500siv2_AA', 'ESP6500siv2_EA', 
-		'CG46', 'avsnp147', 'CLINSIG', 'CLNDBN', 'CLNACC', 'CLNDSDB', 'CLNDSDBID', 'cosmic83_noncoding', 'cosmic83_coding']
+		'CG46', 'avsnp147', 'CLINSIG', 'CLNDBN', 'CLNACC', 'CLNDSDB', 'CLNDSDBID', 'cosmic83_noncoding', 'cosmic83_coding', 'sample_ref/alt', 'parent1_ref/alt', 'parent2_ref/alt']
 
 ##methods
 def change_file_names(work_dir, ped_dict, file_suffix):
@@ -149,12 +149,16 @@ def filter_mosaic(info_file, outfile_prefix, gene_dict, analysis_file_dir, dx_wa
 								lc2 = 0
 								for line in pis_fh:
 									lc2 += 1
+									# if lc2 ==1:
+									# 	line = line.strip('\n').split(delim)
+									# 	print(pisces_file, len(line))
 									if lc2 >1:
 										line = line.strip('\n').split(delim)
 										cadd = line[30]
 										PopFreqMax = line[46]
 										gene = line[6]
 										clinsig = line[66]
+
 										# print(cadd, PopFreqMax, clinsig)
 										if cadd == '.':
 											cadd = '20'
@@ -168,9 +172,19 @@ def filter_mosaic(info_file, outfile_prefix, gene_dict, analysis_file_dir, dx_wa
 												candidates_fh.write(delim.join(line_out) + '\n')
 											if clinsig != '.':
 												if 'athogenic' in clinsig or 'Uncertain' in clinsig:
-													line_out = [ped_id, solved_status, solved_gene, ped_type, dx_group] + line[:73]
+													if len(line) == 74:
+														extra = ['.', '.', '.']
+													elif len(line) == 84:
+														# print(line[77], line[80], line[81])
+														extra = [line[77].split(':')[2], line[80].split(':')[1], line[81].split(':')[1] ]
+													elif len(line) == 83:
+														extra = [line[77].split(':')[2], line[80].split(':')[1], '.']
+													elif len(line) == 81:
+														extra = [line[77].split(':')[2], '.', '.']
+													line_out = [ped_id, solved_status, solved_gene, ped_type, dx_group] + line[:73] + extra
 													clinvar_count += 1
 													clinvar_fh.write(delim.join(line_out) + '\n')
+										
 		print(ped_count, var_count, genelist_count, clinvar_count)
 		print(no_mosiac_peds)
 
@@ -257,11 +271,10 @@ def get_single_var_ar_genes(infiles, outfile):
 			with open(infile, "r") as in_fh:
 				lc = 0
 				fc += 1
-				
 				for line in in_fh:
 					lc += 1
 					line = line.rstrip().split(delim)
-					if lc ==1:
+					if lc == 1:
 						if fc == 1:
 							header = ['ped'] + line[:47]
 							out_fh.write(delim.join(header) + '\n')
@@ -283,14 +296,17 @@ def get_single_var_ar_genes(infiles, outfile):
 
 
 ##run methods
-working_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20'
+# working_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20'
+working_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20/exome_project_0420'
 os.chdir(working_dir)
-project_name = 'exomes_0420'
+# project_name = 'exomes_0420'
+project_name = 'exomes_0420_updated'
 ped_info_file = 'master_ped_tracking_41720.txt'
 candidate_genes = 'genelists_0420.txt'
 single_duo_types = ['Singleton', 'Sibship', 'Duo', 'Parent-sibs', 'Singleton*', 'Duo*']
 std_anal_file_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/std_analysis/'
-pisces_file_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/all_pisces/'
+# pisces_file_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/all_pisces/'
+pisces_file_dir = '/home/atimms/ngs_data/exomes/working/exome_project_20/exome_project_0420/src_files/all_pisces/'
 ped_name_change_dict = {'DWM10':'LR16-461', 'DWM13':'LR16-462', 'DWM3':'LR16-463' }
 dx_groups_wanted = ['MEG', 'MIC', 'MCD', 'MHM', 'DEVN', 'Other']
 var_info_file = 'variant_info_0420.xls'
@@ -305,15 +321,15 @@ var_info_file = 'variant_info_0420.xls'
 
 ##step2. filter singles/duos and pisces - rare in gnomad, cadd 15 and either in candidate gene or clivar 
 ##make dict from gene candidats
-# candidate_gene_dict = make_genelist_dict(candidate_genes)
+candidate_gene_dict = make_genelist_dict(candidate_genes)
 ##filter singles and duos
 # filter_singles_duos(ped_info_file, project_name, candidate_gene_dict, single_duo_types, std_anal_file_dir, dx_groups_wanted)
 ##filter mosaic
-# filter_mosaic(ped_info_file, project_name, candidate_gene_dict, pisces_file_dir, dx_groups_wanted)
+filter_mosaic(ped_info_file, project_name, candidate_gene_dict, pisces_file_dir, dx_groups_wanted)
 
 ##step2b. get all AR single vars - use auto dom files and filter on clinvar/dbdb
-auto_dom_files = glob.glob('/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/auto_dom/*xls')
-get_single_var_ar_genes(auto_dom_files, project_name + '.auto_dom.clinvar_dbdb.xls')
+# auto_dom_files = glob.glob('/home/atimms/ngs_data/exomes/working/exome_project_20/src_files/auto_dom/*xls')
+# get_single_var_ar_genes(auto_dom_files, project_name + '.auto_dom.clinvar_dbdb.xls')
 
 
 

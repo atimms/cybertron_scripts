@@ -107,21 +107,21 @@ def graph_heatmaps_regions_cc_peaks(int_file):
 	int_data['cc_peaks_snp_count'] = int_data.peak_count / int_data.snp_count
 	int_data['cc_peaks_length'] = int_data.peak_count / (int_data.end - int_data.start)
 
-	##split peak count column every 54th col i.e. how many peak beds
+	##split peak count column every 31st col i.e. how many peak beds
 	row_names = int_data.region.unique()
 	col_names = int_data.cc_peaks.unique()
-	df_for_hm = pd.DataFrame(int_data.peak_count.values.reshape(-1, 54))
+	df_for_hm = pd.DataFrame(int_data.peak_count.values.reshape(-1, 31))
 	df_for_hm.columns=col_names
 	df_for_hm['region'] = row_names
 	df_for_hm = df_for_hm.set_index('region')
 	df_for_hm.head()
-	##ussing normalized data
-	df_for_hm2 = pd.DataFrame(int_data.cc_peaks_snp_count.values.reshape(-1, 54))
+	##using normalized data
+	df_for_hm2 = pd.DataFrame(int_data.cc_peaks_snp_count.values.reshape(-1, 31))
 	df_for_hm2.columns=col_names
 	df_for_hm2['region'] = row_names
 	df_for_hm2 = df_for_hm2.set_index('region')
 	df_for_hm2.head()
-	df_for_hm3 = pd.DataFrame(int_data.cc_peaks_length.values.reshape(-1, 54))
+	df_for_hm3 = pd.DataFrame(int_data.cc_peaks_length.values.reshape(-1, 31))
 	df_for_hm3.columns=col_names
 	df_for_hm3['region'] = row_names
 	df_for_hm3 = df_for_hm3.set_index('region')
@@ -136,6 +136,63 @@ def graph_heatmaps_regions_cc_peaks(int_file):
 	sns.heatmap(df_for_hm3)
 	plt.savefig("regions.summit_peaks.heatmap.norm_size.pdf")
 
+
+def make_study_specific_regions_cc_peaks(int_file):
+	##split data
+	int_file = 'combined_regions.summit_peaks.bt_int.bed'
+	int_data = pd.read_table(int_file, header=None)
+	##add header
+	int_data.columns=["chr", "start", "end", "snp_count", "region", "filename", "peak_count"]
+	##add 4 new columns
+	##split filename to just peak names
+	int_data['cc_peaks'] = int_data['filename'].str.split("/").str[-1].str.rsplit(".",3).str[0]
+	int_data['study'] = int_data['region'].str.split("_").str[0]
+	##normalize peak count
+	int_data['cc_peaks_snp_count'] = int_data.peak_count / int_data.snp_count
+	int_data['cc_peaks_length'] = int_data.peak_count / (int_data.end - int_data.start)
+	int_data.head()
+	##get specific data
+	split_data = int_data[int_data['study'] == 'euro']
+	##split peak count column every 31st col i.e. how many peak beds
+	row_names = split_data.region.unique()
+	col_names = split_data.cc_peaks.unique()
+	df_for_hm = pd.DataFrame(split_data.peak_count.values.reshape(-1, 31))
+	df_for_hm.columns = col_names
+	df_for_hm['region'] = row_names
+	df_for_hm.head()
+	df_for_hm = df_for_hm.set_index('region')
+	df_for_hm.head()
+	plt.figure(figsize=(16,12))
+	sns.heatmap(df_for_hm)
+	plt.savefig("euro.summit_peaks.heatmap.pdf")
+	##get specific data
+	split_data = int_data[int_data['study'] == 'all']
+	##split peak count column every 31st col i.e. how many peak beds
+	row_names = split_data.region.unique()
+	col_names = split_data.cc_peaks.unique()
+	df_for_hm = pd.DataFrame(split_data.peak_count.values.reshape(-1, 31))
+	df_for_hm.columns = col_names
+	df_for_hm['region'] = row_names
+	df_for_hm.head()
+	df_for_hm = df_for_hm.set_index('region')
+	df_for_hm.head()
+	plt.figure(figsize=(16,12))
+	sns.heatmap(df_for_hm)
+	plt.savefig("all.summit_peaks.heatmap.pdf")
+	##get specific data
+	split_data = int_data[int_data['study'] == 'scerri']
+	##split peak count column every 31st col i.e. how many peak beds
+	row_names = split_data.region.unique()
+	col_names = split_data.cc_peaks.unique()
+	df_for_hm = pd.DataFrame(split_data.peak_count.values.reshape(-1, 31))
+	df_for_hm.columns = col_names
+	df_for_hm['region'] = row_names
+	df_for_hm.head()
+	df_for_hm = df_for_hm.set_index('region')
+	df_for_hm.head()
+	plt.figure(figsize=(16,12))
+	sns.heatmap(df_for_hm)
+	plt.savefig("scerri.summit_peaks.heatmap.pdf")
 
 def extend_summit_peak_files(in_beds):
 	for in_bed in in_beds:
@@ -219,16 +276,16 @@ working_dir = '/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_gwas_p
 os.chdir(working_dir)
 
 ##bed files with gwas snps
-bed_files = ['fritsche_2016.bed', 'scerri_2017.bed', 'jansen_2019.bed', 'kunkle_2019.bed']
+bed_files = ['fritsche_2016.bed', 'scerri_2017.bed', 'jansen_2019.bed', 'kunkle_2019.bed', 'all_2021.bed', 'euro_2021.bed']
 ##removed region from janson that squed the data and repeat
-adjusted_bed_files = ['fritsche_2016.bed', 'scerri_2017.bed', 'jansen_2019_alt.bed', 'kunkle_2019.bed']
+adjusted_bed_files = ['fritsche_2016.bed', 'scerri_2017.bed', 'jansen_2019_alt.bed', 'kunkle_2019.bed', 'all_2021.bed', 'euro_2021.bed']
 
 ##region/peak files
 combined_snp_bed = 'combined_snps.bed'
 combined_region_bed = 'combined_regions.bed'
 
 peak_beds_dir = '/active/cherry_t/OrgManuscript_SingleCell_Data/peak_calls/archr_macs2_peak_beds_1020/'
-summit_peak_beds = glob.glob(peak_beds_dir + 'human*') + glob.glob(peak_beds_dir + 'organoid*')
+summit_peak_beds = glob.glob(peak_beds_dir + 'human.*') + glob.glob(peak_beds_dir + 'organoid.*')
 regions_summit_bt_bed = 'combined_regions.summit_peaks.bt_int.bed'
 extended_peak_beds = glob.glob('human*bed') + glob.glob('organoid*bed')
 snps_extended_bt_bed = 'combined_snps.extended_peaks.bt_int.bed'
@@ -251,6 +308,9 @@ snps_extended_norm_heatmap = "snps.cc_peaks.heatmap.norm_peak_count.pdf"
 ## 4. make heatmaps from region/peak data
 # graph_heatmaps_regions_cc_peaks(regions_summit_bt_bed)
 
+## 5. split counts into individuals files and make heatmap
+make_study_specific_regions_cc_peaks(regions_summit_bt_bed)
+
 ##snp analysis
 ## 1. extend summit peak bed files
 # extend_summit_peak_files(summit_peak_beds)
@@ -265,8 +325,9 @@ snps_extended_norm_heatmap = "snps.cc_peaks.heatmap.norm_peak_count.pdf"
 ##compare studies
 # compare_snps_vs_cc_extended_peaks(snps_extended_bt_bed, snps_extended_sum)
 ##draw heatmap
-graph_heatmaps_snps_cc_peaks(snps_extended_sum, snps_extended_heatmap)
-graph_heatmaps_snps_cc_peaks(snps_extended_sum_norm, snps_extended_norm_heatmap)
+# graph_heatmaps_snps_cc_peaks(snps_extended_sum, snps_extended_heatmap)
+##manually normalized using line counts of peak bed files (so multipled the % by ratio of max)
+# graph_heatmaps_snps_cc_peaks(snps_extended_sum_norm, snps_extended_norm_heatmap)
 
 ## 3. motifs in summit peaks: intersect motifs with summit peaks
 ## motif bed from scanMotifGenomeWide.pl or from homer.KnownMotifs.hg38.191020.bed 

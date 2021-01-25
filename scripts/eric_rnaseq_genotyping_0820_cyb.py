@@ -164,7 +164,7 @@ def genotype_rs3184504_pipeline_2(info_file):
 	patient_fq_dict = make_patient_fq_dict_2(info_file)
 	project = info_file.split('_')[0] + '_0820'
 	print(project)
-	'''
+	# '''
 	for patient in patient_fq_dict:
 		print(patient, patient_fq_dict[patient])
 		fq1 = patient_fq_dict[patient][0]
@@ -174,7 +174,7 @@ def genotype_rs3184504_pipeline_2(info_file):
 		star_align_paired_end_2_pass(patient, star_index_dir, thread_number, fq1[0], fq2[0])
 		##just add rg so haplotype caller works
 		add_rg_to_bam(patient)
-	'''
+	# '''
 	##call variants
 	make_list_of_bams(patient_fq_dict, '.with_rg.bam', bamlist)
 	get_vars_around_rs3184504(bamlist, project)
@@ -191,6 +191,12 @@ GSE131411_info_file = 'GSE131411_info.txt'
 working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE118165'
 os.chdir(working_dir)			
 GSE118165_info_file = 'GSE118165_info.txt'
-genotype_rs3184504_pipeline_2(GSE118165_info_file)
+# genotype_rs3184504_pipeline_2(GSE118165_info_file)
+
+##GSE120444
+working_dir = '/home/atimms/ngs_data/rnaseq/eric_rnaseq_0720/GSE120444'
+os.chdir(working_dir)			
+GSE120444_info_file = 'GSE120444_info.txt'
+genotype_rs3184504_pipeline_2(GSE120444_info_file)
 
 

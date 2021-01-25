@@ -24,9 +24,9 @@ ann_var = '/home/atimms/programs/annovar/annotate_variation.pl'
 prep_ann = '/home/atimms/programs/annovar/prepare_annovar_user.pl'
 
 ##annovar parameters
-# av_genome = 'hg19'
+av_genome = 'hg19'
 # av_genome = 'hg38'
-av_genome = 'danRer11'
+# av_genome = 'danRer11'
 av_buildver = ['-buildver', av_genome]
 av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
 av_protocol = ['-protocol', 'refGene,kaviar_20150923,gnomad_genome,popfreq_all_20150413']
@@ -104,6 +104,12 @@ def annotate_vcf(vcf, av_prefix):
 # ftds = ['gerp++gt2']
 # for ftd in ftds:
 # 	download_annovar_db_from_annovar(ftd)
+##0121
+# ftds = ['dbnsfp41a', 'clinvar_20200316']
+ftds = ['refGene']
+for ftd in ftds:
+	download_annovar_db_from_annovar(ftd)
+
 
 ##new hg38 files
 # ftds = ['clinvar_20190305', 'dbnsfp31a_interpro']
@@ -123,11 +129,11 @@ def annotate_vcf(vcf, av_prefix):
 
 
 ##zebrafish annotations
-ftds = ['refGene', 'rmsk', 'ensGene']
-# ftds = ['rmsk', 'ensGene']
-ftds = ['ensGene']
-for ftd in ftds:
-	download_annovar_db_not_from_annovar(ftd)
+# ftds = ['refGene', 'rmsk', 'ensGene']
+# # ftds = ['rmsk', 'ensGene']
+# ftds = ['ensGene']
+# for ftd in ftds:
+# 	download_annovar_db_not_from_annovar(ftd)
 
 
 

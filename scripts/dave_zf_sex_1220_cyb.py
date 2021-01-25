@@ -288,6 +288,9 @@ def make_files_for_graphing(snp_beds, window_size, step_size, genome_fai, workin
 			out_file_naf1 = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.experiment1.aaf_for_r.txt'
 			out_file_naf2 = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.experiment2.aaf_for_r.txt'
 			out_file_combined = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.combined_for_r.txt'
+			out_file_naf_male = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.male.aaf_for_r.txt'
+			out_file_naf_female = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.female.aaf_for_r.txt'
+			out_file_naf_all = snp_bed.rsplit('.', 1)[0] + '.' + genome_and_window + '.aaf_for_all.txt'
 			##bedtools intersect 
 			with open('temp.bed', "w") as naf_fh: 
 				# hom_bt_intersect = subprocess.Popen(['bedtools', 'intersect', '-a', window_bed, '-b', snp_bed, '-c'], stdout=naf_fh)
@@ -311,10 +314,13 @@ def make_files_for_graphing(snp_beds, window_size, step_size, genome_fai, workin
 					else:
 						aaf_dict[chr_start_end] = [[maaf1],[faaf1],[maaf2],[faaf2]]
 			##write outfile from dict
-			with open(out_file_naf1, "w") as outn1_fh, open(out_file_naf2, "w") as outn2_fh, open(out_file_combined, "w") as outc_fh:
+			with open(out_file_naf1, "w") as outn1_fh, open(out_file_naf2, "w") as outn2_fh, open(out_file_combined, "w") as outc_fh, open(out_file_naf_male, "w") as outm_fh, open(out_file_naf_female, "w") as outf_fh, open(out_file_naf_all, "w") as outall_fh:
 				outn1_fh.write(delim.join(['chr', 'start', 'end', 'test', 'average_aaf']) + '\n')
 				outn2_fh.write(delim.join(['chr', 'start', 'end', 'test', 'average_aaf']) + '\n')
+				outm_fh.write(delim.join(['chr', 'start', 'end', 'test', 'average_aaf']) + '\n')
+				outf_fh.write(delim.join(['chr', 'start', 'end', 'test', 'average_aaf']) + '\n')
 				outc_fh.write(delim.join(['chr', 'start', 'end', 'test', 'value']) + '\n')
+				outall_fh.write(delim.join(['chr', 'start', 'end', 'test', 'average_aaf']) + '\n')
 
 				for window in aaf_dict:
 					ave_maaf1 = sum(aaf_dict[window][0]) / len(aaf_dict[window][0])
@@ -325,11 +331,16 @@ def make_files_for_graphing(snp_beds, window_size, step_size, genome_fai, workin
 					aaf_diff2 = ave_maaf2 - ave_faaf2
 					snp_count = len(aaf_dict[window][0])
 					log_snp_count = math.log(snp_count, 2)
-					##first graphing file
+					##first graphing files - by experiment
 					outn1_fh.write(window + delim + 'male_aaf_1' + delim + str(ave_maaf1) + '\n')
 					outn1_fh.write(window + delim + 'female_aaf_1' + delim + str(ave_faaf1) + '\n')
 					outn2_fh.write(window + delim + 'male_aaf_2' + delim + str(ave_maaf2) + '\n')
 					outn2_fh.write(window + delim + 'female_aaf_2' + delim + str(ave_faaf2) + '\n')
+					##first graphing files - by sex
+					outm_fh.write(window + delim + 'male_aaf_1' + delim + str(ave_maaf1) + '\n')
+					outf_fh.write(window + delim + 'female_aaf_1' + delim + str(ave_faaf1) + '\n')
+					outm_fh.write(window + delim + 'male_aaf_2' + delim + str(ave_maaf2) + '\n')
+					outf_fh.write(window + delim + 'female_aaf_2' + delim + str(ave_faaf2) + '\n')
 					##second graphing file
 					outc_fh.write(window + delim + 'aaf_male_1' + delim + str(ave_maaf1) + '\n')
 					outc_fh.write(window + delim + 'aaf_female_1' + delim + str(ave_faaf1) + '\n')
@@ -339,7 +350,11 @@ def make_files_for_graphing(snp_beds, window_size, step_size, genome_fai, workin
 					outc_fh.write(window + delim + 'aaf_difference_2' + delim + str(aaf_diff2) + '\n')
 					# outc_fh.write(window + delim + 'snp_count' + delim + str(snp_count) + '\n')
 					outc_fh.write(window + delim + 'log2_snp_count' + delim + str(log_snp_count) + '\n')
-
+					##third graphing - combine naf for both experiments 
+					outall_fh.write(window + delim + 'aaf_male_1' + delim + str(ave_maaf1) + '\n')
+					outall_fh.write(window + delim + 'aaf_female_1' + delim + str(ave_faaf1) + '\n')
+					outall_fh.write(window + delim + 'aaf_male_2' + delim + str(ave_maaf2) + '\n')
+					outall_fh.write(window + delim + 'aaf_female_2' + delim + str(ave_faaf2) + '\n')
 ##run methods
 work_dir = '/home/atimms/ngs_data/enu_mapping/dave_zf_sex_1220'
 os.chdir(work_dir)

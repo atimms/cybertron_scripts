@@ -231,7 +231,7 @@ dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_
 markers_d = c('PGM1', 'PGM2', 'PGM3', 'PGM5', 'PYGM', 'PYGB', 'PYGL')
 DotPlot(human_harmony, features = markers_d) + RotatedAxis()
 dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121d.dotplot.pdf", width = 12, height = 6)
-markers_e = c('SLC25A31', 'SLC25A4', 'SLC25A5', 'SLC25A6', 'NDUFS1', 'NDUFS4', 'NDUFS8', 'SDHA', 'SDHB', 'SDHC', 'SDHD', 'COX4I1', 'COX4I2', 'COX7C', 'COX6B1', 'COX6B2', 'COX6A1', 'COX6A2', 'MT-ATP6', 'MT-ATP8', 'ATP5IF1', 'ATP5PO')
+markers_e = c('SLC25A31', 'SLC25A4', 'SLC25A5', 'SLC25A6', 'NDUFS1', 'NDUFS4', 'NDUFS8', 'SDHA', 'SDHB', 'SDHC', 'SDHD', 'COX4I1', 'COX4I2', 'COX7C', 'COX6B1', 'COX6B2', 'COX6A1', 'COX6A2', 'MT-ATP6', 'MT-ATP8', 'ATP5IF1', 'ATP5PO', 'SLC2A1')
 DotPlot(human_harmony, features = markers_e) + RotatedAxis()
 dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121e.dotplot.pdf", width = 12, height = 6)
 

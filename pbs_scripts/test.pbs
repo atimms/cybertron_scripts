@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N test
-#PBS -l mem=200gb,ncpus=20
+#PBS -l mem=30gb,ncpus=2
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -17,10 +17,16 @@ echo 'work'
 # ghayda_ucb_genomes_germline_0320_cybertron.py
 
 ##testing exome pipleine
-module load java/1.8.0_121 
-module load biobuilds/2016.11
-module load vt/0.5772-60f436c3 
-module load mono/5.10.1.47
-module load Pisces/5.1.6.54
-run_dobyns_exomes_cybertron.py
+# module load java/1.8.0_121 
+# module load biobuilds/2016.11
+# module load vt/0.5772-60f436c3 
+# module load mono/5.10.1.47
+# module load Pisces/5.1.6.54
+# run_dobyns_exomes_cybertron.py
 # single_core_test_1020.py 
+
+
+##testing silvar pipeline
+module load java/1.8.0_202 
+module load biobuilds/2017.11
+ghayda_slivar_reanalysis_0121_cyb.py

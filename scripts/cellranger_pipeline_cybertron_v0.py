@@ -6,13 +6,14 @@ import os
 delim = '\t'
 # cellranger = '/home/atimms/programs/cellranger-3.1.0/cellranger'
 # cellranger = '/home/atimms/programs/cellranger-4.0.0/cellranger'
-cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger'
+# cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger' ##has include-introns 
+cellranger = '/home/atimms/programs/cellranger-5.0.1/cellranger' ##has include-introns 
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
 grc38_prerna_ref = '/home/atimms/ngs_data/references/10x/GRCh38-3.0.0_premrna_new'
 grc38_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
 mm10_prerna_ref = '/gpfs/home/atimms/ngs_data/references/10x/mm10-3.0.0_premrna'
 grc38_atac_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0'
-
+mm10_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
 
 ##methods
 def make_dict_from_info_file(in_file):
@@ -140,6 +141,30 @@ def cellranger_scatac_no_aggr_master(work_dir, infile, ref_dir):
 	run_cellranger_atac_count(info_dict, ref_dir)
 
 
+def run_cellranger5_count(infodict, refdir, use_intronic_reads):
+	for sample in infodict:
+		#cellranger count --id=Mut2-6 --transcriptome=/gpfs/home/atimms/ngs_data/references/10x/refdata-cellranger-GRCh38-3.0.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_organoid_wk5_rerun_done/outs/fastq_path/HHT75BGXC/Mut2-6,/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_Organoid_5wk_done/outs/fastq_path/HFLF2BGXC/Mut2-6 --sample=Mut2-6 --expect-cells=1000
+		fqs = infodict[sample][0]
+		print(cellranger, 'count', '--id=', sample, '--transcriptome=', refdir, '--fastqs=', fqs)
+		##run using just exonic and both exonic and intronic reads
+		if use_intronic_reads == 'no':
+			cr_count1 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample])
+			cr_count1.wait()
+		elif use_intronic_reads == 'yes':
+			cr_count2 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--include-introns'])
+			cr_count2.wait()
+		else:
+			print('issues....')
+
+
+
+def cellranger5_scrnaseq_master_no_aggr(work_dir, infile, ref_dir, use_intronic_reads):
+	os.chdir(work_dir)
+	info_dict = make_dict_from_info_file(infile)
+	for s in info_dict:
+		print(s, info_dict[s])
+	run_cellranger5_count(info_dict, ref_dir, use_intronic_reads)
+
 ##run methods
 
 ##cherry organoid analysis 0320
@@ -256,15 +281,30 @@ transciptome_ref = grc38_ref
 
 
 ##dana/jimmy data 1220
+##do 2x one with std hg38 and one with premrna
+##issue with count, so had to specify chemistry type
 working_dir = '/home/atimms/ngs_data/cellranger/dana_scrna_1220/hg38'
 ##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
 info_file = '201112_Bennett_scRNAseq.txt'
 combined_suffix = '201112_Bennett_scRNAseq_hg38'
 transciptome_ref = grc38_ref
-cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)
+# cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)
 working_dir = '/home/atimms/ngs_data/cellranger/dana_scrna_1220/hg38_premrna'
 ##info on the analysis, 4x columns with a header: sample fqs expected_cells group (expect cells not actually used)
 info_file = '201112_Bennett_scRNAseq.txt'
 combined_suffix = '201112_Bennett_scRNAseq_hg38_premrna'
 transciptome_ref = grc38_prerna_ref
-cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)
+# cellranger_scrnaseq_5prime_master(working_dir, info_file, combined_suffix, transciptome_ref)
+
+##data for michael/gus
+working_dir = '/home/atimms/ngs_data/cellranger/cunn_mouse_scrna_0121/std_ref'
+##info on the analysis, 4x columns with a header: sample fqs na na
+info_file = 'cunn_scRNA_0121.txt'
+transciptome_ref = mm10_ref
+intronic_ref = 'no'
+cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+working_dir = '/home/atimms/ngs_data/cellranger/cunn_mouse_scrna_0121/intronic_ref'
+intronic_ref = 'yes'
+cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+
+
