@@ -106,7 +106,8 @@ def annotate_vcf(vcf, av_prefix):
 # 	download_annovar_db_from_annovar(ftd)
 ##0121
 # ftds = ['dbnsfp41a', 'clinvar_20200316']
-ftds = ['refGene']
+# ftds = ['refGene']
+ftds = ['clinvar_20210123']
 for ftd in ftds:
 	download_annovar_db_from_annovar(ftd)
 

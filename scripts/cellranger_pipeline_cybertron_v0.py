@@ -9,11 +9,14 @@ delim = '\t'
 # cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger' ##has include-introns 
 cellranger = '/home/atimms/programs/cellranger-5.0.1/cellranger' ##has include-introns 
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
+cellranger_arc = '/home/atimms/programs/cellranger-arc-1.0.1/cellranger-arc'
 grc38_prerna_ref = '/home/atimms/ngs_data/references/10x/GRCh38-3.0.0_premrna_new'
 grc38_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
 mm10_prerna_ref = '/gpfs/home/atimms/ngs_data/references/10x/mm10-3.0.0_premrna'
 grc38_atac_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0'
-mm10_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
+mm10_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-mm10-2020-A'
+grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A'
+
 
 ##methods
 def make_dict_from_info_file(in_file):
@@ -156,14 +159,55 @@ def run_cellranger5_count(infodict, refdir, use_intronic_reads):
 		else:
 			print('issues....')
 
-
-
 def cellranger5_scrnaseq_master_no_aggr(work_dir, infile, ref_dir, use_intronic_reads):
 	os.chdir(work_dir)
 	info_dict = make_dict_from_info_file(infile)
 	for s in info_dict:
 		print(s, info_dict[s])
 	run_cellranger5_count(info_dict, ref_dir, use_intronic_reads)
+
+
+def make_arc_library_file_from_dict(sample_name, fq_dicts, out_file):
+	# print(in_file)
+	with open(out_file, "w") as out_fh:
+		out_fh.write(','.join(['fastqs','sample','library_type']) + '\n')
+		# print(line)
+		ge_fqs = fq_dicts[0]
+		ca_fqs = fq_dicts[1]
+		out_fh.write(','.join([ge_fqs,sample_name ,'Gene Expression']) + '\n')
+		out_fh.write(','.join([ca_fqs,sample_name,'Chromatin Accessibility']) + '\n')
+
+def make_arc_dict_from_info_file(in_file):
+	# print(in_file)
+	i_dict = {}
+	with open(in_file, "r") as in_fh:
+		lc = 0
+		for line in in_fh:
+			lc += 1
+			if lc > 1:
+				# print(line)
+				line = line.rstrip().split(delim)
+				sample = line[0]
+				ge_fqs = line[1]
+				ca_fqs = line[2]
+				i_dict[sample] = [ge_fqs, ca_fqs]
+	return(i_dict)
+
+def run_cellranger_arc_count(sample_dict, refdir, lib_file_suffix):
+	for sample in sample_dict:
+		fq_list = sample_dict[sample]
+		lib_file = sample + lib_file_suffix
+		make_arc_library_file_from_dict(sample, fq_list, lib_file)
+		##cellranger-arc count --id=sample345 --reference=/opt/refdata-cellranger-arc-GRCh38-2020-A --libraries=/home/jdoe/runs/libraries.csv
+		cr_count = subprocess.Popen([cellranger_arc, 'count', '--id=' + sample, '--reference=' + refdir, '--libraries=' + lib_file])
+		cr_count.wait()
+
+def cellranger_arc_master(work_dir, infile, ref_dir):
+	os.chdir(work_dir)
+	library_file_suffix = '.library.csv'
+	sample_dict = make_arc_dict_from_info_file(infile)
+	print(sample_dict)
+	run_cellranger_arc_count(sample_dict, ref_dir, library_file_suffix)
 
 ##run methods
 
@@ -302,9 +346,14 @@ working_dir = '/home/atimms/ngs_data/cellranger/cunn_mouse_scrna_0121/std_ref'
 info_file = 'cunn_scRNA_0121.txt'
 transciptome_ref = mm10_ref
 intronic_ref = 'no'
-cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+# cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
 working_dir = '/home/atimms/ngs_data/cellranger/cunn_mouse_scrna_0121/intronic_ref'
 intronic_ref = 'yes'
 cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
 
-
+##data for tim/eric --- run atac and rnaseq both ways
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_10x_0121/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = '12wk_snporg_0121.txt'
+transciptome_ref = grc38_arc_ref
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)

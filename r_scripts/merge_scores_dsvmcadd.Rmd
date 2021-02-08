@@ -1,0 +1,60 @@
+---
+title: "Combine_VCF"
+author: "Leah VandenBosch"
+date: "12/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Combine VCF files
+
+Trying to keep the NAs in for generating a summary file, let's combine the files with merge using four columns.
+
+To load these files, use the below. However, on observing the file contents, we need to do some data massaging. Firstly, in the dsvm vcf, we have added the "DSVM=" for the vcf merge, so we should remake the file without that. Secondly, in the cadd file, the chromosomes are only labeled by the chromosome number, but not "chr" so we may need to find a way to change one or both of them. Alternatively, we could try merging without using the chromosome name, but tht is risky. Also, there are two columns with potential scores in the cadd file so we need to determine which is the correct column to include.
+
+```{r load files}
+model_dsvm <- read.delim("/active/cherry_t/Leah/Analyses/gkm_svm/RandNeg_analysis/AltKernel/vcf/dsvm_simplified.txt", header=FALSE, comment.char="#")
+colnames(model_dsvm) <- c("chr", "start", "ID", "ref", "alt", "dots1", "dots2","dsvm")
+model_dsvm_alt <- model_dsvm %>% select(chr, start, ID, ref, alt, dsvm) %>% mutate(start = start + 1)
+cadd <- read.delim("/active/cherry_t/Kelsey/Capstone/gkm_svm/bulk_ATAC_ChIP/validation/CADD/ALL_disease_summits_ext300.CADD_score.tsv", header=FALSE)
+colnames(cadd) <- c("chr", "start", "ref", "alt", "score1", "score2")
+```
+
+## merge
+
+
+
+```{r merge}
+scores_all <- merge(model_dsvm, cadd, by.x = c("chr", "start", "ref", "alt"), by.y = c("chr", "start", "ref", "alt"))
+#This works but only returns values where there is a score for both. Could be used for the scatter plot in the plotter, but not for the line plot etc.
+
+scores_ALL <- merge(model_dsvm, cadd, by.x = c("chr", "start", "ref", "alt"), by.y = c("chr", "start", "ref", "alt"), all = TRUE)
+scores_ALL[is.na(scores_ALL)] <- 0
+
+#There is an issue of altering reference values... This could be an issue
+```
+
+After looking through the sequences, the dsvm chromosomal positions are just off by one so, I added one to all and am redoing the merges:
+
+```{r merge2}
+scores_merge_alt <- merge(model_dsvm_alt, cadd, by.x = c("chr", "start", "ref", "alt"), by.y = c("chr", "start", "ref", "alt"))
+
+scores_ALL_alt <- merge(model_dsvm_alt, cadd, by.x = c("chr", "start", "ref", "alt"), by.y = c("chr", "start", "ref", "alt"), all = TRUE)
+scores_ALL_alt[is.na(scores_ALL_alt)] <- 0
+
+#There is an issue of altering reference values... This could be an issue
+```
+
+
+
+Write the data
+
+```{r write}
+write_delim(scores_merge_alt, "/active/cherry_t/Leah/Analyses/gkm_svm/RandNeg_analysis/AltKernel/vcf/dsvm_cadd_soresmerge_nozeros.txt", delim = "\t", col_names = FALSE)
+
+write_delim(scores_ALL_alt, "/active/cherry_t/Leah/Analyses/gkm_svm/RandNeg_analysis/AltKernel/vcf/dsvm_cadd_soresmerge_inclzeros.txt", delim = "\t", col_names = FALSE)
+```

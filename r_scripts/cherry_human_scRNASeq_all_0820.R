@@ -236,9 +236,31 @@ DotPlot(human_harmony, features = markers_e) + RotatedAxis()
 dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.markers_0121e.dotplot.pdf", width = 12, height = 6)
 
 
+##get umaps etc 0121
+human_harmony <- readRDS(file = "./seurat_analysis/all/human_harmony_clusters_defined.rds")
+FeaturePlot(human_harmony, features = c('HTRA1'))
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.HTRA1.FeaturePlot.pdf", width = 7, height =7)
+VlnPlot(human_harmony,c("HTRA1"), pt.size = 0.01)
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.HTRA1.ViolinPlot.pdf", width = 10, height =7)
+RidgePlot(human_harmony,c("HTRA1"))
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.HTRA1.RidgePlot.pdf", width = 10, height =7)
+
+##want to make the violin plot comparable to the mouse data, so don't use all cell types and order
+# Define an order of cluster identities and then factor the metadata column
+my_levels <- c('Amacrines', 'Astrocytes', 'Bipolars', 'Cones', 'Ganglions', 'Horizontals', 'Microglia', 'Mullers', 'Rods')
+human_harmony$celltype <- factor(x = human_harmony$celltype, levels = my_levels)
+VlnPlot(human_harmony,c("HTRA1"), pt.size = 0, group.by = "celltype", idents =c('Amacrines', 'Astrocytes', 'Bipolars', 'Cones', 'Ganglions', 'Horizontals', 'Microglia', 'Mullers', 'Rods'))
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.HTRA1.ViolinPlot_formatted.pdf", width = 10, height =7)
+VlnPlot(human_harmony,c("PLEKHA1"), pt.size = 0, group.by = "celltype", idents =c('Amacrines', 'Astrocytes', 'Bipolars', 'Cones', 'Ganglions', 'Horizontals', 'Microglia', 'Mullers', 'Rods'))
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.PLEKHA1.ViolinPlot_formatted.pdf", width = 10, height =7)
+VlnPlot(human_harmony,c("ARMS2"), pt.size = 0, group.by = "celltype", idents =c('Amacrines', 'Astrocytes', 'Bipolars', 'Cones', 'Ganglions', 'Horizontals', 'Microglia', 'Mullers', 'Rods'))
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.ARMS2.ViolinPlot_formatted.pdf", width = 10, height =7)
 
 
-
+#Plot UMAP
+#DimPlot(human_harmony, reduction='umap', split.by='sample', pt.size=0.1, label = TRUE)
+DimPlot(human_harmony, reduction = 'umap')
+dev.copy2pdf(file="./seurat_analysis/all/human_scrnaseq_all_0620.res0.4.umap.pdf", width =10, height = 10)
 
 #>>>>>>>>>>>>>> egs
 #Add celltype info for RNASeq analysis..... done 0820
