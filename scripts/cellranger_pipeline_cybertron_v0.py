@@ -349,7 +349,7 @@ intronic_ref = 'no'
 # cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
 working_dir = '/home/atimms/ngs_data/cellranger/cunn_mouse_scrna_0121/intronic_ref'
 intronic_ref = 'yes'
-cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+# cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
 
 ##data for tim/eric --- run atac and rnaseq both ways
 working_dir = '/home/atimms/ngs_data/cellranger/cherry_10x_0121/'
@@ -357,3 +357,17 @@ working_dir = '/home/atimms/ngs_data/cellranger/cherry_10x_0121/'
 info_file = '12wk_snporg_0121.txt'
 transciptome_ref = grc38_arc_ref
 # cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+##data for tim/eric, rnaseq on mouse and human (organoid) data
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_scrnaseq_0221/mactel_mouse_scRNAseq'
+info_file = 'mactel_mouse_scRNAseq_0221.txt'
+transciptome_ref = mm10_ref
+intronic_ref = 'yes'
+# cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_scrnaseq_0221/organoid_microglia_scRNAseq'
+info_file = 'organoid_microglia_scRNAseq_0221.txt'
+transciptome_ref = grc38_ref
+intronic_ref = 'yes'
+cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+
+

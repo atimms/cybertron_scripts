@@ -12,6 +12,9 @@ cp bwa_gatk.bam from:
 /archive/luquetti_d/microtia_exomes
 /home/atimms/ngs_data/exomes/working/daniela_mosaic_exomes_redo_1219
 
+had wrong version of the moasaic data i.e. not from daniela_mosaic_exomes_redo_1219
+so repeated 0221
+
 
 '''
 
@@ -229,6 +232,16 @@ sample_rpt_from_fq = ['101003103', '101003202', '103001301', '103001302', '10300
 
 ##genotype gvcf
 gvcfs_to_genotype = [gvcf1, gvcf2, gvcf3]
+# genotype_gvcfs_and_filter(gvcfs_to_genotype, project)
+
+
+##repeat moasaic data from correct versions
+mosaic_rpts = ['CFM-MOS-01-01-B', 'CFM-MOS-01-01-T', 'CFM-MOS-01-11-B', 'CFM-MOS-01-21-B', 'CFM-MOS-06-01-B', 'CFM-MOS-06-01-T', 
+		'CFM-MOS-06-11-B', 'CFM-MOS-06-21-B', 'CFM-MOS-09-01-B', 'CFM-MOS-09-01-T', 'CFM-MOS-13-01-B', 'CFM-MOS-13-01-T', 
+		'CFM-MOS-13-11-B', 'CFM-MOS-13-21-B', 'CFM-MOS-14-01-B', 'CFM-MOS-14-01-T', 'CFM-MOS-14-11-B', 'CFM-MOS-14-21-B', 
+		'CFM-MOS-15-01-B', 'CFM-MOS-15-01-T', 'CFM-MOS-15-11-B', 'CFM-MOS-15-21-B', 'CFM-MOS-16-01-B', 'CFM-MOS-16-01-T', 
+		'CFM-MOS-18-01-B', 'CFM-MOS-18-01-T']
+project = 'microtia_exomes_recall_0221'
+variant_calling_gatk_hc(mosaic_rpts)
+combine_gvcfs(b3_samples, gvcf3)
 genotype_gvcfs_and_filter(gvcfs_to_genotype, project)
-
-

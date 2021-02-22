@@ -59,6 +59,11 @@ dev.copy2pdf(file="mouse_sutures_0121.umap.pdf", width = 10, height = 10)
 seurat_mat.markers <- FindAllMarkers(seurat_mat, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 write.csv(seurat_mat.markers, file="mouse_sutures_0121.cluster_markers.csv")
 
+#Identify the number of cells in each cluster between samples
+counts_cluster_sample = table(seurat_mat$seurat_clusters, seurat_mat$orig.ident)
+write.csv(counts_cluster_sample, file='mouse_sutures_0121.counts_cluster_sample.res0.4.csv')
+
+
 
 #done up to here......
 

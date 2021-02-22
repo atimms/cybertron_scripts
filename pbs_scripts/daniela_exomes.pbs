@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N daniela_exomes
-#PBS -l mem=100gb,ncpus=20
+#PBS -l mem=100gb,ncpus=5
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org

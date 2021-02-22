@@ -1,16 +1,16 @@
 #!/bin/bash
 #PBS -N daniela_genomes
-#PBS -l mem=60gb,ncpus=2
+#PBS -l mem=30gb,ncpus=2
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
 #PBS -m abe
-#PBS -A "dluque"
+#PBS -P 9aa67182-09d6-405c-b7f7-93b0320828c1
 
 echo 'work'
 module load java/1.8.0_121 
-module load biobuilds/2017.11
-module load vt/0.5772-60f436c3 
+# module load biobuilds/2017.11
+# module load vt/0.5772-60f436c3 
 # module load mono/5.10.1.47
 # module load Pisces/5.1.6.54
 
@@ -37,4 +37,7 @@ module load vt/0.5772-60f436c3
 # daniela_genomes_0620_cybertron.py
 
 ##calculate exome coverage 1020
-daniela_genomes_0219_uw_coverage_1020_cyb.py
+# daniela_genomes_0219_uw_coverage_1020_cyb.py
+
+##slivar analysis 0221
+daniela_slivar_analysis_0221_cyb.py
