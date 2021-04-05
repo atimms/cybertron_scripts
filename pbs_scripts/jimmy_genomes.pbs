@@ -1,22 +1,21 @@
 #!/bin/bash
 #PBS -N fetal_genome
-#PBS -l mem=200gb,ncpus=20
+#PBS -l mem=50gb,ncpus=2
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
 #PBS -m abe
-#PBS -A "jbenn1"
+# Pick your appropriate project ID for ‘-P’ below: 
+#PBS -P 0f241fcd-0dd3-491c-acac-15c6cff1c880
 
 echo 'work'
 module load java/1.8.0_121 
-module load biobuilds/2017.11
-module load vt/0.5772-60f436c3 
-module load mono/5.10.1.47
-module load Pisces/5.1.6.54
 
 ##analysis 
 
-##for most use: #PBS -l mem=200gb,ncpus=20
-##for mutect split by chr and use #PBS -l mem=20gb,ncpus=20
+##for bwa: #PBS -l mem=200gb,ncpus=20
+##for mutect:  #PBS -l mem=50gb,ncpus=2
+source activate MF
+jimmy_fetal_genomes_mf_0321_cyb.py
 
-jimmy_fetal_genome_0819_cybertron.py
+

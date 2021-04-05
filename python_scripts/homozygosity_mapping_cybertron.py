@@ -65,7 +65,7 @@ def make_bed_from_ann(working_dir, var_caller, filename, zygosity_col, last_col)
 		if line_count > 1:
 			line = line.split(delim)
 			info = line[last_col - 1].split(':')
-			#print info
+			# print info
 			if var_caller == 'gatk' or var_caller == 'gatk_hc':
 				if len(info[1].split(',')) != 2: #gives snps with mutiple alleles naf of 0
 					non_ref_allele, total_alleles = 0,0

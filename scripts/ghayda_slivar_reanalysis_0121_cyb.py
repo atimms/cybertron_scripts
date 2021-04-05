@@ -23,8 +23,8 @@ threads = '5'
 ##programs
 bcftools = '/home/atimms/programs/bcftools-1.11/bcftools'
 snpeff_jar = '/home/atimms/programs/snpEff_0121/snpEff.jar'
-# slivar = '/home/atimms/programs/slivar_0121/slivar'
-slivar = '/home/atimms/programs/slivar_0121/slivar_dev'
+slivar = '/home/atimms/programs/slivar_0121/slivar'
+# slivar = '/home/atimms/programs/slivar_0121/slivar_dev'
 pslivar = '/home/atimms/programs/slivar_0121/pslivar'
 slivar_functions = '/home/atimms/programs/slivar_0121/slivar-0.2.1/js/slivar-functions_at.js'
 table_annovar = '/home/atimms/programs/annovar_1019/table_annovar.pl'
@@ -42,7 +42,7 @@ gnomad_gnotate = '/home/atimms/ngs_data/references/slivar/gnomad.hg37.zip'
 pli_lookup = '/home/atimms/ngs_data/references/slivar/pli.lookup'
 #cut -f2,3,4,6,8 dbdb.gene_association.txt | awk 'BEGIN{FS="\t"}{ printf("%s\tinheritance=%s;phenotype=%s;syndrome=%s;loe=%s\n", $1, $2, $3, $4, $5)}' > ~/ngs_data/references/slivar/dbdb.lookup
 dbdb_lookup = '/home/atimms/ngs_data/references/slivar/dbdb.lookup'
-#grep -v '^#' omim_genemap2_0816.txt | cut -f9,13 | grep -v '^\s' > /home/atimms/ngs_data/references/slivar/omim.lookup
+#grep -v '^#' omim_genemap2_0321.txt | cut -f9,13 | grep -v '^\s' > /home/atimms/ngs_data/references/slivar/omim.lookup
 omim_lookup = '/home/atimms/ngs_data/references/slivar/omim.lookup'
 hg19_selfchain = '/home/atimms/ngs_data/references/slivar/selfchain-LCR.hg19.bed'
 hg19_refgene_exons = '/home/atimms/ngs_data/references/slivar/hg19.refflat_exons.nochr.bed'
@@ -139,6 +139,35 @@ def merge_std_silvar_annovar(std_tsv, cp_tsv, multianno, outfile):
 					line2_out = line_2[:16] + multianno_dict[cpra]
 					out_fh.write(delim.join(line2_out) + '\n')
 
+def merge_dn_silvar_annovar(std_tsv, multianno, outfile):
+	##make dict from annovar multianno
+	multianno_dict = {}
+	with open(multianno, "r") as ma_fh:
+		lc = 0
+		for line in ma_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc == 1:
+				##add header info
+				extra_header = line[8:10] + line[96:100] + ['Geno2MP'] + [line[69]] + line[83:85] + line[47:49] + line[50:52] + [line[58]] + line[10:44] + ['vcf_info']
+			else:
+				chr_pos_ref_alt = ':'.join(line[104:106] + line[107:109])
+				##keep refgene, clivar/Geno2MP, cadd, gerp, polyphe, mutataster/mutass,REVEL, extra gnomad, vcf info
+				info_to_keep = line[8:10] + line[96:101] + [line[69]] + line[83:85] + line[47:49]  + line[50:52] + [line[58]] + line[10:44] + line[112:]
+				multianno_dict[chr_pos_ref_alt] = info_to_keep
+	with open(outfile, "w") as out_fh:
+		with open(std_tsv, "r") as std_fh:
+			lc = 0
+			for line_1 in std_fh:	
+				line_1 = line_1.rstrip('\n').split(delim)
+				lc += 1
+				if lc == 1:
+					header = line_1[:13] + ['pLI', 'dbdb', 'omim'] + extra_header
+					out_fh.write(delim.join(header) + '\n')
+				else:
+					cpra = line_1[3]
+					line1_out = line_1[:16] + multianno_dict[cpra]
+					out_fh.write(delim.join(line1_out) + '\n')
 
 
 
@@ -168,6 +197,7 @@ def slivar_std_analysis_on_trio(in_vcfs, ped_file, ped_type):
 		slivar_cp = subprocess.Popen([slivar, 'compound-hets', '--vcf', slivar_std_vcf, '--ped', ped_file,
 					'--sample-field', 'comphet_side', '--sample-field', 'denovo', '-o', slivar_cp_vcf])
 		slivar_cp.wait()
+		# '''
 		##different params for diff annotations
 		ann_program = in_vcf.split('.')[2]
 		if ann_program == 'bcftools':
@@ -187,11 +217,13 @@ def slivar_std_analysis_on_trio(in_vcfs, ped_file, ped_type):
 			'-g', pli_lookup, '-g', dbdb_lookup,'-g', omim_lookup, slivar_cp_vcf])
 		slivar_ch_tsv.wait()
 		##if no variants don't run annovar
-		with open(slivar_std_tsv, "r") as sst_fh:
-			std_lc = 0
+		var_lc = 0
+		with open(slivar_std_tsv, "r") as sst_fh, open(slivar_cp_tsv, "r") as sct_fh:
 			for line in sst_fh:
-				std_lc += 1
-		if std_lc > 1:
+				var_lc += 1
+			for line in sct_fh:
+				var_lc += 1			
+		if var_lc > 2:
 			##annotate vcfs with annovar i.e. run_table_annovar
 			command = [table_annovar] + av_buildver + [slivar_std_vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', slivar_std_annovar]
 			annovar = subprocess.Popen(command)
@@ -199,12 +231,27 @@ def slivar_std_analysis_on_trio(in_vcfs, ped_file, ped_type):
 			# '''
 			##combine slivar files with annovar annotation
 			merge_std_silvar_annovar(slivar_std_tsv, slivar_cp_tsv, slivar_std_multi, slivar_std_final)
+		else:
+			with open(slivar_std_final, "w") as out_fh:
+				with open(slivar_std_tsv, "r") as std_fh:
+					lc = 0
+					for line_1 in std_fh:	
+						line_1 = line_1.rstrip('\n').split(delim)
+						lc += 1
+						if lc == 1:
+							header = line_1[:13] + ['pLI', 'dbdb', 'omim']
+							out_fh.write(delim.join(header) + '\n')		
 
-		##extra analyses
-		'''
+
+def slivar_genic_dn_on_trio(in_vcfs, ped_file, ped_type):
+	for in_vcf in in_vcfs:
 		slivar_dn_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_exonic_dn.vcf'
-		slivar_dom_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_dominant.vcf'
-		
+		slivar_dn_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_dn.temp.xls'
+		slivar_dn_annovar = in_vcf.rsplit('.', 2)[0] + '.slivar_dn.temp'
+		slivar_dn_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_dn.temp.hg19_multianno.txt'
+		slivar_dn_final = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.genic_dn_analysis.xls'
+		##get std file
+		# '''
 		##all exonic de novo, i.e. use genic instead of impactful
 		slivar_dn = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
 			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
@@ -212,18 +259,44 @@ def slivar_std_analysis_on_trio(in_vcfs, ped_file, ped_type):
 			'--family-expr', 'denovo:fam.every(segregating_denovo) && INFO.gnomad_popmax_af < 0.001',
 			'-o', slivar_dn_vcf])
 		slivar_dn.wait()
-		##dominant -- not working
-		slivar_dom = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
-			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
-			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
-			'--family-expr', 'dominant:fam.every(segregating_dominant)',
-			'-o', slivar_dom_vcf])
-		slivar_dom = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
-			'-g', gnomad_gnotate, '--js', slivar_functions, '--info',
-			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
-			'-o', slivar_dom_vcf])
-		slivar_dom.wait()
-		'''		
+		# '''
+		##different params for diff annotations
+		ann_program = in_vcf.split('.')[2]
+		if ann_program == 'bcftools':
+			c_param = 'BCSQ'
+		elif ann_program == 'snpeff':
+			c_param = 'ANN'
+		else:
+			print(ann_program, 'not recognized as annotation program')
+		##convert to tsv (add extra annotation?)
+		slivar_trio_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param,
+			'-o', slivar_dn_tsv, '-s', 'denovo',
+			'-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt', '-g', pli_lookup,
+			'-g', dbdb_lookup,'-g', omim_lookup, slivar_dn_vcf])
+		slivar_trio_tsv.wait()
+		##if no variants don't run annovar
+		var_lc = 0
+		with open(slivar_dn_tsv, "r") as sst_fh:
+			for line in sst_fh:
+				var_lc += 1		
+		if var_lc > 1:
+			##annotate vcfs with annovar i.e. run_table_annovar
+			command = [table_annovar] + av_buildver + [slivar_dn_vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', slivar_dn_annovar]
+			annovar = subprocess.Popen(command)
+			annovar.wait()
+			##combine slivar files with annovar annotation
+			merge_dn_silvar_annovar(slivar_dn_tsv, slivar_dn_multi, slivar_dn_final)
+		else:
+			##make dummy file with just header is no var
+			with open(slivar_dn_final, "w") as out_fh:
+				with open(slivar_dn_tsv, "r") as std_fh:
+					lc = 0
+					for line_1 in std_fh:	
+						line_1 = line_1.rstrip('\n').split(delim)
+						lc += 1
+						if lc == 1:
+							header = line_1[:13] + ['pLI', 'dbdb', 'omim']
+							out_fh.write(delim.join(header) + '\n')		
 
 def slivar_std_analysis_on_duo(in_vcfs, ped_file, ped_type):
 	for in_vcf in in_vcfs:
@@ -294,8 +367,6 @@ def slivar_std_analysis_on_duo(in_vcfs, ped_file, ped_type):
 		annovar.wait()
 		##combine slivar files with annovar annotation
 		merge_std_silvar_annovar(slivar_std_tsv, slivar_cp_tsv, slivar_std_multi, slivar_std_final)
-
-		# '''
 	
 def slivar_std_analysis_on_multiplex(in_vcfs, ped_file, ped_type):
 	for in_vcf in in_vcfs:
@@ -307,7 +378,7 @@ def slivar_std_analysis_on_multiplex(in_vcfs, ped_file, ped_type):
 		slivar_std_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.hg19_multianno.txt'
 		slivar_std_final = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.std_analysis.xls'
 		##get std file
-		# '''
+		'''
 		slivar_multi = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
 			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
 			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
@@ -318,11 +389,12 @@ def slivar_std_analysis_on_multiplex(in_vcfs, ped_file, ped_type):
 
 			'-o', slivar_std_vcf])
 		slivar_multi.wait()
-		# '''
+		
 		#slivar compound-hets -v vcfs/$cohort.vcf --sample-field comphet_side --sample-field denovo -p $ped > vcfs/$cohort.ch.vcf
 		slivar_cp = subprocess.Popen([slivar, 'compound-hets', '--vcf', slivar_std_vcf, '--ped', ped_file,
 					'-s', 'comphet_side', '-s', 'aff_het', '--allow-non-trios', '-o', slivar_cp_vcf])
 		slivar_cp.wait()
+		'''
 		ann_program = in_vcf.split('.')[2]
 		##different params for diff annotations
 		ann_program = in_vcf.split('.')[2]
@@ -369,9 +441,9 @@ def slivar_duo_del(in_vcfs, ped_file, ped_type):
 		temp1_bed = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.duo_del_temp1.bed'
 		temp2_bed = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.duo_del_temp2.bed'
 		with open(temp1_file, "w") as t1_fh:
-			slivar_duo_del = subprocess.Popen([slivar, 'duo-del', '--ped', ped_file, '--exclude', hg19_selfchain,
+			run_slivar_duo_del = subprocess.Popen([slivar, 'duo-del', '--ped', ped_file, '--exclude', hg19_selfchain,
 			'-a', in_vcf], stdout=t1_fh)
-			slivar_duo_del.wait()
+			run_slivar_duo_del.wait()
 		##make bed from duo_del
 		with open(temp1_file, "r") as t1_fh, open(temp1_bed, "w") as tb_fh:
 			lc = 0
@@ -547,22 +619,23 @@ def get_var_counts(work_directory, info_file, analysis_types):
 					else:
 						formatted_ped_type = ped_type
 					std_file = ped + analysis_type + formatted_ped_type + '.std_analysis.xls'
-					with open(std_file, "r") as std_fh:
-						lc2 = 0
-						for line2 in std_fh:
-							line2 = line2.rstrip().split(delim)
-							lc2 += 1
-							if lc2 > 1:
-								if 'slivar' in std_file:
-									var_type = line2[0]
-								else:
-									var_type = line2[-1]
-								if var_type.startswith('slivar_comphet'):
-									var_type = 'slivar_comphet'
-								if ped in var_count_dict:
-									var_count_dict[ped][0].append(var_type)
-								else:
-									var_count_dict[ped] = [[var_type], ped_type]
+					if os.path.isfile(std_file):
+						with open(std_file, "r") as std_fh:
+							lc2 = 0
+							for line2 in std_fh:
+								line2 = line2.rstrip().split(delim)
+								lc2 += 1
+								if lc2 > 1:
+									if 'slivar' in std_file:
+										var_type = line2[0]
+									else:
+										var_type = line2[-1]
+									if var_type.startswith('slivar_comphet'):
+										var_type = 'slivar_comphet'
+									if ped in var_count_dict:
+										var_count_dict[ped][0].append(var_type)
+									else:
+										var_count_dict[ped] = [[var_type], ped_type]
 		##get list of all var types we see with these std files
 		all_var_types = []
 		for p in var_count_dict:
@@ -607,25 +680,26 @@ def combine_var_counts(work_directory, info_file, analysis_types):
 					else:
 						formatted_ped_type = ped_type
 					std_file = ped + analysis_type + formatted_ped_type + '.std_analysis.xls'
-					with open(std_file, "r") as std_fh:
-						lc2 = 0
-						for line2 in std_fh:
-							line2 = line2.rstrip().split(delim)
-							lc2 += 1
-							if lc2 == 1:
-								if lc == 2:
-									sd_fh.write(delim.join(line2) + '\n')
-									tq_fh.write(delim.join(line2) + '\n')
-									m_fh.write(delim.join(line2) + '\n')
-							else:
-								if ped_type in trio_types:
-									tq_fh.write(delim.join(line2) + '\n')
-								elif ped_type in single_duo_types:
-									sd_fh.write(delim.join(line2) + '\n')
-								elif ped_type in multiplex_types:
-									m_fh.write(delim.join(line2) + '\n')
+					if os.path.isfile(std_file):
+						with open(std_file, "r") as std_fh:
+							lc2 = 0
+							for line2 in std_fh:
+								line2 = line2.rstrip().split(delim)
+								lc2 += 1
+								if lc2 == 1:
+									if lc == 2:
+										sd_fh.write(delim.join(line2) + '\n')
+										tq_fh.write(delim.join(line2) + '\n')
+										m_fh.write(delim.join(line2) + '\n')
 								else:
-									print(ped_type, ' not recognized as a ped type')
+									if ped_type in trio_types:
+										tq_fh.write(delim.join(line2) + '\n')
+									elif ped_type in single_duo_types:
+										sd_fh.write(delim.join(line2) + '\n')
+									elif ped_type in multiplex_types:
+										m_fh.write(delim.join(line2) + '\n')
+									else:
+										print(ped_type, ' not recognized as a ped type')
 
 def filter_clinsig_vars(work_directory, in_files, out_suffix, path_definitions):
 	os.chdir(work_directory)
@@ -731,10 +805,10 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 	ped_file = pedigree + '.ped'
 	annotated_vcfs = [pedigree + '.intersect.bcftools.GRCh37_87.vcf.gz', pedigree + '.gatk38.bcftools.GRCh37_87.vcf.gz']
 	##process vcf files, so have normalized and annotated vcf 
-	# '''
+	'''
 	process_annotate_vcf(pedigree + '.intersect', int_vcf)
 	process_annotate_vcf(pedigree + '.gatk38', gatk_vcf)
-	# '''
+	'''
 	##filter with slivar
 	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
 	duo_types = ['duo', 'duo*', 'parent_sibship']
@@ -747,6 +821,7 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 		formatted_ped_type = ped_type
 	# print(pedigree, ped_type, formatted_ped_type)
 	# '''
+	##standard analyses
 	if ped_type.lower() in trio_types:
 		slivar_std_analysis_on_trio(annotated_vcfs, ped_file, formatted_ped_type)
 	elif ped_type.lower() in duo_types or ped_type.lower() in single_types:
@@ -755,9 +830,38 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 		slivar_std_analysis_on_multiplex(annotated_vcfs, ped_file, formatted_ped_type)
 	else:
 		print(ped_type, ' ped type not recognized')
+	
+	##run duo_del
+	if ped_type.lower() in trio_types or ped_type.lower() in multiplex_types or ped_type.lower() in duo_types:
+		slivar_duo_del(annotated_vcfs, ped_file, formatted_ped_type)
 	# '''
-	# if ped_type.lower() in trio_types or ped_type.lower() in multiplex_types or ped_type.lower() in duo_types:
-	# 	slivar_duo_del(annotated_vcfs, ped_file, formatted_ped_type)
+	##get genic denovo vars
+	if ped_type.lower() in trio_types:
+		slivar_genic_dn_on_trio(annotated_vcfs, ped_file, formatted_ped_type)
+
+def combine_files(work_directory, var_types, file_suffix):
+	os.chdir(work_directory)
+	for var_type in var_types:
+		infiles = glob.glob('*' + var_type + '*' + file_suffix)
+		outfile = 'combined' + var_type + file_suffix
+		infiles.remove(outfile)
+		print(var_type, len(infiles))
+		# print(infiles)
+		fc = 0
+		with open(outfile, "w") as out_fh:
+			for infile in infiles:
+				with open(infile, "r") as in_fh:
+					fc += 1
+					lc = 0
+					for line in in_fh:
+						lc += 1
+						if lc == 1:
+							if fc == 1:
+								out_fh.write(line)
+						else:
+							out_fh.write(line)
+
+
 
 def repeat_var_calling_0221(work_directory, infile):
 	rss_dir = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/all_exome_files/'
@@ -799,6 +903,182 @@ def repeat_var_calling_0221(work_directory, infile):
 			##run slivar
 			standard_slivar_protocol_v2(work_directory, ped, ped_type, gatk_vcf, int_vcf)								
 
+def slivar_analysis_master_0221(work_directory, infile):
+	os.chdir(work_directory)
+	with open(infile, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			ped = line[0]
+			ped_type = line[2]
+			gatk_vcf = ped + '.gatk38hc.vcf.gz'
+			int_vcf = ped + '.intersect_vcfs/0002.vcf'
+			##run slivar
+			standard_slivar_protocol_v2(work_directory, ped, ped_type, gatk_vcf, int_vcf)
+
+
+def slivar_std_analysis_on_trio_split(in_vcfs, ped_file, ped_type, ped_name):
+	for in_vcf in in_vcfs:
+		slivar_std_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.vcf'
+		slivar_cp_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_comphet.temp.vcf'
+		slivar_std_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.xls'
+		slivar_cp_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_comphet.temp.xls'
+		slivar_std_annovar = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp'
+		slivar_std_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.hg19_multianno.txt'
+		slivar_std_final = ped_name + '.' + in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.std_analysis.xls'
+		##get std file
+		# '''
+		slivar_trio = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
+			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
+			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
+			'--family-expr', 'denovo:fam.every(segregating_denovo) && INFO.gnomad_popmax_af < 0.001',
+			'--family-expr', 'recessive:fam.every(segregating_recessive)',
+			'--family-expr', 'x_denovo:(variant.CHROM == "X" || variant.CHROM == "chrX") && fam.every(segregating_denovo_x) && INFO.gnomad_popmax_af < 0.001',
+			'--family-expr', 'x_recessive:(variant.CHROM == "X" || variant.CHROM == "chrX") && fam.every(segregating_recessive_x)',
+			'--trio', 'comphet_side:comphet_side(kid, mom, dad) && INFO.gnomad_nhomalt < 10',
+			'-o', slivar_std_vcf])
+		slivar_trio.wait()
+		##comp het from std vcf
+		#slivar compound-hets -v vcfs/$cohort.vcf --sample-field comphet_side --sample-field denovo -p $ped > vcfs/$cohort.ch.vcf
+		slivar_cp = subprocess.Popen([slivar, 'compound-hets', '--vcf', slivar_std_vcf, '--ped', ped_file,
+					'--sample-field', 'comphet_side', '--sample-field', 'denovo', '-o', slivar_cp_vcf])
+		slivar_cp.wait()
+		# '''
+		##different params for diff annotations
+		ann_program = in_vcf.split('.')[2]
+		if ann_program == 'bcftools':
+			c_param = 'BCSQ'
+		elif ann_program == 'snpeff':
+			c_param = 'ANN'
+		else:
+			print(ann_program, 'not recognized as annotation program')
+		##convert to tsv (add extra annotation?)
+		slivar_trio_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param,
+			'-o', slivar_std_tsv, '-s', 'denovo', '-s', 'x_denovo', '-s', 'recessive', '-s', 'x_recessive',
+			'-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt', '-g', pli_lookup,
+			'-g', dbdb_lookup,'-g', omim_lookup, slivar_std_vcf])
+		slivar_trio_tsv.wait()
+		slivar_ch_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param, '-o', slivar_cp_tsv, 
+			'-s', 'slivar_comphet', '-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt',
+			'-g', pli_lookup, '-g', dbdb_lookup,'-g', omim_lookup, slivar_cp_vcf])
+		slivar_ch_tsv.wait()
+		##if no variants don't run annovar
+		var_lc = 0
+		with open(slivar_std_tsv, "r") as sst_fh, open(slivar_cp_tsv, "r") as sct_fh:
+			for line in sst_fh:
+				var_lc += 1
+			for line in sct_fh:
+				var_lc += 1			
+		if var_lc > 2:
+			##annotate vcfs with annovar i.e. run_table_annovar
+			command = [table_annovar] + av_buildver + [slivar_std_vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', slivar_std_annovar]
+			annovar = subprocess.Popen(command)
+			annovar.wait()
+			# '''
+			##combine slivar files with annovar annotation
+			merge_std_silvar_annovar(slivar_std_tsv, slivar_cp_tsv, slivar_std_multi, slivar_std_final)
+		else:
+			with open(slivar_std_final, "w") as out_fh:
+				with open(slivar_std_tsv, "r") as std_fh:
+					lc = 0
+					for line_1 in std_fh:	
+						line_1 = line_1.rstrip('\n').split(delim)
+						lc += 1
+						if lc == 1:
+							header = line_1[:13] + ['pLI', 'dbdb', 'omim']
+							out_fh.write(delim.join(header) + '\n')		
+
+def slivar_std_analysis_on_duo_split(in_vcfs, ped_file, ped_type, ped_name):
+	for in_vcf in in_vcfs:
+		slivar_std_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.vcf'
+		slivar_cp_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_comphet.temp.vcf'
+		slivar_std_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.xls'
+		slivar_cp_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_comphet.temp.xls'
+		slivar_std_annovar = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp'
+		slivar_std_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.hg19_multianno.txt'
+		slivar_std_final = ped_name + '.' + in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.std_analysis.xls'
+		##get std file
+		slivar_duo = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
+			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
+			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
+			'--family-expr', 'potential_denovo:fam.every(function(s) {return s.het == s.affected && s.hom_ref == !s.affected && s.GQ >=15 && s.DP >= 10 && s.AB > 0.20 == s.affected && s.AB < 0.1 == !s.affected}) && INFO.gnomad_popmax_af < 0.001',
+			'--family-expr', 'recessive:fam.every(segregating_recessive)',
+			'--family-expr', 'x_recessive:(variant.CHROM == "X" || variant.CHROM == "chrX") && fam.every(segregating_recessive_x)',
+			##gets all het and hom_ref vars in all inds, filtered by comp het
+			'--family-expr', 'comphet_side:fam.every(function(s) {return (s.het || s.hom_ref) && s.GQ >= 15 && s.DP >= 10})',
+			##are more specific alternative would be
+			#'--family-expr', 'comphet_side:fam.every(function(s) {return (s.het || s.hom_ref) && s.GQ >= 20 }) && fam.some(function(s) { return s.het && s.affected })',
+			'-o', slivar_std_vcf])
+		slivar_duo.wait()
+		##comp het from std vcf
+		#slivar compound-hets -v vcfs/$cohort.vcf --sample-field comphet_side --sample-field denovo -p $ped > vcfs/$cohort.ch.vcf
+		slivar_cp = subprocess.Popen([slivar, 'compound-hets', '--vcf', slivar_std_vcf, '--ped', ped_file,
+					'-s', 'comphet_side', '-s', 'potential_denovo', '--allow-non-trios', '-o', slivar_cp_vcf])
+		slivar_cp.wait()
+		ann_program = in_vcf.split('.')[2]
+
+		##different params for diff annotations
+		ann_program = in_vcf.split('.')[2]
+		if ann_program == 'bcftools':
+			c_param = 'BCSQ'
+		elif ann_program == 'snpeff':
+			c_param = 'ANN'
+		else:
+			print(ann_program, 'not recognized as annotation program')
+		##convert to tsv (add extra annotation?)
+		slivar_trio_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param,
+			'-o', slivar_std_tsv, '-s', 'potential_denovo', '-s', 'recessive', '-s', 'x_recessive',
+			'-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt', '-g', pli_lookup,
+			'-g', dbdb_lookup,'-g', omim_lookup, slivar_std_vcf])
+		slivar_trio_tsv.wait()
+		slivar_ch_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param, '-o', slivar_cp_tsv, 
+			'-s', 'slivar_comphet', '-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt',
+			'-g', pli_lookup, '-g', dbdb_lookup,'-g', omim_lookup, slivar_cp_vcf])
+		slivar_ch_tsv.wait()
+		##annotate vcfs with annovar i.e. run_table_annovar
+		command = [table_annovar] + av_buildver + [slivar_std_vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', slivar_std_annovar]
+		annovar = subprocess.Popen(command)
+		annovar.wait()
+		##combine slivar files with annovar annotation
+		merge_std_silvar_annovar(slivar_std_tsv, slivar_cp_tsv, slivar_std_multi, slivar_std_final)
+
+def standard_split_slivar_protocol(working_directory, ped_file, ped_type, gatk_vcf, int_vcf, new_ped_name):
+	os.chdir(working_directory)
+	annotated_vcfs = [int_vcf, gatk_vcf]
+	##filter with slivar
+	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
+	duo_types = ['duo', 'duo*', 'parent_sibship']
+	single_types = ['singleton', 'singleton*', 'sibship']
+	multiplex_types = ['multiplex']
+	##change ped type for final file name
+	if '*' in ped_type:
+		formatted_ped_type = ped_type.replace('*', 's')
+	else:
+		formatted_ped_type = ped_type
+	# print(pedigree, ped_type, formatted_ped_type)
+	# '''
+	##standard analyses
+	if ped_type.lower() in trio_types:
+		slivar_std_analysis_on_trio_split(annotated_vcfs, ped_file, formatted_ped_type, new_ped_name)
+	elif ped_type.lower() in duo_types or ped_type.lower() in single_types:
+		slivar_std_analysis_on_duo_split(annotated_vcfs, ped_file, formatted_ped_type, new_ped_name)
+	else:
+		print(ped_type, ' ped type not recognized')
+
+
+
+def slivar_analysis_split_ped(work_directory, infile):
+	os.chdir(work_directory)
+	with open(infile, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			ped = line[0]
+			ped_split = line[1]
+			ped_type = line[2]
+			ped_file = ped_split + '.ped'
+			gatk_vcf = ped + '.gatk38.bcftools.GRCh37_87.vcf.gz'
+			int_vcf = ped + '.intersect.bcftools.GRCh37_87.vcf.gz'
+			##run slivar
+			standard_split_slivar_protocol(work_directory, ped_file, ped_type, gatk_vcf, int_vcf, ped_split)		
 
 ##run on original gatk and intersected files
 working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/all_exome_data'
@@ -858,50 +1138,29 @@ trio_files = ['combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_sl
 
 ##repeat var calling/slivar analysis
 # exome_ped_file = 'exome_aa'
-# exome_ped_file = 'exome_ab'
-# exome_ped_file = 'exome_ac'
-# exome_ped_file = 'exome_ad'
-# exome_ped_file = 'exome_ae'
-# exome_ped_file = 'exome_af'
-# exome_ped_file = 'exome_ag'
-# exome_ped_file = 'exome_ah'
-# exome_ped_file = 'exome_ai'
-# exome_ped_file = 'exome_aj'
-# exome_ped_file = 'exome_ak'
-# exome_ped_file = 'exome_al'
-# exome_ped_file = 'exome_am'
-# exome_ped_file = 'exome_an'
-# exome_ped_file = 'exome_ao'
-# exome_ped_file = 'exome_ap'
-# exome_ped_file = 'exome_aq'
-# exome_ped_file = 'exome_ar'
-# exome_ped_file = 'exome_as'
-# exome_ped_file = 'exome_at'
-# exome_ped_file = 'exome_au'
-# exome_ped_file = 'exome_av'
-# exome_ped_file = 'exome_ay'
-# exome_ped_file = 'exome_all'
-# exome_ped_file = 'exome_baa'
-# exome_ped_file = 'exome_bab'
-# exome_ped_file = 'exome_caa'
-# exome_ped_file = 'exome_cab'
-# exome_ped_file = 'exome_daa'
-# exome_ped_file = 'exome_dab'
-# exome_ped_file = 'exome_eaa'
-# exome_ped_file = 'exome_eab'
-# exome_ped_file = 'exome_baaa'
-# exome_ped_file = 'exome_aqa'
-# exome_ped_file = 'exome_ara'
-# exome_ped_file = 'exome_asa'
-# exome_ped_file = 'exome_gaa'
-# exome_ped_file = 'exome_gab'
-# exome_ped_file = 'exome_aja'
-# exome_ped_file = 'exome_aia'
-# exome_ped_file = 'exome_haa'
-exome_ped_file = 'exome_hab'
+# exome_ped_file = 'exomes_11'
+# exome_ped_file = 'ex_aa'
+# exome_ped_file = 'ex_ab'
+# exome_ped_file = 'ex_ac'
+# exome_ped_file = 'ex_t'
+# exome_ped_file = 'exome_info.txt' ##all the peds
+# exome_ped_file = 'exome_info_2'
+# exome_ped_file = 'exome_infoaa'
+# exome_ped_file = 'exome_infoab'
+# exome_ped_file = 'exome_infoac'
+# exome_ped_file = 'exome_infoad'
+# exome_ped_file = 'exome_infoae'
+# exome_ped_file = 'exome_infob'
+
+##for combining files
+ped_info_file = 'all_exome_info.txt'
 
 working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/recall_vars_0221'
-repeat_var_calling_0221(working_dir, exome_ped_file)
+##repeat var calling and slivar
+# repeat_var_calling_0221(working_dir, exome_ped_file)
+
+##redo slivar with new omim and repeats etc
+# slivar_analysis_master_0221(working_dir, exome_ped_file)
 
 ##latest versions of analysis files - 0221
 var_types = ['.gatk38_slivar.', '.intersect_slivar.']
@@ -924,9 +1183,19 @@ trio_files = ['combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_sl
 # filter_parental_mosiac(working_dir, trio_files, '.parental_mosaic.xls')
 
 ##combine duo_del files, need to run on all samples first
+# combine_files(working_dir, var_types, 'duo_del.xls')
 
+##combine genic de novos
+# combine_files(working_dir, var_types, 'genic_dn_analysis.xls')
 
-
-
+##split quads/quints etc
+##need to split ped and make ped analysis file  i.e. ped, ped split, ped split type
+# exome_ped_file = 'exome_split_1.txt'
+# exome_ped_file = 'exome_split_2.txt'
+# exome_ped_file = 'exome_split_3.txt'
+# exome_ped_file = 'exome_split_4.txt'
+exome_ped_file = 'exome_split_5.txt'
+##redo slivar with
+slivar_analysis_split_ped(working_dir, exome_ped_file)
 
 

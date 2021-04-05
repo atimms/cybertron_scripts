@@ -30,3 +30,9 @@ echo 'work'
 module load java/1.8.0_202 
 module load biobuilds/2017.11
 ghayda_slivar_reanalysis_0121_cyb.py
+
+##kim tpm
+# source activate tpm_calculator
+# tpm_calculator_1120.py
+
+

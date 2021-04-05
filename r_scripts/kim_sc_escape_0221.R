@@ -27,7 +27,7 @@ expr_matrix <- cbl_dev_clean@assays$RNA@counts #sparsematrix
 expr_matrix <- expr_matrix[tabulate(summary(expr_matrix)$i) != 0, , drop = FALSE] #remove any feature without a single count
 expr_matrix <- as.matrix(expr_matrix) #convert to matrix
 
-list = c(CBLM_geneset, JS_geneset, ID_geneset, ASD_geneset, SCA_geneset, ALZ_geneset)
+list = c(expr_matrix, JS_geneset, ID_geneset, ASD_geneset, SCA_geneset, ALZ_geneset)
 enrichIt(cbl_dev_clean, gene.sets = CBLM_geneset, groups = 100, cores = 5)
 
 

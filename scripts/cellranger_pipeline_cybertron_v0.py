@@ -159,6 +159,21 @@ def run_cellranger5_count(infodict, refdir, use_intronic_reads):
 		else:
 			print('issues....')
 
+def run_cellranger5_count_force_cells(infodict, refdir, use_intronic_reads, cell_number_wanted):
+	for sample in infodict:
+		#cellranger count --id=Mut2-6 --transcriptome=/gpfs/home/atimms/ngs_data/references/10x/refdata-cellranger-GRCh38-3.0.0 --fastqs=/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_organoid_wk5_rerun_done/outs/fastq_path/HHT75BGXC/Mut2-6,/home/atimms/ngs_data/misc/cherry_10x_organoid_0120/MacTel_Organoid_5wk_done/outs/fastq_path/HFLF2BGXC/Mut2-6 --sample=Mut2-6 --expect-cells=1000
+		fqs = infodict[sample][0]
+		print(cellranger, 'count', '--id=', sample, '--transcriptome=', refdir, '--fastqs=', fqs)
+		##run using just exonic and both exonic and intronic reads
+		if use_intronic_reads == 'no':
+			cr_count1 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--force-cells', cell_number_wanted])
+			cr_count1.wait()
+		elif use_intronic_reads == 'yes':
+			cr_count2 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--include-introns', '--force-cells', cell_number_wanted])
+			cr_count2.wait()
+		else:
+			print('issues....')
+
 def cellranger5_scrnaseq_master_no_aggr(work_dir, infile, ref_dir, use_intronic_reads):
 	os.chdir(work_dir)
 	info_dict = make_dict_from_info_file(infile)
@@ -166,6 +181,12 @@ def cellranger5_scrnaseq_master_no_aggr(work_dir, infile, ref_dir, use_intronic_
 		print(s, info_dict[s])
 	run_cellranger5_count(info_dict, ref_dir, use_intronic_reads)
 
+def cellranger5_scrnaseq_master_force_cells(work_dir, infile, ref_dir, use_intronic_reads, cells_wanted):
+	os.chdir(work_dir)
+	info_dict = make_dict_from_info_file(infile)
+	for s in info_dict:
+		print(s, info_dict[s])
+	run_cellranger5_count_force_cells(info_dict, ref_dir, use_intronic_reads, cells_wanted)
 
 def make_arc_library_file_from_dict(sample_name, fq_dicts, out_file):
 	# print(in_file)
@@ -368,6 +389,11 @@ working_dir = '/home/atimms/ngs_data/cellranger/cherry_scrnaseq_0221/organoid_mi
 info_file = 'organoid_microglia_scRNAseq_0221.txt'
 transciptome_ref = grc38_ref
 intronic_ref = 'yes'
-cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
-
+# cellranger5_scrnaseq_master_no_aggr(working_dir, info_file, transciptome_ref, intronic_ref)
+##try using force cells to get extra data
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_scrnaseq_0221/mactel_mouse_scRNAseq_force_cells'
+info_file = 'mactel_mouse_scRNAseq_0221.txt'
+transciptome_ref = mm10_ref
+intronic_ref = 'yes'
+cellranger5_scrnaseq_master_force_cells(working_dir, info_file, transciptome_ref, intronic_ref, '8000')
 

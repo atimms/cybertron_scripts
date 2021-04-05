@@ -174,6 +174,9 @@ def get_ave_dvsm_per_bp_around_motif(dvsm_motif_beds):
 				new_motif_dvsm_dict[mr] = motif_region_svsm_dict[mr][0]
 		##make dict into a panda's dataframe and get 
 		motif_df = pd.DataFrame.from_dict(new_motif_dvsm_dict, orient='index')
+		##write file
+		dvsm_motif_csv = dvsm_motif_bed.rsplit('.', 1)[0] + '.csv'
+		motif_df.to_csv(dvsm_motif_csv)
 		##convert columns to floats
 		cols = motif_df.columns
 		motif_df[cols] = motif_df[cols].apply(pd.to_numeric, errors='coerce')
@@ -209,6 +212,9 @@ def get_ave_dvsm_per_bp_only_motif(dvsm_motif_beds):
 				new_motif_dvsm_dict[mr] = motif_region_svsm_dict[mr][0]
 		##make dict into a panda's dataframe and get 
 		motif_df = pd.DataFrame.from_dict(new_motif_dvsm_dict, orient='index')
+		##write file
+		dvsm_motif_csv = dvsm_motif_bed.rsplit('.', 1)[0] + '.csv'
+		motif_df.to_csv(dvsm_motif_csv)
 		##convert columns to floats
 		cols = motif_df.columns
 		motif_df[cols] = motif_df[cols].apply(pd.to_numeric, errors='coerce')
@@ -280,7 +286,7 @@ homer_motifs_ext25_beds = [homer_motif_nomerge_prefix + i + '.ext25.bed' for i i
 
 ##using +- 25bps bed files
 print(dvsm_motifs_ext25_beds)
-get_ave_dvsm_per_bp_around_motif(dvsm_motifs_ext25_beds)
+# get_ave_dvsm_per_bp_around_motif(dvsm_motifs_ext25_beds)
 get_ave_dvsm_per_bp_only_motif(dvsm_motif_only_beds)
 
 

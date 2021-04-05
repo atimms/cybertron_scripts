@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N dave_work
-#PBS -l mem=200gb,ncpus=20
+#PBS -l mem=120gb,ncpus=10
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -8,7 +8,7 @@
 #PBS -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
 echo 'work'
 
-
+## #PBS -l mem=200gb,ncpus=20
 ##dave zf sex analysis 0920
 # module load biobuilds/2017.11
 # module load gcc/6.1.0 ##for homozygosity_mapping_cybertron
@@ -20,6 +20,16 @@ echo 'work'
 # dave_enu_exomes_0920_cyb.py
 
 ##dave zf sex analysis 1220
+# module load biobuilds/2017.11
+# module load gcc/6.1.0 ##for homozygosity_mapping_cybertron
+# dave_zf_sex_1220_cyb.py
+
+##genome analysis dave/lisa 0321
+# module load java/11.0.10 ##for snpeff part
+# dave_lisa_chd_kf_genomes_0321_cyb.py
+
+##dave/chunyue zf hom mapping 0321
+# #PBS -l mem=120gb,ncpus=10
 module load biobuilds/2017.11
 module load gcc/6.1.0 ##for homozygosity_mapping_cybertron
-dave_zf_sex_1220_cyb.py
+chunyue_abcb11b_recessive_0321_cyb.py
