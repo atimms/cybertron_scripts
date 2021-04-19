@@ -423,7 +423,7 @@ def standard_slivar_protocol_v2(ped_info_file, project_name, combined_vcf, combi
 	##annoate the combined vcf
 	vcf_prefix = combined_vcf.rsplit('.',2)[0]
 	annotated_vcf = vcf_prefix + '.bcftools.GRCh37_87.vcf.gz'
-	# process_annotate_vcf(annotated_vcf, combined_vcf, vcf_prefix)
+	process_annotate_vcf(annotated_vcf, combined_vcf, vcf_prefix)
 	##get ped ids for the three groups
 	ped_type_dict = {'trios': [], 'single_duos': [], 'multiplex':[]}
 	with open(ped_info_file, 'r') as pi_fh:
@@ -461,7 +461,7 @@ def standard_slivar_protocol_v2(ped_info_file, project_name, combined_vcf, combi
 
 
 
-##run mthods
+##run methods
 working_dir = '/home/atimms/ngs_data/exomes/working/daniela_slivar_analysis_0221'
 os.chdir(working_dir)
 
@@ -480,9 +480,9 @@ exome_ped_info = 'exomes_0221.ped_info.txt'
 # plink_relatadness_check(exome_vcf, exome_prefix, 'exome')
 
 ##run slivar after splitting ped and vcf file
-standard_slivar_protocol_v2(exome_ped_info, exome_prefix, exome_vcf, exome_ped, 'std')
+# standard_slivar_protocol_v2(exome_ped_info, exome_prefix, exome_vcf, exome_ped, 'std')
 
-##genomes
+##genomes -- combined all genomes (these are odd with depth missing in some cases) 
 genome_vcf = 'luquetti_grc_wgs_combined.sample_ids.vcf.gz'
 genome_ped = 'genome_0221.ped'
 genome_prefix = 'genome_0221'
@@ -493,5 +493,31 @@ genome_sample_in_vcf = 'genome_original_vcf_ids.txt'
 # plink_relatadness_check(genome_vcf, genome_prefix, 'genome')
 
 ##run slivar after splitting ped and vcf file
-standard_slivar_protocol_v2(genome_ped_info, genome_prefix, genome_vcf, genome_ped, 'nodp')
+# standard_slivar_protocol_v2(genome_ped_info, genome_prefix, genome_vcf, genome_ped, 'nodp')
+
+
+##genomes 0219
+##maunally switched ids to our using bcftools
+genome_vcf = 'luquetti_external_uwcmg_cfm_1.HF.sample_ids.vcf.gz'
+genome_ped = 'genome_0219.ped'
+genome_prefix = 'genome_0219'
+genome_ped_info = 'genome_0219.ped_info.txt'
+
+##run slivar after splitting ped and vcf file
+standard_slivar_protocol_v2(genome_ped_info, genome_prefix, genome_vcf, genome_ped, 'std')
+
+
+
+##genomes 0620
+##maunally switched ids to our using bcftools
+genome_vcf = 'luquetti_grc_wgs_2.HF.sample_ids.vcf.gz'
+genome_ped = 'genome_0620.ped'
+genome_prefix = 'genome_0620'
+genome_ped_info = 'genome_0620.ped_info.txt'
+
+##run slivar after splitting ped and vcf file
+# standard_slivar_protocol_v2(genome_ped_info, genome_prefix, genome_vcf, genome_ped, 'std')
+
+
+
 

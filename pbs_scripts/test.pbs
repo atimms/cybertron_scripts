@@ -35,4 +35,7 @@ ghayda_slivar_reanalysis_0121_cyb.py
 # source activate tpm_calculator
 # tpm_calculator_1120.py
 
-
+##laser analysis of exomes with unknown ethnicity
+# module load java/1.8.0_202 
+# module load biobuilds/2017.11
+# ghayda_laser_exomes_0421_cyb.py

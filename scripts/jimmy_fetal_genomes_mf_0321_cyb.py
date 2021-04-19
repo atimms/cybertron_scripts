@@ -390,4 +390,48 @@ samples_0816 = ['Brain', 'Liver', 'Heart', 'Lung', 'Muscle', 'Placenta', 'fg_com
 # samples_0816 = ['Brain', 'Liver', 'Heart']
 # samples_0816 = ['Muscle', 'Placenta', 'Lung']
 # samples_0816 = ['fg_combined']
-run_all_methods(working_dir, samples_0816, project_name_0816)
+# run_all_methods(working_dir, samples_0816, project_name_0816)
+
+
+def combine_vars(infiles, outfile):
+	# print(infiles)
+	var_dict = {}
+	samples = []
+	for infile in infiles:
+		sample = infile.split('.')[1]
+		samples.append(sample)
+		with open(infile, "r") as in_fh:
+			lc = 0
+			for line in in_fh:
+				lc += 1
+				if lc >1:
+					line = line.rstrip().split(delim)
+					var = '_'.join(line[0].split('~')[1:])
+					var_type = line[34]
+					# print(var, var_type)
+					if var_type == 'mosaic':
+						if var in var_dict:
+							var_dict[var].append(sample)
+						else:
+							var_dict[var] = [sample]
+	print(samples)
+	with open(outfile, "w") as out_fh:
+		header = ['var', 'sample_count', 'samples']
+		out_fh.write(delim.join(header) + '\n')
+		for v in var_dict:
+			print(v, len(var_dict[v]))
+			line_out = [v, str(len(var_dict[v])), ', '.join(var_dict[v])]
+			out_fh.write(delim.join(line_out) + '\n')
+
+##compare variants in all samples
+os.chdir(working_dir)
+prediction_files = glob.glob('genome_0816*MAF0.predictions.all.xls')
+combined_var_file = 'genome_0816_MAF0_variants.xls'
+combine_vars(prediction_files, combined_var_file)
+
+prediction_files = glob.glob('genome_0819*MAF0.predictions.all.xls')
+combined_var_file = 'genome_0819_MAF0_variants.xls'
+combine_vars(prediction_files, combined_var_file)
+
+
+

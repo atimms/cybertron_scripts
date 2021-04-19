@@ -944,6 +944,11 @@ working_dir = '/home/atimms/ngs_data/rnaseq/cunn_flexcell_rnaseq_0321'
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_FLNB.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_FLNC.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_PIEZO1.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_cell_line.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flna.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnb.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnc.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_piezo1.txt', 'GRCh38', ['sample'])
 
 ##vishal/lan rnaseq 0719
 working_dir = '/home/atimms/ngs_data/rnaseq/vishal_pig_rnaseq_0321'

@@ -119,6 +119,18 @@ newdf <- as.data.frame(colData(rld)[,c("sample_name","dx")])
 pheatmap(newmat, annotation_col=newdf, fontsize_row=8, fontsize_col=8)
 dev.copy2pdf(file='laura_rnaseq_dys_0619.dys_gene_clustering.pdf', width = 9, height = 6)
 
+##clustering/heatmap from list heatmap v3
+genes = c('Vps37A', 'Gm9573', 'Adcyap1R1', 'Zfyve26', 'Krt4', 'Fat1', 'Vprbp', 'Gsto1', 'Muc6', 'Rian', 'Auts2', 'Bdp1', 'Ccnd2', 'Etl4', 'Slc23A3', 'Siah3', 'Dlgap1', 'Dnajc6', 'Tagln3', 'Akt1S1', 'Pglyrp4', 'Ephb6', 'Slc15A3', 'Ppm1F', 'Slc45A4', 'Cul1', 'Ccnd3', 'Mdm2', 'Cdkn1A', 'Tnfrsf1A', 'Muc4', 'Cd44', 'Tmem173', 'Dusp9', 'Col27A1', 'Dsc2', 'Lama3', 'Cdk16', 'Ly6G6C', 'Siglece', 'Nkr', 'Tmprss11G', 'Etl4', 'Nccrp1', 'Aldh3A1', 'Gsto1', 'Gm9573', 'Krt4', 'Gsta4', 'Ups49', 'Altp1A3', 'Rnf138', 'Clca4', 'Aust2', 'Nat10')
+  #genes <- genes$genes #vectorize
+foo <- assay(rld) #save assay as matrix
+assaygenes <- row.names(foo) #extract rownames
+idx <- assaygenes %in% genes #find target genes
+newmat <- assay(rld)[idx,] #subset to target genes
+newmat <- newmat - rowMeans(newmat)
+newdf <- as.data.frame(colData(rld)["dx"])
+pheatmap(newmat, annotation_col=newdf, fontsize_row=8, fontsize_col=8)
+dev.copy2pdf(file='laura_rnaseq_dys_0619.dys_gene_clustering_v3.pdf', width = 9, height = 6)
+
 ##differential expression
 ##do the test
 dds <- DESeq(dds)
@@ -185,6 +197,18 @@ newmat <- newmat - rowMeans(newmat)
 newdf <- as.data.frame(colData(rld)[,c("sample_name","dx")])
 pheatmap(newmat, annotation_col=newdf, fontsize_row=8, fontsize_col=8)
 dev.copy2pdf(file='laura_rnaseq_scc_0619.scc_gene_clustering.pdf', width = 9, height = 6)
+
+##clustering/heatmap from list
+genes = c('Dsg3', 'Krt6A', 'Krt13', 'Serpinb2', 'Col17A1', 'Dsc3', 'Krt17', 'Psca', 'Krt14', 'Krt5', 'Dsc2', 'Pkp1', 'Arg1', 'Krt15', 'Ltf', 'Gm9573', 'Gsto1', 'Bpifa1', 'Anxa1', 'Krt4', 'Ly6G6C', 'Muc4', 'Dsp', 'Anxa8', 'Clca4', 'Aqp3', 'Scgb1A1', 'Beta-S', 'Slc34A2', 'Hpgd', 'Gpr116', 'Sftpc', 'Inmt', 'Calcrl', 'Sec14L3', 'Lyz1', 'Sftpb', 'Il8')
+#genes <- genes$genes #vectorize
+foo <- assay(rld) #save assay as matrix
+assaygenes <- row.names(foo) #extract rownames
+idx <- assaygenes %in% genes #find target genes
+newmat <- assay(rld)[idx,] #subset to target genes
+newmat <- newmat - rowMeans(newmat)
+newdf <- as.data.frame(colData(rld)["dx"])
+pheatmap(newmat, annotation_col=newdf, fontsize_row=8, fontsize_col=8)
+dev.copy2pdf(file='laura_rnaseq_scc_0619.scc_gene_clustering_v3.pdf', width = 9, height = 6)
 
 ##differential expression
 ##do the test
