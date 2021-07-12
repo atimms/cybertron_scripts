@@ -32,4 +32,6 @@ echo 'work'
 # #PBS -l mem=120gb,ncpus=10
 module load biobuilds/2017.11
 module load gcc/6.1.0 ##for homozygosity_mapping_cybertron
-chunyue_abcb11b_recessive_0321_cyb.py
+# chunyue_abcb11b_recessive_0321_cyb.py
+##and for the rnaseq analysis
+chunyue_abcb11b_rnaseq_0521_cyb.py

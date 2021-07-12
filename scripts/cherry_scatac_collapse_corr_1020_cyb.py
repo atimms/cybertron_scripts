@@ -171,7 +171,16 @@ def format_correlation_all_samples(annotate_prefix, annotate_suffix, d_values, s
 						line_out = [line[0]] + line[19:]
 						out_fh.write(delim.join(line_out + ['\n']))
 
-
+def run_macs2_again(samples, qvalues):
+	##run macs2
+	for sample in samples:
+		for qvalue in qvalues:
+			bam = sample + '.bam'
+			outname = sample + '.macs2_q' + qvalue
+			print(sample, bam, outname)
+			##run macs2
+			run_macs2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', outname, '-g', 'hs', '-q', qvalue, '--keep-dup', 'all'])
+			run_macs2.wait()
 
 ##run methods
 
@@ -227,9 +236,29 @@ correlation_peak_prefix = 'correlation.'
 # get_correlation_info_homer(extra_samples, d_values_wanted, size_values_wanted, bed_suffix, merged_peak_prefix, annotated_peak_prefix)
 # get_correlation_info_homer(all_samples, d_values_wanted, size_values_wanted, bed_suffix, merged_peak_prefix, annotated_peak_prefix)
 ## 4. format corrlation file for graphing
-format_correlation_all_samples(annotated_peak_prefix, txt_suffix, d_values_wanted, size_values_wanted, correlation_peak_prefix)
+# format_correlation_all_samples(annotated_peak_prefix, txt_suffix, d_values_wanted, size_values_wanted, correlation_peak_prefix)
 
 
 
+##rerun macs2 on human samples using different q values
+human_ccs = ['human.AC_HC_GC_Precursors', 'human.Developing_Amacrines', 'human.Developing_Bipolars', 'human.Developing_Cones', 
+	'human.Developing_Ganglions', 'human.Developing_Horizontals', 'human.Developing_Rods', 'human.Early_Progenitors', 
+	'human.Ganglion_Precursors', 'human.Late_Progenitors', 'human.Mature_Amacrines', 'human.Mature_Bipolars', 
+	'human.Mature_Cones', 'human.Mature_Horizontals', 'human.Mature_Mullers', 'human.Mature_Rods', 'human.Photoreceptor_Bipolar_Precursors']
+q_values = ['0.001', '0.005']
+# run_macs2_again(human_ccs, q_values)
+
+human_ccs = ['human.Mature_Cones', 'human.Mature_Rods']
+# q_values = ['0.0001']
+q_values = ['0.00001', '0.000001']
+# run_macs2_again(human_ccs, q_values)
+
+human_ccs = ['human.AC_HC_GC_Precursors', 'human.Developing_Amacrines', 'human.Developing_Bipolars', 'human.Developing_Cones', 
+	'human.Developing_Ganglions', 'human.Developing_Horizontals', 'human.Developing_Rods', 'human.Early_Progenitors', 
+	'human.Ganglion_Precursors', 'human.Late_Progenitors', 'human.Mature_Amacrines', 'human.Mature_Bipolars', 
+	'human.Mature_Cones', 'human.Mature_Horizontals', 'human.Mature_Mullers', 'human.Mature_Rods', 'human.Photoreceptor_Bipolar_Precursors']
+
+q_values = ['0.000001']
+run_macs2_again(human_ccs, q_values)
 
 

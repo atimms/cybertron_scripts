@@ -70,7 +70,6 @@ def proccess_vcfs_etc(input_vcfs):
 		# '''
 		avinputs = glob.glob(out_prefix + '.L*put')
 		print(avinputs)
-		# '''
 		##format files into annotated
 		ann_files = []
 		for avinput in avinputs:

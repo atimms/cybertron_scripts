@@ -225,6 +225,11 @@ markersPeaks <- getMarkerFeatures(ArchRProj = proj1,
 markerList <- getMarkers(markersPeaks, cutOff = "FDR <= 0.01 & Log2FC >= 1")
 markerList
 write.csv(markerList, file='marker_list.peaks_per_cell_class.macs2_q0.01.csv')
+##get all markers regardless 
+markerList <- getMarkers(markersPeaks)
+markerList
+write.csv(markerList, file='marker_list.peaks_per_cell_class.unfiltered.macs2_q0.01.csv')
+
 ##graph marker peaks
 heatmapPeaks <- plotMarkerHeatmap(seMarker = markersPeaks, 
                   cutOff = "FDR <= 0.1 & Log2FC >= 0.5",transpose = TRUE)
@@ -232,10 +237,14 @@ draw(heatmapPeaks, heatmap_legend_side = "bot", annotation_legend_side = "bot")
 plotPDF(heatmapPeaks, name = "heatmap_cell_class_marker_peaks.macs2_q0.01.pdf", width = 8, height = 6, ArchRProj = proj1, addDOC = FALSE)
 ##instead of drawing plot make a matrix
 heatmap.matrix <- plotMarkerHeatmap(seMarker = markersPeaks, 
-        cutOff = "FDR <= 0.1 & Log2FC >= 0.5",transpose = TRUE, returnMat = TRUE)
+        cutOff = "FDR <= 0.1 & Log2FC >= 0.5", returnMat = TRUE)
 ##get csv file from matrix
 write.csv(heatmap.matrix, file='heatmap_cell_class_marker_peaks.matrix.csv')
-
+##get all peaks 
+heatmap.matrix <- plotMarkerHeatmap(seMarker = markersPeaks, 
+                                    cutOff = "FDR <= 1000 & Log2FC >= -1000", returnMat = TRUE)
+##get csv file from matrix
+write.csv(heatmap.matrix, file='heatmap_cell_class_all_peaks.matrix.csv')
 
 ##get tracks for marker genes and then print
 p <- plotBrowserTrack(ArchRProj = proj1, groupBy = "Clusters2", 
@@ -477,6 +486,18 @@ write.table(p2g, '/active/cherry_t/OrgManuscript_SingleCell_Data/human_scATAC/ar
 rnaidx.info = metadata(p2g)[[2]]
 rnaidx.df = data.frame(rnaidx.info)
 write.table(rnaidx.df, '/active/cherry_t/OrgManuscript_SingleCell_Data/human_scATAC/archr_analysis/all/co_acc_analysis_0920/human_all.min_cell20.m2_q0.01.rnaseq_info.txt', row.names = T, sep="\t", quote = FALSE)
+##get peak to gene data and atac/rna index info - repeat and save in current dir
+p2g <- getPeak2GeneLinks(ArchRProj = proj1, corCutOff = 0.4,
+                         resolution = 10000, returnLoops = F)
+write.table(p2g, 'human_all.min_cell20.p2g.m2_q0.01.cor4.txt', row.names = F, sep="\t", quote = FALSE)
+rnaidx.info = metadata(p2g)[[2]]
+rnaidx.df = data.frame(rnaidx.info)
+write.table(rnaidx.df, 'human_all.min_cell20.m2_q0.01.rnaseq_info.txt', row.names = T, sep="\t", quote = FALSE)
+peaks.gr <- getPeakSet(proj1)
+df.peaks.gr = data.frame(peaks.gr)
+write.table(df.peaks.gr, 'human_all.min_cell20.peak_info.m2_q0.01.txt', row.names = T, sep="\t", quote = FALSE)
+
+
 
 ##gene score matrix and gene integration UMAPS for LINC00461 
 genesToPlot  <- c('LINC00461')
@@ -487,6 +508,9 @@ p2 <- plotEmbedding(ArchRProj = proj1, colorBy = "GeneIntegrationMatrix", name =
 
 plotPDF(p1, p2, name = "LINC00461.gene_expression.UMAP.pdf", width = 5, height = 5, ArchRProj = proj1, addDOC = FALSE)
 
+##get bigwigs for each cell class
+proj1 = loadArchRProject(path = 'human_all')
+getGroupBW(ArchRProj = proj1, groupBy = "Clusters2")
 
 
 

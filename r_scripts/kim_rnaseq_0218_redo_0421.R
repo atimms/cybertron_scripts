@@ -49,13 +49,14 @@ pheatmap(sampleDistMatrix,
 dev.copy2pdf(file='kim_rnaseq_0218_rl_combined.sample_heatmap.pdf', width = 7, height = 5)
 #principal components analysis 
 plotPCA(rld, intgroup = "tissue")
-ggsave('kim_rnaseq_0218_rl_combined.pca.tissue.pdf', width=6, height = 6) 
+ggsave('kim_rnaseq_0218_rl_combined.pca.tissue.pdf', width=4, height = 4) 
+#ggsave('kim_rnaseq_0218_rl_combined.pca.tissue.pdf') 
 plotPCA(rld, intgroup = "age_pcw")
-ggsave('kim_rnaseq_0218_rl_combined.pca.age.pdf', width=6, height = 6) 
+ggsave('kim_rnaseq_0218_rl_combined.pca.age.pdf', width=4, height = 4) 
 plotPCA(rld, intgroup = "donor")
-ggsave('kim_rnaseq_0218_rl_combined.pca.donor.pdf', width=6, height = 6) 
+ggsave('kim_rnaseq_0218_rl_combined.pca.donor.pdf', width=4, height = 4) 
 plotPCA(rld, intgroup = "rnaaccess_batch")
-ggsave('kim_rnaseq_0218_rl_combined.pca.batch.pdf', width=6, height = 6) 
+ggsave('kim_rnaseq_0218_rl_combined.pca.batch.pdf', width=4, height = 4) 
 ##gene clustering
 ##take 25 most variable gene
 topVarGenes <- head(order(rowVars(assay(rld)),decreasing=TRUE),25)

@@ -9,14 +9,17 @@ delim = '\t'
 # cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger' ##has include-introns 
 cellranger = '/home/atimms/programs/cellranger-5.0.1/cellranger' ##has include-introns 
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
-cellranger_arc = '/home/atimms/programs/cellranger-arc-1.0.1/cellranger-arc'
+cellranger_atac2 = '/home/atimms/programs/cellranger-atac-2.0.0/cellranger-atac'
+# cellranger_arc = '/home/atimms/programs/cellranger-arc-1.0.1/cellranger-arc'
+cellranger_arc = '/home/atimms/programs/cellranger-arc-2.0.0/cellranger-arc'
 grc38_prerna_ref = '/home/atimms/ngs_data/references/10x/GRCh38-3.0.0_premrna_new'
 grc38_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-GRCh38-2020-A'
 mm10_prerna_ref = '/gpfs/home/atimms/ngs_data/references/10x/mm10-3.0.0_premrna'
 grc38_atac_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-atac-GRCh38-1.2.0'
 mm10_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-mm10-2020-A'
-grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A'
-
+# grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A'
+grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A-2.0.0'
+mm10_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-mm10-2020-A-2.0.0'
 
 ##methods
 def make_dict_from_info_file(in_file):
@@ -230,6 +233,22 @@ def cellranger_arc_master(work_dir, infile, ref_dir):
 	print(sample_dict)
 	run_cellranger_arc_count(sample_dict, ref_dir, library_file_suffix)
 
+def run_cellranger_atac2_count(sample, fq_dir, refdir):
+	cr_count = subprocess.Popen([cellranger_atac2, 'count', '--id=' + sample, '--fastqs=' + fq_dir, '--reference=' + refdir])
+	cr_count.wait()
+
+
+def cellranger_atac2_master(work_dir, in_file):
+	os.chdir(work_dir)
+	with open(in_file, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			sample = line[0]
+			fqs = line[1]
+			ref = line[2]
+			run_cellranger_atac2_count(sample,fqs,ref)
+
+
 ##run methods
 
 ##cherry organoid analysis 0320
@@ -395,5 +414,25 @@ working_dir = '/home/atimms/ngs_data/cellranger/cherry_scrnaseq_0221/mactel_mous
 info_file = 'mactel_mouse_scRNAseq_0221.txt'
 transciptome_ref = mm10_ref
 intronic_ref = 'yes'
-cellranger5_scrnaseq_master_force_cells(working_dir, info_file, transciptome_ref, intronic_ref, '8000')
+# cellranger5_scrnaseq_master_force_cells(working_dir, info_file, transciptome_ref, intronic_ref, '8000')
+
+
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_human_scATAC_periph_vs_macula_0521'
+##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'peripheral_vs_macula_huret.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+##data for tim/eric --- run atac and rnaseq both ways
+working_dir = '/home/atimms/ngs_data/cellranger/cherry_10x_multiome_0621/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = '20wk_snporg_0621.txt'
+transciptome_ref = grc38_arc_ref
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+##mouse multiome data for kim 
+working_dir = '/home/atimms/ngs_data/cellranger/kim_mouse_multiome_0721/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'kim_mouse_multiome_0721.txt'
+transciptome_ref = mm10_arc_ref
+cellranger_arc_master(working_dir, info_file, transciptome_ref)
 

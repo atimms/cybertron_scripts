@@ -28,6 +28,8 @@ auts2_nms = ['ENST00000342771', 'ENST00000406775', 'ENST00000403018', 'ENST00000
 		'ENST00000483297', 'ENST00000475660', 'ENST00000489774', 'ENST00000464768', 'ENST00000481994', 'ENST00000498384', 
 		'ENST00000465899', 'JQ670867']
 
+auts2_nms = ['ENST00000403625', 'MAST4_alt']
+
 def make_salmon_index(fa_file, decoy_file, index):
 	#./bin/salmon index -t transcripts.fa -i transcripts_index -decoys decoys.txt -k 31
 	st_n_sort = subprocess.Popen([salmon, 'index', '-t', fa_file, '-i', index, '-d', decoy_file, '-k', '31', '-p', threads])
@@ -236,5 +238,16 @@ sum_tissue_age_file = 'hdbr_auts2_transcripts.by_tissue_age.xls'
 ##get all tpms
 # make_tpm_matrix('.trans_quant/quant.sf', 'hdbr_tpms_1219.xls')
 ##then add genenames
-add_gene_name_tpms('hdbr_tpms_1219.xls', 'hdbr_tpms_genename_0420.xls', ens_gtf)
+# add_gene_name_tpms('hdbr_tpms_1219.xls', 'hdbr_tpms_genename_0420.xls', ens_gtf)
+
+
+##repeat again for MAST4 alt transcript
+##manuallt add scotts transcript
+salmon_index = '/home/atimms/ngs_data/references/salmon/human/gentrome_mast4_index'
+salmon_human_ens_fa = '/home/atimms/ngs_data/references/salmon/human/gentrome_mast4.fa'
+results_file = 'hdbr_mast4_transcripts.by_sample.xls'
+##make index for human ens transcript 
+make_salmon_index_no_decoy(salmon_human_ens_fa, salmon_index)
+##process text file to run salmon and collate results
+call_salmon_on_samples_file_and_combine(data_dir, sample_file, salmon_index, results_file)
 

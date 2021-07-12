@@ -60,10 +60,10 @@ def make_bigwig_files_cpm(in_file):
 			print(sample, bam)
 			if os.path.exists(bam):
 				##index file
-				samtools_index = subprocess.Popen(['samtools', 'index', bam])
-				samtools_index.wait()
+				# samtools_index = subprocess.Popen(['samtools', 'index', bam])
+				# samtools_index.wait()
 				##get bigwigs
-				bc_f = subprocess.Popen(['bamCoverage', '-b', bam, '-o', out_bw, '-p', '18', '--normalizeUsing', 'CPM'])
+				bc_f = subprocess.Popen(['bamCoverage', '-b', bam, '-o', out_bw, '-p', '10', '--normalizeUsing', 'CPM'])
 				bc_f.wait()
 
 			else:
@@ -76,7 +76,7 @@ sc_working_dir = '/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_mak
 sc_info = 'sample_cellclass.info.txt'
 tc_working_dir = '/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_make_archr_bigwigs_1020/timepoint_cellclass'
 tc_info = 'timepoint_cellclass.info.txt'
-
+tc_info2 = 'timepoint_cellclass.info_0621.txt'
 ##test
 # os.chdir('/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_make_archr_bigwigs_1020')
 # make_bigwig_files('test.txt')
@@ -90,7 +90,8 @@ os.chdir(sc_working_dir)
 # make_bigwig_files_cpm(sc_info)
 ##timepoint_cellclass
 os.chdir(tc_working_dir)
-make_bigwig_files_cpm(tc_info)
+# make_bigwig_files_cpm(tc_info)
+make_bigwig_files_cpm(tc_info2)
 
 
 

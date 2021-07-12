@@ -38,7 +38,7 @@ av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
 ##filter on daredevil, bub, pleather and some of jabiers mice
 av_protocol = ['-protocol', 'refGene,ensGene,rmsk,generic,generic', '-genericdbfile', 'TP1FRes.avinput,TP1FUnr.avinput']
 av_operation = ['-operation', 'g,g,r,f,f']
-# av_options = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,', '-vcfinput']
+av_options_vcf = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,', '-vcfinput']
 av_options = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,', '--nopolish']
 
 
@@ -161,10 +161,17 @@ def convert_to_annovar_move_to_annovar_folder(samples, vcf):
 		shutil.move(temp_av_file, av_file)
 		shutil.copy(av_file, str(av_ref_dir[0]))
 
-# def run_table_annovar(vcf, av_prefix):
-# 	command = [table_annovar] + av_buildver + [vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', av_prefix]
-# 	annovar = subprocess.Popen(command)
-# 	annovar.wait()
+
+def convert_to_annovar_sample_combined(vcf, out_prefix):
+	con_ann = subprocess.Popen([convert_2_annovar, '-format', 'vcf4', vcf, '-includeinfo', '-withfreq', '-allsample', '-outfile', out_prefix + '.avinput'])
+	con_ann.wait()
+
+def run_table_annovar_combined(av_prefix):
+	avinput = av_prefix + '.avinput'
+	command = [table_annovar] + av_buildver + [avinput] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', av_prefix]
+	annovar = subprocess.Popen(command)
+	annovar.wait()
+
 
 def run_table_annovar(samples):
 	for sample in samples:
@@ -173,7 +180,6 @@ def run_table_annovar(samples):
 		command = [table_annovar] + av_buildver + [avinput] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', av_prefix]
 		annovar = subprocess.Popen(command)
 		annovar.wait()
-
 
 def split_info_field(info_list):
 	indices = [i for i, s in enumerate(info_list) if 'ANNOVAR_DATE' in s]
@@ -313,7 +319,6 @@ fq_dict = {'TP1FRes': ['TP1FRes_USD16091700L_HL2H3DSXX_L2_1.fq.gz', 'TP1FRes_USD
 ##annotate with annovar
 # filter_vcf_non_std_chr(result_vcf, filtered_vcf)
 # convert_to_annovar_move_to_annovar_folder(fq_dict, filtered_vcf)
-# run_table_annovar(filtered_vcf, project_name) ##when using the vcf
 # run_table_annovar(fq_dict)
 # multianno_to_annotated(fq_dict)
 
@@ -331,7 +336,7 @@ qual_definition = 30
 
 
 ##filter variants for candidates snps
-# '''
+'''
 samples = ['TP1FRes']
 working_dir = work_dir
 for sample in samples:
@@ -339,15 +344,33 @@ for sample in samples:
 	filtering_annotated.filter(working_dir, "or", sample + '.annotated.xls' , sample + "_1.temp", [col_exons[0], col_exons[0],col_exons[1], col_exons[1]], ['==','==','==','=='], [exon_definition[0],exon_definition[1],exon_definition[0],exon_definition[1]])
 	##remove synonymous
 	filtering_annotated.filter(working_dir, "and", sample + "_1.temp", sample + "_2.temp", [col_functions[0], col_functions[1]], ['!=','!='], [syn_definition, syn_definition])
-	##remove in rmsk
-	filtering_annotated.filter(working_dir, "and", sample + "_2.temp", sample + "_3.temp", [16], ['=='], [''])
+	##remove in rmsk -- not used
+	# filtering_annotated.filter(working_dir, "and", sample + "_2.temp", sample + "_3.temp", [16], ['=='], [''])
 	##keep if hom
 	filtering_annotated.filter(working_dir, "and", sample + "_2.temp", sample + "_4.temp", [zygosity_col], ['=='], ['hom'])
 	##keep if not hom in unrescued
 	filtering_annotated.filter(working_dir, "and", sample + "_4.temp", sample + "_5.temp", [18], ['!='], ['hom'])
 	##filter variants by coverage and quality 
 	filtering_annotated.filter(working_dir, "and", sample + "_5.temp", sample + '.hom_exonic_rare_qual_filtered.xls', [cov_col,qual_col], ['>=','>='], [cov_definition,qual_definition])
-# '''
+'''
+
+##get exonic snps for comapison to rnaseq vars
+'''
+samples = ['TP1FRes']
+working_dir = work_dir
+for sample in samples:
+	##exonic_variants
+	filtering_annotated.filter(working_dir, "or", sample + '.annotated.xls' , sample + "_21.temp", [col_exons[0], col_exons[0],col_exons[1], col_exons[1]], ['==','==','==','=='], [exon_definition[0],exon_definition[1],exon_definition[0],exon_definition[1]])
+	##remove in rmsk -- not used
+	filtering_annotated.filter(working_dir, "and", sample + "_21.temp", sample + "_22.temp", [16], ['=='], [''])
+	##keep if hom
+	filtering_annotated.filter(working_dir, "and", sample + "_22.temp", sample + "_23.temp", [zygosity_col], ['=='], ['hom'])
+	##keep if not hom in unrescued
+	filtering_annotated.filter(working_dir, "and", sample + "_23.temp", sample + "_24.temp", [18], ['!='], ['hom'])
+	##filter variants by coverage and quality 
+	filtering_annotated.filter(working_dir, "and", sample + "_24.temp", sample + '.hom_exonic_for_rnaseq.xls', [cov_col,qual_col], ['>=','>='], [cov_definition,qual_definition])
+'''
+
 
 ##homozygosity mapping
 # window_size = [100000,500000,1000000,2000000]
@@ -389,10 +412,14 @@ for ws in window_size:
 hom_snp_suffix = '.resc_hom.xls'
 hom_bed_suffix = '.resc_hom.bed'
 samples = ['TP1FRes']
-# window_size = [1000000, 500000, 100000]
-# step_size = 100000
-window_size = [100000]
-step_size = 10000
+window_size = [1000000, 500000, 100000]
+step_size = 100000
+# window_size = [100000]
+# step_size = 10000
+##make more stringent
+cov_definition = 20
+qual_definition = 50
+
 '''
 for sample in samples:
 	##remove if in repeat region or indel and cov/qual
@@ -436,4 +463,77 @@ size_names = ['danRer11_100kb_10kb', 'danRer11_1000kb_100kb']
 # for size_name in size_names:
 # 	make_snptrack_score(rescued_name, unrescued_name, size_name)
 
+
+
+def filter_multianno_get_bed(infile, out_prefix):
+	outfile = out_prefix + '.xls'
+	outbed = out_prefix + '.bed'
+	with open(outfile, "w") as out_fh, open(infile, "r") as in_fh:
+		lc = 0
+		for line in in_fh:
+			lc += 1
+			line = line.strip('\n').split(delim)
+			if lc == 1:
+				out_fh.write(delim.join(line) + '\n')
+			else:
+				rmsk = line[15]
+				ref = line[3]
+				alt = line[4]
+				cov = int(line[20])
+				##not in rmsk and not an indel and res cov >=15
+				if rmsk == '' and ref != '-' and alt != '-' and cov >= 15:
+					res_alleles = line[31].split(':')[4].split(',')
+					unres_alleles = line[30].split(':')[4].split(',')
+					# print(res_alleles, unres_alleles)
+					##make sure alleles look good
+					if len(res_alleles) == 2 and len(unres_alleles) == 2:
+						# print(res_alleles, unres_alleles)
+						res_cov = int(res_alleles[0]) + int(res_alleles[1])
+						unres_cov = int(unres_alleles[0]) + int(unres_alleles[1])
+						# print(res_alleles, res_cov, res_ab)
+						if res_cov >= 15 and unres_cov >=15:
+							res_ab = float(res_alleles[1]) / res_cov
+							unres_ab = float(unres_alleles[1]) / unres_cov
+							# print(res_alleles, res_ab, unres_alleles, unres_ab)
+							if res_ab >= 0.95 and unres_ab <= 0.6:
+								out_fh.write(delim.join(line) + '\n')
+	make_bed_from_ann_txt(outfile, outbed)
+
+
+def make_files_for_graphing(file_prefix, window_sizes, step_size, working_dir, genome_fai):
+	in_bed = file_prefix + '.bed'
+	for ws in window_sizes:
+		#make bed file with windows and returns genome name and window size variable
+		genome_and_window = homozygosity_mapping_cybertron.make_windows(working_dir, genome_fai, ws, step_size).split('.')[0]
+		print genome_and_window
+		window_bed = genome_and_window + '.bed'
+		##bedtools intersect 
+		print(window_bed, in_bed)
+		with open('temp.bed', "w") as naf_fh: 
+			hom_bt_intersect = subprocess.Popen(['bedtools', 'intersect', '-a', window_bed, '-b', in_bed, '-c'], stdout=naf_fh)
+			hom_bt_intersect.wait()
+		##add header
+		out_bed = file_prefix + '.' + genome_and_window + '.bed'
+		with open(out_bed, "w") as out_fh, open('temp.bed', "r") as in_fh:
+			out_fh.write(delim.join(['chr', 'start', 'end', 'snp_number']) + '\n')
+			for line in in_fh:
+				##removing the chr from start of the line
+				out_fh.write(line[3:])
+
+
+
+##0521 -- use thresholds to identify hom and non hom (<0.6 and > 0.95 AB)
+new_project_name = 'abcb11b_rm_thresholds_0521'
+multianno_combined = new_project_name + '.danRer11_multianno.txt'
+# multianno_combined = 'temp10k.xls'
+
+# convert_to_annovar_sample_combined(filtered_vcf, new_project_name)
+# run_table_annovar_combined(new_project_name)
+
+##filter files to get hom in rescued and not hom in unrescued
+filter_multianno_get_bed(multianno_combined, new_project_name)
+##make files for graphing
+window_size = [1000000]
+step_size = 100000
+# make_files_for_graphing(new_project_name, window_size, step_size, work_dir, fasta_fai)
 

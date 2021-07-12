@@ -202,11 +202,27 @@ genelists = genelist_dict.keys()
 samples = ['OST08_CTRL', 'OST16_CTRL', 'OST22_CTRL', 'C1001_PIEZO1', 'C2064_FLNA', 'C1722_FLNA', 'C3066_FLNB',
 		'C1589_FLNC', 'C1677_FLNC', 'C1192_FLNC', 'C2013_PIEZO1', 'C1957_PIEZO1', 'C1653_PIEZO1', 'C3049_FLNA',
 		'C2012_FLNB', 'C4019_FLNB']
-combine_ratio_heatmap_files(ratio_hm_filenames, gene_groups, genelists, samples)
+# combine_ratio_heatmap_files(ratio_hm_filenames, gene_groups, genelists, samples)
 
 
 ###rm *.norm_counts.*.txt
 
+
+##red0 0506 with new genelist
+genelist_file2 = 'genelist_050621.txt'
+genelist_dict2 = make_genelist_dict(genelist_file2) 
+##filter counts/ratio files for each gene list
+ratio_files = glob.glob('*.norm_counts.ratios.txt')
+filter_by_genelists(ratio_files, genelist_dict2)
+
+##combine ratio files in order
+ratio_hm_filenames = ['cunn_flexcell_rnaseq_0321_ctl_', '.norm_counts.ratios.', '.heatmap.txt']
+gene_groups = ['flna', 'flnb', 'flnc', 'piezo1']
+genelists2 = genelist_dict2.keys()
+samples = ['OST08_CTRL', 'OST16_CTRL', 'OST22_CTRL', 'C1001_PIEZO1', 'C2064_FLNA', 'C1722_FLNA', 'C1192_FLNC',
+		'C1589_FLNC', 'C1677_FLNC', 'C3066_FLNB', 'C2013_PIEZO1', 'C1957_PIEZO1', 'C1653_PIEZO1', 'C3049_FLNA',
+		'C2012_FLNB', 'C4019_FLNB']
+combine_ratio_heatmap_files(ratio_hm_filenames, gene_groups, genelists2, samples)
 
 
 

@@ -879,6 +879,49 @@ def combine_var_counts(work_directory, info_file, analysis_types):
 									else:
 										print(ped_type, ' not recognized as a ped type')
 
+def combine_unfiltered_gatk_slivar_files(work_directory, info_file, file_suffix):
+	os.chdir(work_directory)
+	single_duo_outfile = 'combined.gatk38_not_filtered.single_duo.all.xls'
+	trio_quad_outfile = 'combined.gatk38_not_filtered.trio_quad.all.xls'
+	multiplex_outfile = 'combined.gatk38_not_filtered.multiplex.all.xls'
+	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
+	single_duo_types = ['duo', 'duo*', 'parent_sibship','singleton', 'singleton*', 'sibship']
+	multiplex_types = ['multiplex']
+	with open(info_file, "r") as in_fh, open(single_duo_outfile, "w") as sd_fh, open(trio_quad_outfile, "w") as tq_fh, open(multiplex_outfile, "w") as m_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc > 1:
+				ped = line[0]
+				ped_type = line[2]
+				if '*' in ped_type:
+					formatted_ped_type = ped_type.replace('*', 's')
+				else:
+					formatted_ped_type = ped_type
+				std_file = ped + '.gatk38_slivar.' + formatted_ped_type + file_suffix
+				if os.path.isfile(std_file):
+					with open(std_file, "r") as std_fh:
+						lc2 = 0
+						for line2 in std_fh:
+							line2 = line2.rstrip().split(delim)
+							lc2 += 1
+							if lc2 == 1:
+								if lc == 2:
+									sd_fh.write(delim.join(line2) + '\n')
+									tq_fh.write(delim.join(line2) + '\n')
+									m_fh.write(delim.join(line2) + '\n')
+							else:
+								if ped_type in trio_types:
+									tq_fh.write(delim.join(line2) + '\n')
+								elif ped_type in single_duo_types:
+									sd_fh.write(delim.join(line2) + '\n')
+								elif ped_type in multiplex_types:
+									m_fh.write(delim.join(line2) + '\n')
+								else:
+									print(ped_type, ' not recognized as a ped type')
+
+
 def filter_clinsig_vars(work_directory, in_files, out_suffix, path_definitions):
 	os.chdir(work_directory)
 	for in_file in in_files:
@@ -1016,7 +1059,7 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 	##get genic denovo vars
 	if ped_type.lower() in trio_types:
 		slivar_genic_dn_on_trio(annotated_vcfs, ped_file, formatted_ped_type)
-	# '''
+	
 	##slivar on all gatk vars analyses
 	if ped_type.lower() in trio_types:
 		slivar_std_analysis_on_trio_gatk_all([annotated_vcfs[1]], ped_file, formatted_ped_type)
@@ -1026,6 +1069,9 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 		slivar_std_analysis_on_multiplex_gatk_all([annotated_vcfs[1]], ped_file, formatted_ped_type)
 	else:
 		print(ped_type, ' ped type not recognized')
+	# '''
+
+
 
 def combine_files(work_directory, var_types, file_suffix):
 	os.chdir(work_directory)
@@ -1325,14 +1371,14 @@ trio_files = ['combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_sl
 
 
 ##repeat var calling/slivar analysis
-# exome_ped_file = 'exome_test'
-# exome_ped_file = 'exome_info.txt' ##all the peds
+# exome_ped_file = 'exome_test' #test
+exome_ped_file = 'exome_info.txt' ##all the peds
 ##split 5 ways
 # exome_ped_file = 'exome_infoaa'
 # exome_ped_file = 'exome_infoab'
 # exome_ped_file = 'exome_infoac'
 # exome_ped_file = 'exome_infoad'
-exome_ped_file = 'exome_infoae'
+# exome_ped_file = 'exome_infoae'
 
 ##for combining files
 ped_info_file = 'all_exome_info.txt'
@@ -1342,20 +1388,26 @@ working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121
 # repeat_var_calling_0221(working_dir, exome_ped_file)
 
 ##redo slivar with new omim and repeats analyses etc
-slivar_analysis_master_0221(working_dir, exome_ped_file)
+# slivar_analysis_master_0221(working_dir, exome_ped_file)
 
 ##latest versions of analysis files - 0221
 var_types = ['.gatk38_slivar.', '.intersect_slivar.']
 ##get counts
 # get_var_counts(working_dir, ped_info_file, var_types)
+
 ##combine all single/duo trio and mutiplex files for std analysis files
 # combine_var_counts(working_dir, ped_info_file, var_types)
+##also combine the non filtered gatk slivar files
+# combine_unfiltered_gatk_slivar_files(working_dir, exome_ped_file, '.not_filtered_analysis.xls')
+
 
 ##filter the combined files
 ##clivar
 combined_var_files = ['combined.gatk38_slivar.multiplex.all.xls', 'combined.gatk38_slivar.single_duo.all.xls', 
 		'combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_slivar.multiplex.all.xls', 
-		'combined.intersect_slivar.single_duo.all.xls', 'combined.intersect_slivar.trio_quad.all.xls']
+		'combined.intersect_slivar.single_duo.all.xls', 'combined.intersect_slivar.trio_quad.all.xls', 
+		'combined.gatk38_not_filtered.multiplex.all.xls', 'combined.gatk38_not_filtered.single_duo.all.xls', 
+		'combined.gatk38_not_filtered.trio_quad.all.xls']
 pathogenic_definitions = ['Pathogenic', 'Pathogenic/Likely_pathogenic', 'Likely_pathogenic']
 # filter_clinsig_vars(working_dir, combined_var_files, '.clinvar.xls', pathogenic_definitions)
 
@@ -1379,5 +1431,102 @@ trio_files = ['combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_sl
 # exome_ped_file = 'exome_split_6.txt'
 ##redo slivar with
 # slivar_analysis_split_ped(working_dir, exome_ped_file)
+
+
+def slivar_std_analysis_on_trio_dom(in_vcfs, ped_file, ped_type):
+	for in_vcf in in_vcfs:
+		slivar_dn_vcf = in_vcf.rsplit('.', 2)[0] + '.slivar_dom.vcf'
+		slivar_dn_tsv = in_vcf.rsplit('.', 2)[0] + '.slivar_dom.temp.xls'
+		slivar_dn_annovar = in_vcf.rsplit('.', 2)[0] + '.slivar_dom.temp'
+		slivar_dn_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_dom.temp.hg19_multianno.txt'
+		slivar_dn_final = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.dominant_analysis.xls'
+		##get std file
+		'''
+		##all dom
+		slivar_dn = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
+			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
+			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
+			'--family-expr', 'aff_het:fam.every(function(s) {return (!s.affected && s.GQ >= 15 && s.DP >= 10) || (s.affected && s.het && s.GQ >= 15 && s.DP >= 10 && s.AB > 0.2)})',
+			'-o', slivar_dn_vcf])
+		slivar_dn.wait()
+
+		'''
+		##different params for diff annotations
+		ann_program = in_vcf.split('.')[2]
+		if ann_program == 'bcftools':
+			c_param = 'BCSQ'
+		elif ann_program == 'snpeff':
+			c_param = 'ANN'
+		else:
+			print(ann_program, 'not recognized as annotation program')
+		##convert to tsv (add extra annotation?)
+		slivar_trio_tsv = subprocess.Popen([slivar, 'tsv', '--ped', ped_file, '-c', c_param,
+			'-o', slivar_dn_tsv, '-s', 'aff_het',
+			'-i', 'gnomad_popmax_af', '-i', 'gnomad_popmax_af_filter', '-i', 'gnomad_nhomalt', '-g', pli_lookup,
+			'-g', dbdb_lookup,'-g', omim_lookup, slivar_dn_vcf])
+		slivar_trio_tsv.wait()
+		##if no variants don't run annovar
+		var_lc = 0
+		with open(slivar_dn_tsv, "r") as sst_fh:
+			for line in sst_fh:
+				var_lc += 1		
+		if var_lc > 1:
+			##annotate vcfs with annovar i.e. run_table_annovar
+			command = [table_annovar] + av_buildver + [slivar_dn_vcf] + av_ref_dir + av_protocol + av_operation + av_options + ['-out', slivar_dn_annovar]
+			annovar = subprocess.Popen(command)
+			annovar.wait()
+			##combine slivar files with annovar annotation
+			merge_dn_silvar_annovar(slivar_dn_tsv, slivar_dn_multi, slivar_dn_final)
+		else:
+			##make dummy file with just header is no var
+			with open(slivar_dn_final, "w") as out_fh:
+				with open(slivar_dn_tsv, "r") as std_fh:
+					lc = 0
+					for line_1 in std_fh:	
+						line_1 = line_1.rstrip('\n').split(delim)
+						lc += 1
+						if lc == 1:
+							header = line_1[:13] + ['pLI', 'dbdb', 'omim']
+							out_fh.write(delim.join(header) + '\n')	
+
+def standard_dom_slivar_protocol(working_directory, ped_file, ped_type, gatk_vcf, int_vcf):
+	os.chdir(working_directory)
+	annotated_vcfs = [int_vcf, gatk_vcf]
+	##filter with slivar
+	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
+	duo_types = ['duo', 'duo*', 'parent_sibship']
+	single_types = ['singleton', 'singleton*', 'sibship']
+	multiplex_types = ['multiplex']
+	##change ped type for final file name
+	if '*' in ped_type:
+		formatted_ped_type = ped_type.replace('*', 's')
+	else:
+		formatted_ped_type = ped_type
+	# print(pedigree, ped_type, formatted_ped_type)
+	# '''
+	##standard analyses
+	if ped_type.lower() in trio_types:
+		slivar_std_analysis_on_trio_dom(annotated_vcfs, ped_file, formatted_ped_type)
+	else:
+		print(ped_type, ' ped type not recognized')
+
+
+def slivar_dominant_analysis(work_directory, infile):
+	os.chdir(work_directory)
+	with open(infile, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			ped = line[0]
+			ped_type = line[1]
+			ped_file = ped + '.ped'
+			gatk_vcf = ped + '.gatk38.bcftools.GRCh37_87.vcf.gz'
+			int_vcf = ped + '.intersect.bcftools.GRCh37_87.vcf.gz'
+			##run slivar
+			standard_dom_slivar_protocol(work_directory, ped_file, ped_type, gatk_vcf, int_vcf)
+
+##dominant analysis on specific ped/peds
+# exome_ped_file = 'dom_analysis1.txt'
+exome_ped_file = 'dom_analysis2.txt'
+slivar_dominant_analysis(working_dir, exome_ped_file)
 
 

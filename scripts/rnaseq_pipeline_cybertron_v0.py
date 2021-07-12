@@ -670,8 +670,8 @@ working_dir = '/home/atimms/ngs_data/rnaseq/laura_rnaseq_0619'
 conditions_to_use = []
 ##call all methods, so align, count and make filees for deseq
 # call_rnaseq_methods_for_deseq_analysis(working_dir, 'laura_rnaseq_0619.txt', 'mm10', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'laura_rnaseq_dys_0619.txt', 'mm10', ['genotype'])
-count_and_make_files_for_deseq(working_dir, 'laura_rnaseq_scc_0619.txt', 'mm10', ['genotype'])
+# count_and_make_files_for_deseq(working_dir, 'laura_rnaseq_dys_0619.txt', 'mm10', ['genotype'])
+# count_and_make_files_for_deseq(working_dir, 'laura_rnaseq_scc_0619.txt', 'mm10', ['genotype'])
 
 ##amrie rnaseq 0619 
 working_dir = '/home/atimms/ngs_data/rnaseq/amrei_inv_rnaseq_0619'
@@ -945,10 +945,10 @@ working_dir = '/home/atimms/ngs_data/rnaseq/cunn_flexcell_rnaseq_0321'
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_FLNC.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_PIEZO1.txt', 'GRCh38', ['sample'])
 # count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_cell_line.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flna.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnb.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnc.txt', 'GRCh38', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_piezo1.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flna.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnb.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_flnc.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_0321_ctl_piezo1.txt', 'GRCh38', ['sample'])
 
 ##vishal/lan rnaseq 0719
 working_dir = '/home/atimms/ngs_data/rnaseq/vishal_pig_rnaseq_0321'
@@ -970,5 +970,33 @@ working_dir = '/home/atimms/ngs_data/rnaseq/sophie_carm1_splotch_rnaseq_0321'
 conditions_to_use = []
 ##call all methods, so align, count and make files for deseq -- for all time points
 # count_and_make_files_for_deseq(working_dir, 'sophie_carm1_splotch_rnaseq_0321.txt', 'mm10', ['sample'])
+
+
+##gumbiner_rnaseq_0421 combine 2 new sets with data from 0321
+# working_dir = '/home/atimms/ngs_data/rnaseq/gumbiner_rnaseq_0421'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'gumbiner_rnaseq_0421_all.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'gumbiner_rnaseq_0421_4h.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'gumbiner_rnaseq_0421_24h.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'gumbiner_rnaseq_0421_30m.txt', 'GRCh38', ['sample'])
+
+
+
+##sophie rnaseq 1119
+working_dir = '/home/atimms/ngs_data/rnaseq/chunyue_abcb11b_rnaseq_0521'
+conditions_to_use = []
+##call all methods, so align, count and make filees for deseq -- for all time points
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'chunyue_abcb11b_0521.txt', 'danRer11', ['sample'])
+
+##cunn_flexcell_rnaseq_0321
+working_dir = '/home/atimms/ngs_data/rnaseq/cunn_flexcell_rnaseq_0621'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'cunn_flexcell_rnaseq_0621.txt', 'GRCh38', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'cunn_flexcell_rnaseq_dups_0621.txt', 'GRCh38', ['sample'])
+
+##vishal data 0620
+working_dir = '/home/atimms/ngs_data/rnaseq/vishal_rnaseq_0621'
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'vishal_rnaseq_0621.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'vishal_rnaseq_0621_ctl_g1.txt', 'GRCh38', ['sample'])
+count_and_make_files_for_deseq(working_dir, 'vishal_rnaseq_0621_g2_g3.txt', 'GRCh38', ['sample'])
+
 
 

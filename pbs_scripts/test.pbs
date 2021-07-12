@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N test
-#PBS -l mem=20gb,ncpus=1
+#PBS -l mem=200gb,ncpus=10
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -27,9 +27,9 @@ echo 'work'
 
 
 ##testing silvar pipeline
-module load java/1.8.0_202 
-module load biobuilds/2017.11
-ghayda_slivar_reanalysis_0121_cyb.py
+# module load java/1.8.0_202 
+# module load biobuilds/2017.11
+# ghayda_slivar_reanalysis_0121_cyb.py
 
 ##kim tpm
 # source activate tpm_calculator
@@ -39,3 +39,11 @@ ghayda_slivar_reanalysis_0121_cyb.py
 # module load java/1.8.0_202 
 # module load biobuilds/2017.11
 # ghayda_laser_exomes_0421_cyb.py
+
+##getting avinput files for renovo from silvar pipeline
+# ghayda_slivar_vars_for_renovo_0421_cyb.py
+
+##run salmon on hdbr
+## #PBS -l mem=200gb,ncpus=10
+module load biobuilds/2016.11
+kim_salmon_auts2_hdbr_0619_cybertron.py
