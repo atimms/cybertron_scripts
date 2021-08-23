@@ -87,3 +87,37 @@ hom_data <- read.csv('RM3.resc_hom.danRer11_100kb_10kb.bed', sep ='\t')
 ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
   theme_bw() + theme(axis.text.x = element_blank())
 ggsave('RM3.resc_hom.danRer11_100kb_10kb.cov20_q30.pdf', height = 4, width = 12)
+
+
+##redo using parental data 
+setwd('/home/atimms/ngs_data/enu_mapping/chunyue_abcb11b_recessive_0721')
+##graph the count data
+hom_data <- read.csv('TP1FRes.resc_hom.danRer11_1000kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FRes.resc_hom.danRer11_1000kb_100kb.cov20_q50.pdf', height = 4, width = 12)
+hom_data <- read.csv('TP1FRes.resc_hom.danRer11_100kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FRes.resc_hom.danRer11_100kb_100kb.cov20_q50.pdf', height = 4, width = 12)
+hom_data <- read.csv('TP1FRes.resc_hom.danRer11_500kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FRes.resc_hom.danRer11_500kb_100kb.cov20_q50.pdf', height = 4, width = 12)
+
+##parental data but using hom wt in rescued fish
+setwd('/home/atimms/ngs_data/enu_mapping/chunyue_abcb11b_recessive_0721')
+hom_data <- read.csv('TP1FUnr.resc_wt.danRer11_1000kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FUnr.resc_wt.danRer11_1000kb_100kb.cov10_q30.pdf', height = 4, width = 12)
+
+hom_data <- read.csv('TP1FUnr.resc_wt.danRer11_500kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FUnr.resc_wt.danRer11_500kb_100kb.cov10_q30.pdf', height = 4, width = 12)
+
+hom_data <- read.csv('TP1FUnr.resc_wt.danRer11_100kb_100kb.bed', sep ='\t')
+ggplot(data=hom_data,aes(x=start, y=snp_number),binwidth=1e5 ) + geom_bar(stat="identity", colour="black") + facet_grid(~ chr, scales="free", space="free_x") + 
+  theme_bw() + theme(axis.text.x = element_blank())
+ggsave('TP1FUnr.resc_wt.danRer11_100kb_100kb.cov10_q30.pdf', height = 4, width = 12)

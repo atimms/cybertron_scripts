@@ -116,7 +116,8 @@ def annotate_vcf(vcf, av_prefix):
 # ftds = ['clinvar_20190305', 'dbnsfp31a_interpro']
 # ftds = ['gnomad211_genome', 'gnomad211_exome', 'gnomad30_genome']
 # ftds = ['clinvar_20200316']
-ftds = ['clinvar_20210123', 'dbnsfp41a']
+# ftds = ['clinvar_20210123', 'dbnsfp41a']
+ftds = ['knownGene', 'ensGene']
 for ftd in ftds:
 	download_annovar_db_from_annovar(ftd)
 

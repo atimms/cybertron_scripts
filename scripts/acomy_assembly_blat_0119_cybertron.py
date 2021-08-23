@@ -64,7 +64,7 @@ def convert_bed_to_exon_seq(in_bed, out_fa):
 def get_exon_seq_from_ucsc_dna(gene):
 	dna_seq_file = gene + '.gene_region.fa'
 	exon_seq_file = gene + '.exon_seq.fa'
-	convert_dna_to_exons(dna_seq_file, exon_seq_file)
+	# convert_dna_to_exons(dna_seq_file, exon_seq_file)
 	run_blat(acomy_fa, exon_seq_file, 'dna')
 
 def get_exon_seq_from_coding_bed(gene, bed_file):
@@ -124,9 +124,14 @@ bed = 'mm10_Cttn.bed'
 get_exon_seq_from_coding_bed(gene, bed)
 '''
 ##get sequence from fa file
-# '''
+'''
 gene = 'mouse_insulin'
 get_exon_seq_from_ucsc_dna(gene)
-# '''
+'''
 
+##get sequence from fa file
+# '''
+gene = 'Tyr'
+get_exon_seq_from_ucsc_dna(gene)
+# '''
 

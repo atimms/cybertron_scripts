@@ -285,8 +285,75 @@ homer_motifs_ext25_beds = [homer_motif_nomerge_prefix + i + '.ext25.bed' for i i
 ##then count data and make graphs
 
 ##using +- 25bps bed files
-print(dvsm_motifs_ext25_beds)
+# print(dvsm_motifs_ext25_beds)
 # get_ave_dvsm_per_bp_around_motif(dvsm_motifs_ext25_beds)
-get_ave_dvsm_per_bp_only_motif(dvsm_motif_only_beds)
+# get_ave_dvsm_per_bp_only_motif(dvsm_motif_only_beds)
 
+
+##repeat analysis 0721 with new dvsm 
+dsvm_0721 = 'ATAC_dsvm20pout_simple.txt'
+dsvm_0721_all_bed = 'ATAC_dsvm20pout.all_scores.bed'
+dsvm_0721_neg_bed = 'ATAC_dsvm20pout.neg_scores.bed'
+dsvm_bed_files = [dsvm_0721_all_bed, dsvm_0721_neg_bed]
+motif_counts_0721_file = 'ATAC_dsvm20pout_motifs_0721.counts.txt'
+atac_dvsm_motifs_ext25_beds = glob.glob('ATAC_dsvm20pout*ext25.bed')
+atac_ddvsm_motif_only_beds = glob.glob('ATAC_dsvm20pout*.motif_only.bed')
+
+
+##make dvsm bed files
+# convert_dvsm_to_bed(dsvm_0721, dsvm_0721_all_bed, dsvm_0721_neg_bed)
+
+##bedtools intersect dsvm scores with homer beds
+# print(homer_motifs_beds)
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_beds, '.bed')
+
+##get average dvsm per motif for the different score
+# get_counts_per_dvsm_and_motif(dsvm_bed_files, homer_motifs_beds, motif_counts_0721_file)
+
+
+##bedtools intersect dsvm scores with homer beds
+# print(homer_motifs_beds)
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_ext25_beds, '.ext25.bed')
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_nomerge_beds, '.motif_only.bed')
+
+##then count data and make graphs
+
+##using +- 25bps bed files
+# print(atac_dvsm_motifs_ext25_beds)
+# get_ave_dvsm_per_bp_around_motif(atac_dvsm_motifs_ext25_beds)
+# get_ave_dvsm_per_bp_only_motif(atac_ddvsm_motif_only_beds)
+
+
+##repeat analysis 0821 with new dvsm 
+dsvm_0821 = 'ATAC_shuffled_dsvm_simplified.txt'
+dsvm_0821_all_bed = 'ATAC_shuffled_dsvm.all_scores.bed'
+dsvm_0821_neg_bed = 'ATAC_shuffled_dsvm.neg_scores.bed'
+dsvm_bed_files = [dsvm_0821_all_bed, dsvm_0821_neg_bed]
+motif_counts_0821_file = 'ATAC_shuffled_dsvm_motifs_0821.counts.txt'
+atac_dvsm_motifs_ext25_beds = glob.glob('ATAC_shuffled_dsvm*ext25.bed')
+atac_ddvsm_motif_only_beds = glob.glob('ATAC_shuffled_dsvm*.motif_only.bed')
+
+
+##make dvsm bed files
+# convert_dvsm_to_bed(dsvm_0821, dsvm_0821_all_bed, dsvm_0821_neg_bed)
+
+##bedtools intersect dsvm scores with homer beds
+# print(homer_motifs_beds)
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_beds, '.bed')
+
+##get average dvsm per motif for the different score
+# get_counts_per_dvsm_and_motif(dsvm_bed_files, homer_motifs_beds, motif_counts_0821_file)
+
+
+##bedtools intersect dsvm scores with homer beds
+# print(homer_motifs_beds)
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_ext25_beds, '.ext25.bed')
+# bedtools_intersect_dsvm_motif(dsvm_bed_files, homer_motifs_nomerge_beds, '.motif_only.bed')
+
+##then count data and make graphs
+
+##using +- 25bps bed files and just motifs
+print(atac_dvsm_motifs_ext25_beds)
+get_ave_dvsm_per_bp_around_motif(atac_dvsm_motifs_ext25_beds)
+get_ave_dvsm_per_bp_only_motif(atac_ddvsm_motif_only_beds)
 

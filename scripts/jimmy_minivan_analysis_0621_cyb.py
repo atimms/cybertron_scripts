@@ -353,7 +353,7 @@ def mini_van_analysis_master(in_file, project_name, bed, hotspot_bed):
 
 def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_correction_methods):
 	sample_dict = get_sample_dict(in_file)
-	'''
+	# '''
 	##for all samples
 	##make unmapped bam from fqs
 	make_unmapped_bam(sample_dict)
@@ -363,7 +363,7 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 	align_reads(sample_dict)
 	##calculate raw coverage
 	calcluate_coverage(sample_dict, '_bwa.bam', bed, project_name + '_all')
-	'''
+	# '''
 	##error correction A
 	if 'a' in error_correction_methods:
 		##Deduplicate by start-stop position
@@ -454,8 +454,15 @@ info_file = 'minivan_test_0721.txt'
 project = info_file.split('.')[0]
 error_correction_wanted = ['a', 'b', 'c', 'd']
 error_correction_wanted = ['c']
+# minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
+
+##new run 0821
+working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0821'
+os.chdir(working_dir)
+##3 columns, sample name, fq1, fq2
+info_file = 'minivan_test_0821.txt'
+project = info_file.split('.')[0]
+error_correction_wanted = ['a', 'b', 'c', 'd']
 minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
-
-
 
 

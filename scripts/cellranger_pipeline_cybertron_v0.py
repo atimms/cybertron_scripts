@@ -434,5 +434,17 @@ working_dir = '/home/atimms/ngs_data/cellranger/kim_mouse_multiome_0721/'
 ##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
 info_file = 'kim_mouse_multiome_0721.txt'
 transciptome_ref = mm10_arc_ref
-cellranger_arc_master(working_dir, info_file, transciptome_ref)
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
 
+
+##kim atac data 0821
+working_dir = '/archive/millen_k/kims_data/kim_cbl_10X_atac_0821'
+##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'kim_cbl_10X_atac.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+##dana atac data test 0821
+working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_0821'
+##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_atac_10x_0821.txt'
+cellranger_atac2_master(working_dir, info_file)
