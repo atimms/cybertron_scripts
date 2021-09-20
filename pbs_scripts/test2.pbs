@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N test2
+#PBS -l mem=50gb,ncpus=2
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -P 19833a08-f6fb-4bea-8526-8a79069da878
+echo 'work'
+
+
+
+##kim exome variant calling and filtering 0921
+## #PBS -l mem=30gb,ncpus=2
+module load java/1.8.0_202 
+kim_exome_analysis_0621_cyb.py
+
+
+

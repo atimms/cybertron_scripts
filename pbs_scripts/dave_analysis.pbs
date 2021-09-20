@@ -38,7 +38,13 @@ echo 'work'
 
 ##dave/lisa genomes 0821
 #PBS -l mem=20gb,ncpus=1
-dave_lisa_chd_genomes_annovar_0821_cyb.py
+# dave_lisa_chd_genomes_annovar_0821_cyb.py
+
+##dave_pkd_modifier_0921
+## #PBS -l mem=200gb,ncpus=20
+module load biobuilds/2017.11
+module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
+dave_pkd_modifier_0921_cyb.py
 
 
 

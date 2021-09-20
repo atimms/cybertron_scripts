@@ -3,12 +3,7 @@ import os
 import subprocess
 
 '''
-working from 10 threads?
 
-for testing
-qsub -Iq cdbrmq -l mem=120gb,ncpus=10 -P 19833a08-f6fb-4bea-8526-8a79069da878
-qsub -Iq cdbrmq -l mem=20gb,ncpus=1 -P 19833a08-f6fb-4bea-8526-8a79069da878
-#module load java/1.8.0_202 ##for picard/gatk, ?needed if using nextflow
 conda activate nextflow
 
 '''
@@ -23,15 +18,21 @@ sarek_dir = '/home/atimms/programs/sarek'
 hg38_exome_capture = '/home/atimms/ngs_data/references/exome_beds_hg38/hg38_targets_combined_padded_0721.bed'
 hg38_refseq_exons = '/home/atimms/ngs_data/references/hg38/hg38_RefSeq_exons.bed'
 
+##params
+fq_dir = 'fq_files/'
+
+
 ##methods
 
 def make_sarek_tsv_by_cohort(infile, outfile, w_dict):
 	with open(infile, "r") as in_fh, open(outfile, "w") as outfh:
 		lc = 0
+		ped_list = []
 		for line in in_fh:
 			lc += 1
 			if lc > 1:
 				line = line.rstrip().split(delim)
+				ped_id = line[0]
 				sample = line[1]
 				sequenced = line[7]
 				sex_number = line[4]
@@ -41,9 +42,13 @@ def make_sarek_tsv_by_cohort(infile, outfile, w_dict):
 					sex = 'F'
 				else:
 					print('sex not recognized:', ped_dict[sample][1])
-				fq1 = w_dict + sample + '.r1.fastq.gz'
-				fq2 = w_dict + sample + '.r2.fastq.gz'
-				line_out = [sample, sex, '1', sample, '1', fq1, fq2]
+				##set up for lane number, has to be unique per ped (issue with sarek)
+				ped_list.append(ped_id)
+				lane_number = ped_list.count(ped_id)
+				fq1 = w_dict + fq_dir + sample + '.r1.fastq.gz'
+				fq2 = w_dict + fq_dir + sample + '.r2.fastq.gz'
+				##using lc instead of true lane id as issue withe read id
+				line_out = [sample, sex, '1', sample, str(lane_number), fq1, fq2]
 				outfh.write(delim.join(line_out) + '\n')
 
 
@@ -77,4 +82,14 @@ def run_sarek_by_cohort(working_dir, info_file):
 ##run methods
 work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0821/'
 exome_info_file = 'ghayda_genedx_0821.txt'
+# exome_info_file = 'LR10-064_0821.txt' ##repeat on just LR10-064 (issue with rg)
+# run_sarek_by_cohort(work_dir, exome_info_file)
+
+work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
+# exome_info_file = 'kim_exomes_0621.txt'
+##split into 2 files as issue with sarek prepocessing
+# exome_info_file = 'kim_exomes_0621_1.txt'
+# exome_info_file = 'kim_exomes_0621_2.txt'
+exome_info_file = 'kim_exomes_0621_3.txt'
 run_sarek_by_cohort(work_dir, exome_info_file)
+

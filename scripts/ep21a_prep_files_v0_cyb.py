@@ -23,19 +23,29 @@ sarek_dir = '/home/atimms/programs/sarek'
 hg38_exome_capture = '/home/atimms/ngs_data/references/exome_beds_hg38/hg38_targets_combined_padded_0721.bed'
 hg38_refseq_exons = '/home/atimms/ngs_data/references/hg38/hg38_RefSeq_exons.bed'
 
+##directory names
+fq_dir = 'fq_files/'
+original_file_dir = 'original_files/'
+
+
 ##methods
-def make_ped_files(input_dict):
-	for ped in input_dict:
-		# print ped, input_dict[ped]
-		outfile = ped + '.ped'
-		header = ['#family_id', 'name', 'paternal_id', 'maternal_id', 'sex', 'phenotype']
-		with open(outfile, "w") as out_fh:
-			out_fh.write(delim.join(header) + '\n')
-			for outline in input_dict[ped]:
-				out_fh.write(delim.join(outline) + '\n')
+def make_ped_files(input_dict, file_prefix):
+	combined_ped = file_prefix + '.ped'
+	header = ['#family_id', 'name', 'paternal_id', 'maternal_id', 'sex', 'phenotype']
+	##combined ped
+	with open(combined_ped, "w") as cpout_fh:
+		cpout_fh.write(delim.join(header) + '\n')
+		for ped in input_dict:
+			# print ped, input_dict[ped]
+			outfile = ped + '.ped'
+			with open(outfile, "w") as out_fh:
+				out_fh.write(delim.join(header) + '\n')
+				for outline in input_dict[ped]:
+					cpout_fh.write(delim.join(outline) + '\n')
+					out_fh.write(delim.join(outline) + '\n')
 
 
-def make_ped_files_and_dict_from_info(input_file):
+def make_ped_files_and_dict_from_info(input_file, file_prefix):
 	ped_file_dict, analysis_dict = {}, {}
 	with open(input_file, "r") as in_fh:
 		lc = 0
@@ -73,7 +83,7 @@ def make_ped_files_and_dict_from_info(input_file):
 					else:
 						analysis_dict[ped_name] = [[sample_name], [filetype], [filename], [ped_type], [mosaic], [sex]]
 	##make the ped files
-	make_ped_files(ped_file_dict)
+	make_ped_files(ped_file_dict, file_prefix)
 	##retrun analysis info
 	return analysis_dict		
 
@@ -93,17 +103,24 @@ def convert_cram_fastq(cramfile, r1_fastq, r2_fastq):
 	st_fq = subprocess.Popen([samtools, 'fastq', '-@', threads, '-c', '6', '-1', r1_fastq, '-2', r2_fastq, temp_cram])
 	# st_fq = subprocess.Popen([samtools, 'fastq', '-c', '6', '-1', r1_fastq, '-2', r2_fastq, temp_cram])
 	st_fq.wait()
-
+	##mv cram to origanl file dir
+	shutil.move(cramfile, original_file_dir)
 
 def convert_bam_fastq_picard(bamfile, r1_fastq, r2_fastq):
 	# picard_sam_fq = subprocess.Popen(['java', '-Xmx8g', '-jar', picard, 'SamToFastq', 'INPUT=' + bamfile, 'FASTQ=' + r1_fastq, 'SECOND_END_FASTQ=' + r2_fastq, 'VALIDATION_STRINGENCY=SILENT'])
 	picard_sam_fq = subprocess.Popen(['java', '-Xmx100g', '-jar', picard, 'SamToFastq', 'INPUT=' + bamfile, 'FASTQ=' + r1_fastq, 'SECOND_END_FASTQ=' + r2_fastq, 'VALIDATION_STRINGENCY=SILENT'])
 	picard_sam_fq.wait()
+	##mv to origanl file dir
+	shutil.move(bamfile, original_file_dir)
 
 
 def rename_fastq_files(infiles, r1_fastq, r2_fastq):
+	##cp to std file name
 	shutil.copy(infiles[0], r1_fastq)
 	shutil.copy(infiles[1], r2_fastq)
+	##mv to origanl file dir
+	shutil.move(infiles[0], original_file_dir)
+	shutil.move(infiles[1], original_file_dir)
 
 
 def prepare_seq_files(ped_dict):
@@ -117,8 +134,13 @@ def prepare_seq_files(ped_dict):
 			filename = ped_dict[ped][2][sample_pos]
 			sex = ped_dict[ped][5][sample_pos]
 			mosaic = ped_dict[ped][4][sample_pos]
-			read1_fastq = sample + '.r1.fastq.gz'
-			read2_fastq = sample + '.r2.fastq.gz'
+			##make dir for fq files and original files
+			if not os.path.isdir(fq_dir):
+				os.mkdir(fq_dir)
+			if not os.path.isdir(original_file_dir):
+				os.mkdir(original_file_dir)
+			read1_fastq = fq_dir + sample + '.r1.fastq.gz'
+			read2_fastq = fq_dir + sample + '.r2.fastq.gz'
 			if filetype == 'fastq':
 				original_fastqs = filename.split(',')
 				rename_fastq_files(original_fastqs, read1_fastq, read2_fastq)
@@ -133,7 +155,7 @@ def make_exome_files(working_dir, info_file):
 	os.chdir(working_dir)
 	project_name = info_file.rsplit('.',1)[0]
 	##make ped files per ped and return analysis dict
-	analysis_dict = make_ped_files_and_dict_from_info(info_file)
+	analysis_dict = make_ped_files_and_dict_from_info(info_file, project_name)
 	##prep files i.e, convery cram/bams to fastq
 	prepare_seq_files(analysis_dict)
 
@@ -142,7 +164,12 @@ def make_exome_files(working_dir, info_file):
 
 
 ##run methods
-work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0821/'
-exome_info_file = 'ghayda_genedx_0821.txt'
+# work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0821/'
+# exome_info_file = 'ghayda_genedx_0821.txt'
+# make_exome_files(work_dir, exome_info_file)
 
+work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
+# exome_info_file = 'kim_exomes_0621.txt'
+exome_info_file = 'kim_exomes_0621_temp.txt'
 make_exome_files(work_dir, exome_info_file)
+

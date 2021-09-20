@@ -432,9 +432,10 @@ working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0621'
 os.chdir(working_dir)
 
 ##params
-minvan_bed = 'minivan_hg19_nochr_0621.bed'
-hotspot_bed = 'minivan_hotspots_hg19_0621.bed'
-
+# minvan_bed = 'minivan_hg19_nochr_0621.bed'
+# hotspot_bed = 'minivan_hotspots_hg19_0621.bed'
+minvan_bed = '/home/atimms/ngs_data/references/hg19/minivan_hg19_nochr_0621.bed'
+hotspot_bed = '/home/atimms/ngs_data/references/hg19/minivan_hotspots_hg19_0621.bed'
 
 ##minivan test 062821
 ##3 columns, sample name, fq1, fq2
@@ -463,6 +464,13 @@ os.chdir(working_dir)
 info_file = 'minivan_test_0821.txt'
 project = info_file.split('.')[0]
 error_correction_wanted = ['a', 'b', 'c', 'd']
+# minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
+
+##new run 0821
+working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_nextseq_0821'
+os.chdir(working_dir)
+##3 columns, sample name, fq1, fq2
+info_file = 'minivan_nextseq_0821.txt'
+project = info_file.split('.')[0]
+error_correction_wanted = ['a', 'b', 'c', 'd']
 minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
-
-

@@ -8,6 +8,7 @@ import sys
 '''
 requires:
 qsub -Iq cdbrmq -l mem=100gb,ncpus=10 -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
+qsub -Iq cdbrmq -l mem=17gb,ncpus=1 -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
 '''
 
 ##set input variables and parameters
@@ -63,6 +64,81 @@ def multi_to_ann(in_file, out_file):
 			else:
 				line_out = line[:15] + line[18:20] + [line[40]] + line[54:56] + line[66:85] + line[93:]
 				out_fh.write(delim.join(line_out) + '\n')
+
+def filter_exon_rare_vars(in_file, out_file):
+	with open(in_file, "r") as in_fh, open(out_file, "w") as out_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc == 1:
+				out_fh.write(delim.join(line) + '\n')
+			else:
+				rg_func = line[5]
+				kn_func = line[10]
+				rg_exfunc = line[8]
+				kn_exfunc = line[13]
+				af_info = line[25]
+
+				if af_info == '.':
+					af = 0
+				else:
+					af = float(af_info)
+				if rg_func =='exonic' or rg_func == 'splicing' or rg_func == 'exonic;splicing' or kn_func =='exonic' or kn_func == 'splicing' or kn_func == 'exonic;splicing':
+					if af < 0.01:
+						if rg_exfunc == 'synonymous SNV' and kn_exfunc == 'synonymous SNV':
+							pass
+						else:
+							out_fh.write(delim.join(line) + '\n')
+
+
+def filter_by_genenames(in_file, genelist, out_file):
+	with open(in_file, "r") as in_fh, open(out_file, "w") as out_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc == 1:
+				out_fh.write(delim.join(line) + '\n')
+			else:
+				genes = line[6].split(';') + line[11].split(';')
+				if bool(set(genes) & set(genelist)):
+					out_fh.write(delim.join(line) + '\n')
+
+
+def format_vars_by_proband(in_file, out_file):
+	proband_dict = {}
+	with open(in_file, "r") as in_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			lc += 1
+			if lc == 1:
+				sample_names = line[42:]
+			else:
+				gene = line[6]
+				var = ':'.join(line[:5])
+				genotypes = line[42:]
+				gp = -1
+				for genotype in genotypes:
+					gp += 1
+					if genotype == '0/1':
+						sample = sample_names[gp]
+						if sample in proband_dict:
+							if gene not in proband_dict[sample][0]:
+								proband_dict[sample][0].append(gene)
+							if var not in proband_dict[sample][1]:
+								proband_dict[sample][1].append(var)
+						else:
+							proband_dict[sample] = [[gene], [var]]
+
+	with open(out_file, "w") as out_fh:
+		out_fh.write(delim.join(['proband', 'genes', 'vars']) + '\n')
+		for p in proband_dict:
+			genes = ', '.join(proband_dict[p][0])
+			variants = ', '.join(proband_dict[p][1])
+			out_fh.write(delim.join([p, genes, variants]) + '\n')
+
 ##run methods
 working_dir = '/home/atimms/ngs_data/genomes/dave_lisa_chd_genomes_0821'
 os.chdir(working_dir)
@@ -70,16 +146,46 @@ project_name = 'chd_genomes_0821'
 combined_vcf = 'PCGC_CHD_phs001735_TOPMed_WGS_freeze.8.combined.hg38.vcf.gz'
 proband_vcf = 'PCGC_CHD_phs001735_TOPMed_WGS_freeze.8.hg38.probands.vcf.gz'
 proband_samples = 'proband_ids.txt'
+multianno = project_name + '.hg38_multianno.txt'
+annotated = project_name + '.hg38_annotated.txt'
+exonic_rare_vars = project_name + '.exonic_rare.txt'
+
 
 ##step1. filter vcf for proband samples
 # split_vcf_by_sample(combined_vcf, proband_samples, proband_vcf)
 
 ##step2. annotate with annovar and sormat
 # proband_vcf= 'temp.vcf'
-multianno = project_name + '.hg38_multianno.txt'
-annotated = project_name + '.hg38_annotated.txt'
-annotate_vcf_with_annovar(proband_vcf, project_name)
-multi_to_ann(multianno, annotated)
+# annotate_vcf_with_annovar(proband_vcf, project_name)
+# multi_to_ann(multianno, annotated)
+
+##step3. filter exonic rare vars
+# filter_exon_rare_vars(annotated, exonic_rare_vars)
+
+##step4. filter by gene
+lisa_genes = ['POMP', 'PSMD6', 'PSMA6', 'PSMD3', 'PSMA7']
+chd_genes = ['ABL1', 'ACTC1', 'ACVR1', 'ACVR2B', 'ADAMTS10', 'AFF4', 'ANKRD11', 'ARID1A', 'ARID1B', 'B3GAT3', 'BCOR', 
+		'BMPR2', 'BRAF', 'CDK13', 'CFC1', 'CHD4', 'CHD7', 'CHST14', 'CITED2', 'CREBBP', 'CRELD1', 'DLL4', 'DNAH11', 
+		'DOCK6', 'EFTUD2', 'EHMT1', 'ELN', 'EP300', 'ESCO2', 'EVC', 'EVC2', 'FBN1', 'FGFR2', 'FLNA', 'FLT4', 'FOXC1', 
+		'FOXC2', 'FOXH1', 'FOXP1', 'GATA4', 'GATA5', 'GATA6', 'GDF1', 'GJA1', 'GLI3', 'GPC3', 'HAND1', 'HAND2', 'HDAC8', 
+		'HNRNPK', 'HRAS', 'INVS', 'JAG1', 'KANSL1', 'KAT6A', 'KAT6B', 'KDM6A', 'KMT2A', 'KMT2D', 'KRAS', 'KYNU', 'MAP2K1', 
+		'MAP2K2', 'MAP3K7', 'MED12', 'MED13L', 'MEIS2', 'MESP1', 'MYBPC3', 'MYH11', 'MYH6', 'MYH7', 'NF1', 'NIPBL', 
+		'NKX2-5', 'NKX2-6', 'NODAL', 'NONO', 'NOTCH1', 'NOTCH2', 'NPHP3', 'NPHP4', 'NR2F2', 'NRAS', 'NSD1', 'NUP188', 
+		'PBX1', 'PIGL', 'PIGV', 'PITX2', 'PKD1L1', 'PRDM6', 'PRKD1', 'PTPN11', 'RAB23', 'RAD21', 'RAF1', 'RBFOX2', 'RERE', 'RIT1', 'SALL1', 'SALL4', 'SF3B4', 'SHOC2', 'SMAD2', 'SMAD3', 'SMAD4', 'SMAD6', 'SMARCA4', 'SMARCB1', 'SMARCE1', 'SMC1A', 'SMC3', 'SMG9', 'SON', 'SOS1', 'STRA6', 'TAB2', 'TBX1', 'TBX20', 'TBX5', 'TFAP2B', 'TGFBR1', 'TGFBR2', 'TLL1', 'TRAF7', 'TXNL4A', 'UBR1', 'WASHC5', 'ZEB2', 'ZFPM2', 'ZIC3']
+carm1 = ['CARM1']
+lisa_genes_vars = project_name + '.exonic_rare.lisa_genes.xls'
+chd_genes_vars = project_name + '.exonic_rare.chd_genes.xls'
+# carm1_vars = project_name + '.exonic_rare.carm1.xls'
+# filter_by_genenames(exonic_rare_vars, lisa_genes, lisa_genes_vars)
+# filter_by_genenames(exonic_rare_vars, chd_genes, chd_genes_vars)
+# filter_by_genenames(exonic_rare_vars, carm1, carm1_vars)
+
+##step5. modify chd vars file to gene/var by sample
+chd_genes_vars_formatted = project_name + '.exonic_rare.chd_genes.by_proband.xls'
+format_vars_by_proband(chd_genes_vars, chd_genes_vars_formatted)
+
+
+
 
 
 

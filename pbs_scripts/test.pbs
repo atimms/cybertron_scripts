@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N test
-#PBS -l mem=200gb,ncpus=10
+#PBS -l mem=120gb,ncpus=10
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -45,5 +45,13 @@ echo 'work'
 
 ##run salmon on hdbr
 ## #PBS -l mem=200gb,ncpus=10
-module load biobuilds/2016.11
-kim_salmon_auts2_hdbr_0619_cybertron.py
+# module load biobuilds/2016.11
+# kim_salmon_auts2_hdbr_0619_cybertron.py
+
+##kim rnaseq variant calling
+## #PBS -l mem=120gb,ncpus=10
+module load java/1.8.0_202 
+kim_rnaseq_varcalling_0921_cyb.py
+
+
+

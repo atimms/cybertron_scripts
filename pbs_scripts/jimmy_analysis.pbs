@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N fetal_genome
+#PBS -l mem=120gb,ncpus=10
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+# Pick your appropriate project ID for ‘-P’ below: 
+#PBS -P 0f241fcd-0dd3-491c-acac-15c6cff1c880
+
+echo 'work'
+
+## minivan analysis 0821
+module load java/1.8.0_202
+module load R #for vardict
+jimmy_minivan_analysis_0621_cyb.py
+
+
+

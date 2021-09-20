@@ -7,7 +7,8 @@ delim = '\t'
 # cellranger = '/home/atimms/programs/cellranger-3.1.0/cellranger'
 # cellranger = '/home/atimms/programs/cellranger-4.0.0/cellranger'
 # cellranger = '/home/atimms/programs/cellranger-5.0.0/cellranger' ##has include-introns 
-cellranger = '/home/atimms/programs/cellranger-5.0.1/cellranger' ##has include-introns 
+# cellranger = '/home/atimms/programs/cellranger-5.0.1/cellranger' ##has include-introns 
+cellranger = '/home/atimms/programs/cellranger-6.1.1/cellranger' 
 cellranger_atac = '/home/atimms/programs/cellranger-atac-1.2.0/cellranger-atac'
 cellranger_atac2 = '/home/atimms/programs/cellranger-atac-2.0.0/cellranger-atac'
 # cellranger_arc = '/home/atimms/programs/cellranger-arc-1.0.1/cellranger-arc'
@@ -248,6 +249,27 @@ def cellranger_atac2_master(work_dir, in_file):
 			ref = line[2]
 			run_cellranger_atac2_count(sample,fqs,ref)
 
+def run_cellranger_count_v1(sample, fqs, refdir, use_intronic_reads):
+	if use_intronic_reads == 'no':
+		cr_count1 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample])
+		cr_count1.wait()
+	elif use_intronic_reads == 'yes':
+		cr_count2 = subprocess.Popen([cellranger, 'count', '--id=' + sample, '--transcriptome=' + refdir, '--fastqs=' + fqs, '--sample=' + sample, '--include-introns'])
+		cr_count2.wait()
+	else:
+		print('issues....')
+
+def cellranger_scrnaseq_master_no_aggr_v1(work_dir, in_file):
+	os.chdir(work_dir)
+	with open(in_file, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			sample = line[0]
+			fqs = line[1]
+			ref = line[2]
+			intronic_reads = line[3]
+			run_cellranger_count_v1(sample,fqs,ref,intronic_reads)
+
 
 ##run methods
 
@@ -436,15 +458,24 @@ info_file = 'kim_mouse_multiome_0721.txt'
 transciptome_ref = mm10_arc_ref
 # cellranger_arc_master(working_dir, info_file, transciptome_ref)
 
-
 ##kim atac data 0821
 working_dir = '/archive/millen_k/kims_data/kim_cbl_10X_atac_0821'
-##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+##info on the analysis, 3x columns with no header: sample/id fqs ref_file (atac now uses ARC ref)
 info_file = 'kim_cbl_10X_atac.txt'
 # cellranger_atac2_master(working_dir, info_file)
 
-##dana atac data test 0821
-working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_0821'
-##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
-info_file = 'dana_atac_10x_0821.txt'
+##tim/eric scrna
+working_dir = '/active/cherry_t/OrgManuscript_SingleCell_Data/org_snp_multiome/28wk/'
+##4x columns: sample, fqs, transciptome_ref, and if to include intronic reads (no header)
+info_file = '28wk_snporg_scRNAseq.txt'
+transciptome_ref = grc38_ref
+intronic_ref = 'yes'
+# cellranger_scrnaseq_master_no_aggr_v1(working_dir, info_file)
+
+##tim/eric atac data 0921
+working_dir = '/active/cherry_t/OrgManuscript_SingleCell_Data/org_scATAC2/wk12_wt_vs_ko'
+##info on the analysis, 3x columns with no header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'wk12_wt_vs_ko_atac_0921.txt'
 cellranger_atac2_master(working_dir, info_file)
+
+
