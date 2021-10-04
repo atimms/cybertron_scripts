@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N dave_work2
+#PBS -l mem=120gb,ncpus=10
+#PBS -o /home/atimms/pbs_logs
+#PBS -j oe
+#PBS -M andrew.timms@seattlechildrens.org
+#PBS -m abe
+#PBS -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
+echo 'work'
+
+
+
+##dave/lisa genomes 0921
+#PBS -l mem=100gb,ncpus=10
+#PBS -l mem=20gb,ncpus=1
+dave_lisa_chd_genomes_annovar_0921_cyb.py
+
+
+

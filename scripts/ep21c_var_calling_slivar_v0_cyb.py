@@ -43,7 +43,8 @@ somalier = '/home/atimms/programs/somalier_0721/somalier'
 fasta = '/home/atimms/ngs_data/references/hg38_gatk/Homo_sapiens_assembly38.fasta'
 exome_capture_bed = '/home/atimms/ngs_data/references/exome_beds_hg38/hg38_targets_combined_padded_0721.bed'
 ##sorted specifically for this reference
-hg38_refseq_exons = '/home/atimms/ngs_data/references/hg38/hg38_RefSeq_exons.sorted.bed'
+# hg38_refseq_exons = '/home/atimms/ngs_data/references/hg38/hg38_RefSeq_exons.sorted.bed'
+hg38_refseq_exons = '/home/atimms/ngs_data/references/hg38/hg38_RefSeq_coding_exons.sorted_merged.bed'
 ens_gff = '/home/atimms/ngs_data/references/hg38_gatk/Homo_sapiens.GRCh38.103.chr_added.gff3.gz'
 gnomad_gnotate = '/home/atimms/ngs_data/references/slivar/gnomad.hg38.genomes.v3.fix.zip'
 topmed_gnotate = '/home/atimms/ngs_data/references/slivar/topmed.hg38.dbsnp.151.zip'
@@ -466,11 +467,11 @@ def merge_std_silvar_annovar(std_tsv, cp_tsv, multianno, outfile, std_vcf):
 			lc += 1
 			if lc == 1:
 				##add header info
-				extra_header = line[8:18] + line[71:75] + [line[45]] + line[59:61] + line[76:88] + ['vcf_info', 'vcf_format'] + vcf_samples
+				extra_header = line[8:18] + line[71:76] + [line[45]] + line[59:61] + line[76:88] + ['vcf_info', 'vcf_format'] + vcf_samples
 			else:
 				chr_pos_ref_alt = ':'.join(line[92:94] + line[95:97])
 				##keep refgene, clivar, cadd, gerp, polyphe, extra gnomad, vcf info
-				info_to_keep = line[8:18] + line[71:75] + [line[45]] + line[59:61] + line[76:88] + line[99:]				
+				info_to_keep = line[8:18] + line[71:76] + [line[45]] + line[59:61] + line[76:88] + line[99:]				
 				multianno_dict[chr_pos_ref_alt] = info_to_keep
 	with open(outfile, "w") as out_fh:
 		with open(std_tsv, "r") as std_fh:
@@ -506,10 +507,10 @@ def standard_slivar_protocol(ped_dict):
 		int_bcftools_vcf = ped + int_bcftools_vcf_suffix	
 		annotated_vcfs = [gatk_bcftools_vcf, int_bcftools_vcf]
 		##process vcf files, so have annotated vcf 
-		# '''
+		'''
 		process_annotate_vcf(int_vcf, int_bcftools_vcf)
 		process_annotate_vcf(gatk_vcf, gatk_bcftools_vcf)
-		# '''
+		'''
 		##filter with slivar
 		trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
 		duo_types = ['duo', 'duo*', 'parent_sibship']
@@ -533,10 +534,10 @@ def standard_slivar_protocol(ped_dict):
 			print(ped_type, ' ped type not recognized')
 		# '''
 		##run duo_del
-		# '''
+		'''
 		if ped_type.lower() in trio_types or ped_type.lower() in multiplex_types or ped_type.lower() in duo_types:
 			slivar_duo_del(annotated_vcfs, ped_file, formatted_ped_type)
-		# '''
+		'''
 
 
 def run_somalier(ped_dict, ped_file):
@@ -618,20 +619,18 @@ def post_bam_master(working_dir, info_file):
 	##get ped info, samples/pedtype/mosaic per ped
 	pedigree_dict = make_pedigree_dict(info_file)
 	# print(pedigree_dict)
-	'''
 	##call vars on gatk and freeabyes and intersect
-	var_calling(pedigree_dict)
+	# var_calling(pedigree_dict)
 	##slivar
 	standard_slivar_protocol(pedigree_dict)
 	##somalier
-	run_somalier(pedigree_dict, project_name + '.ped')
+	# run_somalier(pedigree_dict, project_name + '.ped')
 	##coverage
-	calculate_exome_coverage(pedigree_dict)
+	# calculate_exome_coverage(pedigree_dict)
 	##mosaic
-	ep21_pisces_mosaic_calling_v0.run_mosaic_variant_calling(working_dir, pedigree_dict)
-	'''
+	# ep21_pisces_mosaic_calling_v0.run_mosaic_variant_calling(working_dir, pedigree_dict)
 	##combine results files into new directory
-	combine_results(project_name)
+	# combine_results(project_name)
 
 
 
@@ -653,10 +652,19 @@ work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0821/'
 exome_info_file = 'ghayda_genedx_0821.txt'
 # exome_info_file = 'LR10-064_0821.txt' ##test on just LR10-064 (issue with rg)
 # post_bam_master(work_dir, exome_info_file)
+work_dir = '/home/atimms/ngs_data/exomes/backed_up/ghayda_genedx_0821/'
+exome_info_file = 'ghayda_genedx_0821_temp.txt'
+post_bam_master(work_dir, exome_info_file)
+
+
 
 ##kim 0921 34 singles
 work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
 exome_info_file = 'kim_exomes_0621.txt'
-post_bam_master(work_dir, exome_info_file)
+# post_bam_master(work_dir, exome_info_file)
  
 
+##ghayda 0821 2x singles plus extras
+work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0921/'
+exome_info_file = 'ghayda_genedx_0921.txt'
+post_bam_master(work_dir, exome_info_file)

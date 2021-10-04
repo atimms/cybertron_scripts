@@ -168,8 +168,12 @@ def make_exome_files(working_dir, info_file):
 # exome_info_file = 'ghayda_genedx_0821.txt'
 # make_exome_files(work_dir, exome_info_file)
 
-work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
+# work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
 # exome_info_file = 'kim_exomes_0621.txt'
-exome_info_file = 'kim_exomes_0621_temp.txt'
+# exome_info_file = 'kim_exomes_0621_temp.txt'
+# make_exome_files(work_dir, exome_info_file)
+
+work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0921/'
+exome_info_file = 'ghayda_genedx_0921.txt'
 make_exome_files(work_dir, exome_info_file)
 

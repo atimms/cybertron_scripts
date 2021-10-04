@@ -90,6 +90,10 @@ work_dir = '/home/atimms/ngs_data/exomes/working/kim_exomes_0621/'
 ##split into 2 files as issue with sarek prepocessing
 # exome_info_file = 'kim_exomes_0621_1.txt'
 # exome_info_file = 'kim_exomes_0621_2.txt'
-exome_info_file = 'kim_exomes_0621_3.txt'
+# exome_info_file = 'kim_exomes_0621_3.txt'
+# run_sarek_by_cohort(work_dir, exome_info_file)
+
+work_dir = '/home/atimms/ngs_data/exomes/working/ghayda_genedx_0921/'
+exome_info_file = 'ghayda_genedx_0921.txt'
 run_sarek_by_cohort(work_dir, exome_info_file)
 

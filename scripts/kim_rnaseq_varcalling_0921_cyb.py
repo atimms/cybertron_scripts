@@ -24,7 +24,8 @@ star = '/home/atimms/programs/STAR-2.7.9a/bin/Linux_x86_64_static/STAR'
 picard = '/home/atimms/programs/picard_2.19/picard.jar'
 gatk = '/home/atimms/programs/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar'
 samtools = '/home/atimms/programs/samtools-1.11/bin/samtools'
-
+gatk4 = '/home/atimms/programs/gatk-4.1.3.0/gatk'
+pisces = '/home/atimms/programs/pisces_all/Pisces'
 
 ##ref files and file names
 genome_name = 'GRCh38'
@@ -39,6 +40,7 @@ ref_dir = '/home/atimms/ngs_data/references/hg38_gatk/'
 indels_mills = ref_dir + 'Mills_and_1000G_gold_standard.indels.hg38.vcf.gz'
 indels_1000g = ref_dir + '1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf'
 dbsnp = ref_dir + 'Homo_sapiens_assembly38.dbsnp138.vcf'
+pisces_fastq_dir = '/home/atimms/ngs_data/references/illumina_hg38/'
 
 
 ##methods
@@ -96,6 +98,55 @@ def make_sample_fq_dict(in_file):
 				fq_dict[sample] = [fq1, fq2]
 	return(fq_dict)
 
+##need to figure this out
+def run_mutect2_tumor_samples(prefix, samples, work_dir):
+	sample_names = [prefix + '.' + i for i in samples]
+	for sample in sample_names:
+		bam = sample + final_bam_suffix
+		raw_vcf = sample + '.mt2_raw.vcf.gz'
+		temp_vcf = sample + '.mt2_temp.vcf.gz'
+		filtered_vcf = sample + '.mt2_filtered.vcf.gz'
+		if os.path.isfile(bam + '.bai'):
+			print('bam %s alreaded indexed'%bam)
+		else:
+			print('indexing bam file:', bam)
+			st_index = subprocess.Popen([samtools, 'index', bam])
+			st_index.wait()
+		##run each sample
+		#gatk Mutect2 -R ref_fasta.fa  -I tumor.bam -tumor tumor_sample_name --germline-resource af-only-gnomad.vcf.gz --pon pon.vcf.gz -L intervals.list --interval-padding 100 -O tumor_unmatched_m2_snvs_indels.vcf.gz
+		# mt2_cmd = [gatk4, 'Mutect2', '-R', fasta, '-I', bam, '-tumor', sample , '--germline-resource', mutect_gnomad_vcf, '--pon', mt2_pon_vcf, '--tmp-dir', work_dir + '/tmp', '-O', raw_vcf]
+		# run_mt2 = subprocess.Popen(mt2_cmd)
+		# run_mt2.wait()
+		##gatk FilterMutectCalls -R ref_fasta.fa -v tumor_unmatched_m2_snvs_indels.vcf.gz -O tumor_unmatched_m2_snvs_indels_filtered.vcf.gz 
+		mt2_filter = [gatk4, 'FilterMutectCalls', '-R', fasta, '-V', raw_vcf, '-O', temp_vcf]
+		run_mt2_filter = subprocess.Popen(mt2_filter)
+		run_mt2_filter.wait()
+		##using single or 10 threads with no sed command as ad good in vcf
+		bcftools_norm = subprocess.Popen([bcftools, 'norm', '-m', '-', '-w', '10000', '-f', fasta, '-o', filtered_vcf, '-O', 'z', temp_vcf])
+		# bcftools_norm = subprocess.Popen([bcftools, 'norm', '-m', '-', '--threads', '10', '-w', '10000', '-f', fasta, '-o', temp_vcf, '-O', 'z', input_vcf])
+		bcftools_norm.wait()
+
+def variant_calling_pisces(all_samples):
+	all_bams = [b + proccessed_bam_suffix for b in all_samples]
+	out_dir = 'pisces_analysis'
+	##check bai file exists and make if it isn't there
+	for bam in all_bams:
+		if os.path.isfile(bam + '.bai'):
+			print('bam %s alreaded indexed'%bam)
+		else:
+			print('indexing bam file:', bam)
+			st_index = subprocess.Popen([samtools, 'index', bam])
+			st_index.wait()
+	##run pisces on all samples
+	# '''
+	# run_pisces = subprocess.Popen(['mono', pisces, '-G', pisces_fastq_dir, '-BamPaths', ','.join(all_bams), '-MinVF', '0.01', '-i', exome_capture_bed, '-t', '16', '-OutFolder', out_dir])
+	run_pisces = subprocess.Popen([pisces, '-g', pisces_fastq_dir, '-BamPaths', ','.join(all_bams), '-MinVF', '0.01', '-t', '10', '-gVCF', 'false', '-ThreadByChr', 'True', '-FilterDuplicates', 'true', '-OutFolder', out_dir])
+	run_pisces.wait()
+	# '''
+	##annotate and filter the variants
+	# annotate_pisces_output(pro_vcfs, parent_comined_vcf, parent_bam_files, does_ped_have_parents)
+
+
 def genotyping_pipeline(info_file):
 	sample_fq_dict = make_sample_fq_dict(info_file)
 	project = info_file.split('_')[0]
@@ -104,12 +155,16 @@ def genotyping_pipeline(info_file):
 		fq1 = sample_fq_dict[sample][0]
 		fq2 = sample_fq_dict[sample][1]
 		##align with star
-		star_align_paired_end_2_pass(sample, fq1, fq2)
+		# star_align_paired_end_2_pass(sample, fq1, fq2)
 		##process files 
-		proccess_bam_files(sample)
+		# proccess_bam_files(sample)
 	##call variants
-	# make_list_of_bams(sample_fq_dict, sample_fq_dict, bamlist)
+	variant_calling_pisces(sample_fq_dict)
 	# get_vars_around_rs3184504(bamlist, project)
+
+
+
+
 
 ##run methods
 working_dir = '/home/atimms/ngs_data/rnaseq/kim_rnaseq_varcalling_0921'

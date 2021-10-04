@@ -13,6 +13,9 @@ thread_number = '20'
 
 ##modules 
 '''
+use dave_analysis.pbs or
+qsub -Iq cdbrmq -l mem=200gb,ncpus=20 -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
+qsub -Iq cdbrmq -l mem=40gb,ncpus=2 -P 2cf4ba3b-f9ef-4cfc-a2c1-be85f5db6730
 
 module load biobuilds/2017.11
 module load gcc/6.1.0 ##gcc version used to make bedtools using in homo mapping
@@ -34,6 +37,7 @@ bgzip = 'bgzip'
 fasta = '/home/atimms/ngs_data/references/mm10/mm10.fa'
 bamlist = 'bams.list'
 # st_avinputs = ['K50000022.avinput', 'K50000024.avinput', 'K50000095.avinput', 'combined.avinput']
+bedtools_genome_file  = '/home/atimms/ngs_data/references/mm10/mm10.fa.genome'
 
 ##file suffix
 post_bwa_bam = '.bwa.bam'
@@ -45,10 +49,9 @@ st_vcf_suffix = '.st.vcf.gz'
 av_genome = 'mm10'
 av_buildver = ['-buildver', av_genome]
 av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
-##filter on daredevil, bub, pleather and some of jabiers mice
-av_protocol = ['-protocol', 'refGene,rmsk,genomicSuperDups,snp142,generic,generic,generic,generic,generic,generic', '-genericdbfile', 'mgp.v5.merged.snps_all.dbSNP142.avinput,0620.kc1_wt.avinput,0620.kc2_ko.avinput,129P2_OlaHsd.mgp.v5.snps.dbSNP142.avinput,129S1_SvImJ.mgp.v5.snps.dbSNP142.avinput,129S5SvEvBrd.mgp.v5.snps.dbSNP142.avinput']
-av_operation = ['-operation', 'g,r,r,f,f,f,f,f,f,f']
-av_options = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,,,,,,', '-vcfinput']
+av_protocol = ['-protocol', 'refGene,rmsk,genomicSuperDups,snp142,generic,generic,generic,generic', '-genericdbfile', 'mgp.v5.merged.snps_all.dbSNP142.avinput,EP0014-0259-0008.avinput,EP0014-0259-0009.avinput,EP0014-0259-0010.avinput']
+av_operation = ['-operation', 'g,r,r,f,f,f,f,f']
+av_options = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,,,,', '-vcfinput']
 #av_options = ['-otherinfo', '-remove', '-vcfinput']
 
 ##filtering and hom mapping parameters
@@ -56,18 +59,14 @@ av_options = ['-otherinfo', '-remove','-arg', '-splicing 10 ,,,,,,,,,', '-vcfinp
 col_exon = 6
 exon_definition = ['exonic', 'splicing']
 col_function = 9
-syn_definition = 'synonymous SNV'
-zygosity_col = 28
-cov_col = 30
+syn_definition = ['synonymous SNV', 'unknown']
 cov_definition = 10
-qual_col = 29
 qual_definition = 30
 ##het snp mapping 
 genome_fai = '/home/atimms/ngs_data/references/mm10/mm10.fa.fai'
-window_size = [1000000,5000000,2000000]
-# window_size = [10000000]
+# window_size = [1000000,5000000,2000000]
+window_size = [10000000]
 step_size = 1000000
-info_col = 40
 
 ##methods
 
@@ -110,7 +109,8 @@ def variant_calling_samtools(project, final_vcf_suffix, bamlist_file):
 	# stmp = subprocess.Popen([samtools,'mpileup', '-ug','-t', 'DP,DV,DPR', '-q', '20', '-C', '50', '-f', fasta, '-b', bamlist_file], stdout=subprocess.PIPE)
 	# bcft = subprocess.Popen([bcftools,'call', '-vmO', 'z', '--threads', '19', '-V', 'indels', '-o', vcf_temp1], stdin=stmp.stdout)
 	stmp = subprocess.Popen([samtools,'mpileup', '-Ou','-t', 'DP,DV,DPR', '-q', '20', '-C', '50', '-f', fasta, '-b', bamlist_file], stdout=subprocess.PIPE)
-	bcft = subprocess.Popen([bcftools,'call', '-vmO', 'z', '--threads', '10', '-V', 'indels', '-o', vcf_temp1], stdin=stmp.stdout)
+	# bcft = subprocess.Popen([bcftools,'call', '-vmO', 'z', '--threads', '10', '-V', 'indels', '-o', vcf_temp1], stdin=stmp.stdout)
+	bcft = subprocess.Popen([bcftools,'call', '-vmO', 'z', '--threads', '10', '-o', vcf_temp1], stdin=stmp.stdout)
 	bcft.wait()
 	bcf_index = subprocess.Popen([bcftools, 'index', vcf_temp1])
 	bcf_index.wait()
@@ -123,13 +123,25 @@ def variant_calling_samtools(project, final_vcf_suffix, bamlist_file):
 	bcf_index = subprocess.Popen([bcftools, 'index', final_vcf])
 	bcf_index.wait()
 
+def filter_vcf_non_std_chr(in_vcf, out_vcf):
+	vcf_temp1 = 'temp1.vcf.gz'
+	vcf_temp2 = 'temp2.vcf.gz'
+	bcftools_filter = subprocess.Popen(['bcftools', 'view', '-r', 'chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19', '-o', vcf_temp1, '-O', 'z', in_vcf])
+	bcftools_filter.wait()
+	#split multi-allelic variants calls in separate lines, and left normalize indels
+	bcf_norm1 = subprocess.Popen(['bcftools', 'norm', '-m-both', '-O', 'z', '-o', vcf_temp2, vcf_temp1])
+	bcf_norm1.wait()
+	bcf_norm2 = subprocess.Popen(['bcftools', 'norm', '-f', fasta, '-O', 'z', '-o', out_vcf, vcf_temp2])
+	bcf_norm2.wait()
 
 ##make avinput files
 def convert_to_annovar_move_to_annovar_folder(samples, vcf):
-	con_ann = subprocess.Popen([convert_2_annovar, '-format', 'vcf4', vcf, '-includeinfo', '-withzyg', '-allsample', '-outfile', '0620'])
+	con_ann = subprocess.Popen([convert_2_annovar, '-format', 'vcf4', vcf, '-includeinfo', '-withzyg', '-allsample', '-outfile', 'temp'])
 	con_ann.wait()
 	for sample in samples:
-		av_file = '0620.' + sample + '.avinput'
+		temp_av_file = 'temp.' + sample + '.avinput'
+		av_file = sample + '.avinput'
+		shutil.move(temp_av_file, av_file)
 		shutil.copy(av_file, str(av_ref_dir[0]))
 
 def run_table_annovar(vcf, av_prefix):
@@ -138,21 +150,117 @@ def run_table_annovar(vcf, av_prefix):
 	annovar.wait()
 
 def multianno_to_annotated(av_prefix): 
-	head = ['Chr', 'Start', 'End', 'Ref', 'Alt', 'Func.refGene', 'Gene.refGene', 'GeneDetail.refGene', 'ExonicFunc.refGene', 'AAChange.refGene', 'rmsk', 'genomicSuperDups', 'snp142', 'mgp.v5.snps', 'kc1_wt', 'kc2_ko', '129P2_OlaHsd', '129S1_SvImJ', '129S5SvEvBrd', 'vcf_info', 'vcf_format', 'vcf_kc1_wt', 'vcf_kc2_ko']
+	head = ['Chr', 'Start', 'End', 'Ref', 'Alt', 'Func.refGene', 'Gene.refGene', 'GeneDetail.refGene', 'ExonicFunc.refGene', 'AAChange.refGene', 'rmsk', 'genomicSuperDups', 'snp142', 'mgp.v5.snps', 'EP0014-0259-0008', 'EP0014-0259-0009', 'EP0014-0259-0010', 'QUAL', 'vcf_info', 'vcf_format', 'vcf_10', 'vcf_08', 'vcf_09', 'dp_10', 'dp_08', 'dp_09']
 	head_out = delim.join(head + ['\n'])
-
 	multianno = av_prefix + '.mm10_multianno.txt'
 	annotated = av_prefix + '.annotated.txt'
 	with open(multianno, "r") as multi, open(annotated, "w") as final:
 		final.write(head_out)
 		line_count = 0
 		for line in multi:
-			line = line.split(delim)
+			line = line.rstrip().split(delim)
 			line_count += 1
 			if line_count > 1:
-				line_out = line[:18] + line[28:]
-				final.write(delim.join(line_out))
+				# print(line[29:])
+				dp1 = line[29].split(":")[2]
+				dp2 = line[30].split(":")[2]
+				dp3 = line[31].split(":")[2]
+				line_out = line[:17] + [line[18]] + line[27:] + [dp1, dp2, dp3]
+				final.write(delim.join(line_out) + '\n')
 
+def calculate_genome_coverage(samples, bam_suffix, genome_file, prefix):
+	##parameters and header
+	coverage_required = [1,5,10,20,50,100,200]
+	cov_head = []
+	for cr in coverage_required:
+		cr1 = 'total bp >=' + str(cr)
+		cr2 = 'percentage covered >=' + str(cr)
+		cov_head.extend([cr1, cr2])
+	header = delim.join(['bam file', 'target size', 'total bp', 'coverage'] + cov_head + ['\n'])
+	##open results file and write header
+	output_file = prefix + '.coverage_data.txt'
+	print output_file
+	with open(output_file, "w") as outfh:
+		outfh.write(header)
+		##go through bam files and get coverage histogram
+		for sample in samples:
+			bam = sample + bam_suffix
+			print 'calculating coverge for bam file', bam
+			##get temp coverage files
+			coverage_histogram = sample + '.hist.temp'
+			hist_fh = open(coverage_histogram, 'w')
+			##just the file
+			# bedtools_cov = subprocess.Popen([bedtools, 'genomecov', '-ibam', bam, '-g', genome_file], stdout=hist_fh)
+			# bedtools_cov.wait()
+			bedtools_cov = subprocess.Popen([bedtools, 'genomecov', '-ibam', bam, '-g', genome_file], stdout=subprocess.PIPE)
+			grep_cmd = subprocess.Popen(['grep', '^genome'], stdin=bedtools_cov.stdout, stdout=hist_fh)
+			grep_cmd.wait()
+			hist_fh.close()
+			##calculate numbers from histogram
+			with open(coverage_histogram, "r") as cov_temp:
+				seq_total = 0
+				for line in cov_temp:
+					line = line.strip('\n').split(delim)
+					target_size = float(line[3])
+					if line[1] != '0':
+						seq_total += int(line[1]) *  int(line[2])
+			cov_stats = []
+			for cr in coverage_required:
+				coverage_bp = 0
+				with open(coverage_histogram, "r") as cov_temp:
+					for line in cov_temp:
+						line = line.strip('\n').split(delim)
+						target_size = float(line[3])
+						if int(line[1]) >= cr:
+							coverage_bp += int(line[2])
+					cov_stats.extend([str(coverage_bp), str((coverage_bp / target_size) * 100)])
+			line_out = delim.join([bam, str(target_size), str(seq_total), str(seq_total / target_size)] + cov_stats + ['\n'])
+			outfh.write(line_out)
+
+def filter_ann_file_exonic(file_prefix):
+	##exonic_variants
+	filtering_annotated.filter(working_dir, "or", file_prefix + '.annotated.txt' , file_prefix + "_1.temp", [col_exon, col_exon], ['==','=='], exon_definition)
+	##remove synonymous
+	filtering_annotated.filter(working_dir, "and", file_prefix + "_1.temp", file_prefix + "_2.temp", [col_function,col_function], ['!=','!='], syn_definition)
+	##in all 3 samples
+	filtering_annotated.filter(working_dir, "and", file_prefix + "_2.temp", file_prefix + "_3.temp", [15,16,17], ['!=','!=','!='], ['.','.','.'])
+	##not in dbSNP or mgp 
+	filtering_annotated.filter(working_dir, "and", file_prefix + "_3.temp", file_prefix + ".exonic_rare.xls", [13,14], ['==','=='], ['.','.'])
+
+def hom_mapping(file_prefix, sample_names):
+	##remove if in rmsk or segdups
+	filtering_annotated.filter(working_dir, "and", file_prefix + '.annotated.txt', file_prefix + "11.temp", [11,12], ['==','=='], ['.','.'])
+	##remove indels
+	filtering_annotated.filter(working_dir, "and", file_prefix + "11.temp", file_prefix + "12.temp", [4,5], ['!=','!='], ['-','-'])
+	##filter variants by coverage and quality 
+	filtering_annotated.filter(working_dir, "and", file_prefix + "12.temp", file_prefix + '13.temp', [18], ['>='], [qual_definition])
+	filtering_annotated.filter(working_dir, "and", file_prefix + "13.temp", file_prefix + '.hom_temp.txt', [24,25,26], ['>=','>=','>='], [cov_definition,cov_definition,cov_definition])
+	##get enu vars to check
+	filtering_annotated.filter(working_dir, "and", file_prefix + ".hom_temp.txt", file_prefix + '.rare.txt', [13,14], ['==','=='], ['.','.'])
+	for sample in sample_names:
+		shutil.copy(file_prefix + '.hom_temp.txt', sample + '.hom_temp.txt')
+		for ws in window_size:
+			#make bed file with windows and returns genome name and window size variable
+			genome_and_window = homozygosity_mapping_cybertron.make_windows(working_dir, genome_fai, ws, step_size).split('.')[0]
+			if sample == 'EP0014-0259-0008':
+				zygosity_col = 15
+				info_col = 22
+			if sample == 'EP0014-0259-0009':
+				zygosity_col = 16
+				info_col = 23
+			if sample == 'EP0014-0259-0010':
+				zygosity_col = 17
+				info_col = 21
+			##make bed file from variants
+			homozygosity_mapping_cybertron.make_bed_from_ann(working_dir, 'samtools', sample + '.hom_temp.txt', zygosity_col, info_col)
+			##hom and het count and hom percentage
+			homozygosity_mapping_cybertron.count_and_percentage(working_dir, genome_and_window, sample + '.bed')
+			##naf
+			homozygosity_mapping_cybertron.naf_in_window(working_dir, genome_and_window, sample + '.bed')
+			##total snp number
+			homozygosity_mapping_cybertron.total_snp_in_window(working_dir, genome_and_window, sample + '.bed')
+			##combine bedgraphs for graphing in r
+			homozygosity_mapping_cybertron.combine_bedgraphs_for_r(working_dir, sample, genome_and_window)
 
 ##run_methods
 working_dir = '/home/atimms/ngs_data/enu_mapping/dave_pkd_modifier_0921'
@@ -164,23 +272,34 @@ fq_dict = {'EP0014-0259-0008':['EP0014-0259-0008_R1_001.fastq.gz', 'EP0014-0259-
 		'EP0014-0259-0010':['EP0014-0259-0010_R1_001.fastq.gz', 'EP0014-0259-0010_R2_001.fastq.gz']}
 samples = fq_dict.keys()
 result_vcf = project_name + st_vcf_suffix
-
+filtered_vcf = project_name + '.st.autosomes.vcf.gz'
 
 ##analysis wanted 
-## exonic variants that were shared by all the sample
+## exonic variants that were shared by all the samples
 ## common region of homozygosity in all samples
 
 
 ##align all samples
-align_with_bwa(fq_dict)
-
+# align_with_bwa(fq_dict)
 
 ##call vars
-make_list_of_bams(samples, mkdup_bam, bamlist)
-variant_calling_samtools(project_name, st_vcf_suffix, bamlist)
+# make_list_of_bams(samples, mkdup_bam, bamlist)
+# variant_calling_samtools(project_name, st_vcf_suffix, bamlist)
 
-##annotate and filter
-# convert_to_annovar_move_to_annovar_folder(samples, result_vcf)
-# run_table_annovar(result_vcf, project_name)
+##coverage
+# calculate_genome_coverage(samples, mkdup_bam, bedtools_genome_file, project_name)
+
+##annotate and format
+# filter_vcf_non_std_chr(result_vcf, filtered_vcf)
+# convert_to_annovar_move_to_annovar_folder(samples, filtered_vcf)
+# run_table_annovar(filtered_vcf, project_name)
 # multianno_to_annotated(project_name)
-# filter_ann_file(project_name)
+
+##get exonic variants in all three samples
+# filter_ann_file_exonic(project_name)
+
+##homozygosity mapping for the 3 samples
+hom_mapping(project_name, samples)
+
+
+

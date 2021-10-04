@@ -353,6 +353,7 @@ def mini_van_analysis_master(in_file, project_name, bed, hotspot_bed):
 
 def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_correction_methods):
 	sample_dict = get_sample_dict(in_file)
+	print(sample_dict)
 	# '''
 	##for all samples
 	##make unmapped bam from fqs
@@ -366,6 +367,7 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 	# '''
 	##error correction A
 	if 'a' in error_correction_methods:
+		# '''
 		##Deduplicate by start-stop position
 		dedup_by_position(sample_dict)
 		##Clip overlap between read pairs
@@ -376,12 +378,14 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 		calcluate_coverage_per_region(sample_dict, '.method_a_rmdup_temp2.bam', bed, project_name + '_method_a')
 		calcluate_coverage(sample_dict, '.method_a_rmdup_temp2.bam', hotspot_bed, project_name + '_method_a_hotspot')
 		calcluate_coverage_per_region(sample_dict, '.method_a_rmdup_temp2.bam', hotspot_bed, project_name + '_method_a_hotspot')
+		# '''
 		##variant calling
 		var_calling_vardict(sample_dict, bed, '.method_a_mkdup.bam', '.method_a_mkdup.vardict.vcf')
 		##annovar
 		annotate_vcf(sample_dict, '.method_a_mkdup.vardict.vcf', project_name + '.method_a_mkdup.vardict.xls')
 	##error correction B
 	if 'b' in error_correction_methods:
+		# '''
 		##Deduplicate by umi
 		dedup_by_umi(sample_dict)
 		##Clip overlap between read pairs
@@ -392,12 +396,15 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 		calcluate_coverage_per_region(sample_dict, '.method_b_rmdup_temp2.bam', bed, project_name + '_method_b')
 		calcluate_coverage(sample_dict, '.method_b_rmdup_temp2.bam', hotspot_bed, project_name + '_method_b_hotspot')
 		calcluate_coverage_per_region(sample_dict, '.method_b_rmdup_temp2.bam', hotspot_bed, project_name + '_method_b_hotspot')
+		# '''		
 		##variant calling
 		var_calling_vardict(sample_dict, bed, '.method_b_mkdup.bam', '.method_b_mkdup.vardict.vcf')
 		##annovar
 		annotate_vcf(sample_dict, '.method_b_mkdup.vardict.vcf', project_name + '.method_b_mkdup.vardict.xls')
+
 	##error correction C
 	if 'c' in error_correction_methods:
+		# '''
 		##Error correct by collapsing single read families
 		error_correct_collapse_srf(sample_dict)
 		##Clip overlap between read pairs
@@ -407,12 +414,15 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 		calcluate_coverage_per_region(sample_dict, '.method_c_collapsed.bam', bed, project_name + '_method_c')
 		calcluate_coverage(sample_dict, '.method_c_collapsed.bam', hotspot_bed, project_name + '_method_c_hotspot')
 		calcluate_coverage_per_region(sample_dict, '.method_c_collapsed.bam', hotspot_bed, project_name + '_method_c_hotspot')
+		# '''
 		##variant calling
 		var_calling_vardict(sample_dict, bed, '.method_c_collapsed.bam', '.method_c_collapsed.vardict.vcf')
 		##annovar
 		annotate_vcf(sample_dict, '.method_c_collapsed.vardict.vcf', project_name + '.method_c_collapsed.vardict.xls')
+
 	##error correction D
 	if 'd' in error_correction_methods:
+		# '''
 		##Error correct by collapsing combined read families
 		error_correct_collapse(sample_dict)
 		##Clip overlap between read pairs
@@ -422,14 +432,15 @@ def minivan_analysis_master_v2(in_file, project_name, bed, hotspot_bed, error_co
 		calcluate_coverage_per_region(sample_dict, '.method_d_collapsed.bam', bed, project_name + '_method_d')
 		calcluate_coverage(sample_dict, '.method_d_collapsed.bam', hotspot_bed, project_name + '_method_d_hotspot')
 		calcluate_coverage_per_region(sample_dict, '.method_d_collapsed.bam', hotspot_bed, project_name + '_method_d_hotspot')
+		# '''		
 		##variant calling
 		var_calling_vardict(sample_dict, bed, '.method_d_collapsed.bam', '.method_d_collapsed.vardict.vcf')
 		##annovar
 		annotate_vcf(sample_dict, '.method_d_collapsed.vardict.vcf', project_name + '.method_d_collapsed.vardict.xls')
 
 ##run methods
-working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0621'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0621'
+# os.chdir(working_dir)
 
 ##params
 # minvan_bed = 'minivan_hg19_nochr_0621.bed'
@@ -458,8 +469,8 @@ error_correction_wanted = ['c']
 # minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
 
 ##new run 0821
-working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0821'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0821'
+# os.chdir(working_dir)
 ##3 columns, sample name, fq1, fq2
 info_file = 'minivan_test_0821.txt'
 project = info_file.split('.')[0]
@@ -467,10 +478,20 @@ error_correction_wanted = ['a', 'b', 'c', 'd']
 # minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
 
 ##new run 0821
-working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_nextseq_0821'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_nextseq_0821'
+# os.chdir(working_dir)
 ##3 columns, sample name, fq1, fq2
 info_file = 'minivan_nextseq_0821.txt'
+project = info_file.split('.')[0]
+error_correction_wanted = ['a', 'b', 'c', 'd']
+# minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
+
+
+##new run 0921
+working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0921'
+os.chdir(working_dir)
+##3 columns, sample name, fq1, fq2
+info_file = 'minivan_0921.txt'
 project = info_file.split('.')[0]
 error_correction_wanted = ['a', 'b', 'c', 'd']
 minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
