@@ -1,7 +1,7 @@
 ##just use common library, so check which one to use and then set that parameter
 #.libPaths()
 #.libPaths( .libPaths()[2] )
-33using r 3.6
+##using r 3.6
 
 ##load libarys
 library("DESeq2")

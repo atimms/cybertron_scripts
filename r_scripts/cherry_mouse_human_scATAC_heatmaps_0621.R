@@ -130,3 +130,25 @@ mat_cluster_rows <- sort_hclust(hclust(dist(ho_hm)))
 pheatmap(ho_hm, show_rownames = F, cluster_cols = mat_cluster_cols, cluster_rows = mat_cluster_rows)
 dev.copy2pdf(file='human_org_0621.ret_genes.heatmap_markers.no_RGC.cluster2.pdf', width = 9, height = 6)
 
+
+##graph human/organoid data -- removing hu_Mature Ganglions... with new data 1021
+ho_hm <- read.table('human_organoid_1021.ret_genes.heatmap_all.int.txt', row.names=1, header=T, sep='\t')
+ho_hm = subset(ho_hm, select=-c(hu_Mature.Ganglions))
+pheatmap(ho_hm, show_rownames = F)
+dev.copy2pdf(file='human_org_1021.ret_genes.heatmap_all.no_RGC.cluster.pdf', width = 9, height = 6)
+mat_cluster_cols <- hclust(dist(t(ho_hm)))
+mat_cluster_cols <- sort_hclust(mat_cluster_cols)
+mat_cluster_rows <- sort_hclust(hclust(dist(ho_hm)))
+pheatmap(ho_hm, show_rownames = F, cluster_cols = mat_cluster_cols, cluster_rows = mat_cluster_rows)
+dev.copy2pdf(file='human_org_1021.ret_genes.heatmap_all.no_RGC.cluster2.pdf', width = 9, height = 6)
+
+ho_hm <- read.table('human_organoid_1021.ret_genes.heatmap_markers.int.txt', row.names=1, header=T, sep='\t')
+ho_hm = subset(ho_hm, select=-c(hu_Mature.Ganglions))
+pheatmap(ho_hm, show_rownames = F)
+dev.copy2pdf(file='human_org_1021.ret_genes.heatmap_markers.no_RGC.cluster.pdf', width = 9, height = 6)
+mat_cluster_cols <- hclust(dist(t(ho_hm)))
+mat_cluster_cols <- sort_hclust(mat_cluster_cols)
+mat_cluster_rows <- sort_hclust(hclust(dist(ho_hm)))
+pheatmap(ho_hm, show_rownames = F, cluster_cols = mat_cluster_cols, cluster_rows = mat_cluster_rows)
+dev.copy2pdf(file='human_org_1021.ret_genes.heatmap_markers.no_RGC.cluster2.pdf', width = 9, height = 6)
+

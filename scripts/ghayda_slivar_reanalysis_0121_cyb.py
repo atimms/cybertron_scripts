@@ -503,7 +503,7 @@ def slivar_std_analysis_on_multiplex(in_vcfs, ped_file, ped_type):
 		slivar_std_multi = in_vcf.rsplit('.', 2)[0] + '.slivar_std.temp.hg19_multianno.txt'
 		slivar_std_final = in_vcf.rsplit('.', 4)[0] + '_slivar.' + ped_type + '.std_analysis.xls'
 		##get std file
-		'''
+		# '''
 		slivar_multi = subprocess.Popen([slivar, 'expr', '--vcf', in_vcf, '--ped', ped_file,
 			'--pass-only', '-g', gnomad_gnotate, '--js', slivar_functions, '--info',
 			'INFO.impactful && INFO.gnomad_popmax_af < 0.01 && variant.FILTER == "PASS" && variant.ALT[0] != "*"',
@@ -519,7 +519,7 @@ def slivar_std_analysis_on_multiplex(in_vcfs, ped_file, ped_type):
 		slivar_cp = subprocess.Popen([slivar, 'compound-hets', '--vcf', slivar_std_vcf, '--ped', ped_file,
 					'-s', 'comphet_side', '-s', 'aff_het', '--allow-non-trios', '-o', slivar_cp_vcf])
 		slivar_cp.wait()
-		'''
+		# '''
 		ann_program = in_vcf.split('.')[2]
 		##different params for diff annotations
 		ann_program = in_vcf.split('.')[2]
@@ -683,7 +683,7 @@ def standard_slivar_protocol(working_directory, pedigree, ped_type):
 	# 		pedigree + '.gatk.snpeff.GRCh37_87.vcf.gz', pedigree + '.gatk.snpeff.hg19.vcf.gz']
 	annotated_vcfs = [pedigree + '.intersected.bcftools.GRCh37_87.vcf.gz', pedigree + '.gatk.bcftools.GRCh37_87.vcf.gz']
 	##process vcf files, so have normalized and annotated vcf 
-	'''
+	# '''
 	process_annotate_vcf(pedigree + '.intersected', in_vcf)
 	process_annotate_vcf(pedigree + '.gatk', gatk_vcf)
 	# '''
@@ -698,7 +698,7 @@ def standard_slivar_protocol(working_directory, pedigree, ped_type):
 	else:
 		formatted_ped_type = ped_type
 	# print(pedigree, ped_type, formatted_ped_type)
-	'''
+	# '''
 	if ped_type.lower() in trio_types:
 		slivar_std_analysis_on_trio(annotated_vcfs, ped_file, formatted_ped_type)
 	elif ped_type.lower() in duo_types or ped_type.lower() in single_types:
@@ -1026,10 +1026,10 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 	ped_file = pedigree + '.ped'
 	annotated_vcfs = [pedigree + '.intersect.bcftools.GRCh37_87.vcf.gz', pedigree + '.gatk38.bcftools.GRCh37_87.vcf.gz']
 	##process vcf files, so have normalized and annotated vcf 
-	'''
+	# '''
 	process_annotate_vcf(pedigree + '.intersect', int_vcf)
 	process_annotate_vcf(pedigree + '.gatk38', gatk_vcf)
-	'''
+	# '''
 	##filter with slivar
 	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
 	duo_types = ['duo', 'duo*', 'parent_sibship']
@@ -1041,7 +1041,7 @@ def standard_slivar_protocol_v2(working_directory, pedigree, ped_type, gatk_vcf,
 	else:
 		formatted_ped_type = ped_type
 	# print(pedigree, ped_type, formatted_ped_type)
-	'''
+	# '''
 	##standard analyses
 	if ped_type.lower() in trio_types:
 		slivar_std_analysis_on_trio(annotated_vcfs, ped_file, formatted_ped_type)
@@ -1098,7 +1098,8 @@ def combine_files(work_directory, var_types, file_suffix):
 
 
 def repeat_var_calling_0221(work_directory, infile):
-	rss_dir = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/all_exome_files/'
+	# rss_dir = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/all_exome_files/'
+	rss_dir = '/archive/mirzaa_g/dobyns_lab/exome_data/all_exome_files/'
 	rss_dir2 = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/exomes_after_0616/jimmy_trios_0916/'
 	rss_dir3 = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/batch1_and_2_exomes_2016/acc_fp1/'
 	rss_dir4 = '/archive/.snapshot/202005281800-Dobyns_W-Archive/dobyns_w/exome_data/exomes_after_1217/ghayda_gw_0218/'
@@ -1131,7 +1132,7 @@ def repeat_var_calling_0221(work_directory, infile):
 			fb_vcf = ped + '.freebayes13.vcf.gz'
 			int_vcf = ped + '.intersect_vcfs/0002.vcf'
 			##call vars and intersect
-			variant_calling_gatk_hc_no_gvcf(bams_list, ped)
+			# variant_calling_gatk_hc_no_gvcf(bams_list, ped)
 			variant_calling_freebayes(bams_list, ped)
 			intersect_two_vcf_files(gatk_vcf, fb_vcf, ped + '.intersect_vcfs')
 			##run slivar
@@ -1314,124 +1315,6 @@ def slivar_analysis_split_ped(work_directory, infile):
 			##run slivar
 			standard_split_slivar_protocol(work_directory, ped_file, ped_type, gatk_vcf, int_vcf, ped_split)		
 
-##run on original gatk and intersected files
-working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/all_exome_data'
-
-##run as a batch
-# input_exomes_file = 'exomes_1.txt'
-# input_exomes_file = 'exomes_2.txt'
-# input_exomes_file = 'exomes_3.txt'
-# input_exomes_file = 'exomes_4.txt'
-# input_exomes_file = 'exomes_5.txt'
-# input_exomes_file = 'exomes_6.txt'
-# input_exomes_file = 'exomes_all.txt'
-# input_exomes_file = 'exomes_s2.txt'
-
-##input files
-# slivar_exome_inputs(working_dir, input_exomes_file)
-
-##ind peds
-# standard_slivar_protocol(working_dir, "LR02-027", 'trio')
-# standard_slivar_protocol(working_dir, "LR05-203", 'multiplex')
-# standard_slivar_protocol(working_dir, "LP99-100", 'sibship')
-
-
-#rm *temp* *snpeff* *bcftools*
-
-##get var counts per ped for each version of slivar data
-working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/analysis_files_0121'
-std_file_suffices = ['.std_analysis.xls', '.gatk.bcftools.GRCh37_87.slivar.std_analysis.xls', 
-		'.gatk.snpeff.GRCh37_87.slivar.std_analysis.xls', '.gatk.snpeff.hg19.slivar.std_analysis.xls',
-		'.intersected.bcftools.GRCh37_87.slivar.std_analysis.xls', '.intersected.snpeff.GRCh37_87.slivar.std_analysis.xls',
-		'.intersected.snpeff.hg19.slivar.std_analysis.xls']
-ped_info_file = 'all_exome_info.txt'
-# ped_info_file = 'test_exome_info.txt'
-# get_var_counts_per_ped(working_dir, ped_info_file, std_file_suffices)
-
-##latest versions of analysis files - 0221
-working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/analysis_files_0221'
-var_types = ['.gatk_slivar.', '.intersected_slivar.']
-##get counts
-# get_var_counts(working_dir, ped_info_file, var_types)
-##combine all single/duo trio and mutiplex files
-# combine_var_counts(working_dir, ped_info_file, var_types)
-##filter the combined files
-combined_var_files = ['combined.gatk_slivar.multiplex.all.xls', 'combined.gatk_slivar.single_duo.all.xls', 
-		'combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_slivar.multiplex.all.xls', 
-		'combined.intersected_slivar.single_duo.all.xls', 'combined.intersected_slivar.trio_quad.all.xls']
-pathogenic_definitions = ['Pathogenic', 'Pathogenic/Likely_pathogenic', 'Likely_pathogenic']
-# filter_clinsig_vars(working_dir, combined_var_files, '.clinvar.xls', pathogenic_definitions)
-
-##parental mosaic from denovo
-trio_files = ['combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_slivar.trio_quad.all.xls']
-# filter_parental_mosiac(working_dir, trio_files, '.parental_mosaic.xls')
-
-##cnv analysis
-
-
-
-##repeat var calling/slivar analysis
-# exome_ped_file = 'exome_test' #test
-exome_ped_file = 'exome_info.txt' ##all the peds
-##split 5 ways
-# exome_ped_file = 'exome_infoaa'
-# exome_ped_file = 'exome_infoab'
-# exome_ped_file = 'exome_infoac'
-# exome_ped_file = 'exome_infoad'
-# exome_ped_file = 'exome_infoae'
-
-##for combining files
-ped_info_file = 'all_exome_info.txt'
-
-working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/recall_vars_0221'
-##repeat var calling and slivar
-# repeat_var_calling_0221(working_dir, exome_ped_file)
-
-##redo slivar with new omim and repeats analyses etc
-# slivar_analysis_master_0221(working_dir, exome_ped_file)
-
-##latest versions of analysis files - 0221
-var_types = ['.gatk38_slivar.', '.intersect_slivar.']
-##get counts
-# get_var_counts(working_dir, ped_info_file, var_types)
-
-##combine all single/duo trio and mutiplex files for std analysis files
-# combine_var_counts(working_dir, ped_info_file, var_types)
-##also combine the non filtered gatk slivar files
-# combine_unfiltered_gatk_slivar_files(working_dir, exome_ped_file, '.not_filtered_analysis.xls')
-
-
-##filter the combined files
-##clivar
-combined_var_files = ['combined.gatk38_slivar.multiplex.all.xls', 'combined.gatk38_slivar.single_duo.all.xls', 
-		'combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_slivar.multiplex.all.xls', 
-		'combined.intersect_slivar.single_duo.all.xls', 'combined.intersect_slivar.trio_quad.all.xls', 
-		'combined.gatk38_not_filtered.multiplex.all.xls', 'combined.gatk38_not_filtered.single_duo.all.xls', 
-		'combined.gatk38_not_filtered.trio_quad.all.xls']
-pathogenic_definitions = ['Pathogenic', 'Pathogenic/Likely_pathogenic', 'Likely_pathogenic']
-# filter_clinsig_vars(working_dir, combined_var_files, '.clinvar.xls', pathogenic_definitions)
-
-##parental mosaic from denovo
-trio_files = ['combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_slivar.trio_quad.all.xls']
-# filter_parental_mosiac(working_dir, trio_files, '.parental_mosaic.xls')
-
-##combine duo_del files, need to run on all samples first
-# combine_files(working_dir, var_types, 'duo_del.xls')
-
-##combine genic de novos
-# combine_files(working_dir, var_types, 'genic_dn_analysis.xls')
-
-##split quads/quints etc
-##need to split ped and make ped analysis file  i.e. ped, ped split, ped split type
-# exome_ped_file = 'exome_split_1.txt'
-# exome_ped_file = 'exome_split_2.txt'
-# exome_ped_file = 'exome_split_3.txt'
-# exome_ped_file = 'exome_split_4.txt'
-# exome_ped_file = 'exome_split_5.txt'
-# exome_ped_file = 'exome_split_6.txt'
-##redo slivar with
-# slivar_analysis_split_ped(working_dir, exome_ped_file)
-
 
 def slivar_std_analysis_on_trio_dom(in_vcfs, ped_file, ped_type):
 	for in_vcf in in_vcfs:
@@ -1524,9 +1407,133 @@ def slivar_dominant_analysis(work_directory, infile):
 			##run slivar
 			standard_dom_slivar_protocol(work_directory, ped_file, ped_type, gatk_vcf, int_vcf)
 
+
+
+##run on original gatk and intersected files
+working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/all_exome_data'
+
+##run as a batch
+# input_exomes_file = 'exomes_1.txt'
+# input_exomes_file = 'exomes_2.txt'
+# input_exomes_file = 'exomes_3.txt'
+# input_exomes_file = 'exomes_4.txt'
+# input_exomes_file = 'exomes_5.txt'
+# input_exomes_file = 'exomes_6.txt'
+# input_exomes_file = 'exomes_all.txt'
+# input_exomes_file = 'exomes_s2.txt'
+
+##input files
+# slivar_exome_inputs(working_dir, input_exomes_file)
+
+##ind peds
+# standard_slivar_protocol(working_dir, "LR02-027", 'trio')
+# standard_slivar_protocol(working_dir, "LR05-203", 'multiplex')
+# standard_slivar_protocol(working_dir, "LP99-100", 'sibship')
+
+
+#rm *temp* *snpeff* *bcftools*
+
+##get var counts per ped for each version of slivar data
+working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/analysis_files_0121'
+std_file_suffices = ['.std_analysis.xls', '.gatk.bcftools.GRCh37_87.slivar.std_analysis.xls', 
+		'.gatk.snpeff.GRCh37_87.slivar.std_analysis.xls', '.gatk.snpeff.hg19.slivar.std_analysis.xls',
+		'.intersected.bcftools.GRCh37_87.slivar.std_analysis.xls', '.intersected.snpeff.GRCh37_87.slivar.std_analysis.xls',
+		'.intersected.snpeff.hg19.slivar.std_analysis.xls']
+ped_info_file = 'all_exome_info.txt'
+# ped_info_file = 'test_exome_info.txt'
+# get_var_counts_per_ped(working_dir, ped_info_file, std_file_suffices)
+
+##latest versions of analysis files - 0221
+working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/analysis_files_0221'
+var_types = ['.gatk_slivar.', '.intersected_slivar.']
+##get counts
+# get_var_counts(working_dir, ped_info_file, var_types)
+##combine all single/duo trio and mutiplex files
+# combine_var_counts(working_dir, ped_info_file, var_types)
+##filter the combined files
+combined_var_files = ['combined.gatk_slivar.multiplex.all.xls', 'combined.gatk_slivar.single_duo.all.xls', 
+		'combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_slivar.multiplex.all.xls', 
+		'combined.intersected_slivar.single_duo.all.xls', 'combined.intersected_slivar.trio_quad.all.xls']
+pathogenic_definitions = ['Pathogenic', 'Pathogenic/Likely_pathogenic', 'Likely_pathogenic']
+# filter_clinsig_vars(working_dir, combined_var_files, '.clinvar.xls', pathogenic_definitions)
+
+##parental mosaic from denovo
+trio_files = ['combined.gatk_slivar.trio_quad.all.xls', 'combined.intersected_slivar.trio_quad.all.xls']
+# filter_parental_mosiac(working_dir, trio_files, '.parental_mosaic.xls')
+
+##cnv analysis
+
+##repeat var calling/slivar analysis
+# exome_ped_file = 'exome_test' #test
+# exome_ped_file = 'exome_info.txt' ##all the peds
+##split 5 ways
+# exome_ped_file = 'exome_infoaa'
+# exome_ped_file = 'exome_infoab'
+# exome_ped_file = 'exome_infoac'
+# exome_ped_file = 'exome_infoad'
+# exome_ped_file = 'exome_infoae'
+
+##for combining files
+ped_info_file = 'all_exome_info.txt'
+
+working_dir = '/home/atimms/ngs_data/exomes/working/ghayda_reanalyze_exomes_0121/recall_vars_0221'
+##repeat var calling and slivar
+exome_ped_file = 'exome_info_1021.txt' ##1 repeat 1021
+# repeat_var_calling_0221(working_dir, exome_ped_file)
+
+##redo slivar with new omim and repeats analyses etc
+exome_ped_file = 'exome_info_1021_2.txt' ##20 repeats 1021 after somailer check
+# slivar_analysis_master_0221(working_dir, exome_ped_file)
+
+##latest versions of analysis files - 0221
+var_types = ['.gatk38_slivar.', '.intersect_slivar.']
+ped_info_file = 'all_exome_info_1021.txt' ##after remving 5 pedigrees
+##get counts
+# get_var_counts(working_dir, ped_info_file, var_types)
+
+##combine all single/duo trio and mutiplex files for std analysis files
+combine_var_counts(working_dir, ped_info_file, var_types)
+##also combine the non filtered gatk slivar files
+combine_unfiltered_gatk_slivar_files(working_dir, exome_ped_file, '.not_filtered_analysis.xls')
+
+
+##filter the combined files
+##clivar
+combined_var_files = ['combined.gatk38_slivar.multiplex.all.xls', 'combined.gatk38_slivar.single_duo.all.xls', 
+		'combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_slivar.multiplex.all.xls', 
+		'combined.intersect_slivar.single_duo.all.xls', 'combined.intersect_slivar.trio_quad.all.xls', 
+		'combined.gatk38_not_filtered.multiplex.all.xls', 'combined.gatk38_not_filtered.single_duo.all.xls', 
+		'combined.gatk38_not_filtered.trio_quad.all.xls']
+pathogenic_definitions = ['Pathogenic', 'Pathogenic/Likely_pathogenic', 'Likely_pathogenic']
+filter_clinsig_vars(working_dir, combined_var_files, '.clinvar.xls', pathogenic_definitions)
+
+##parental mosaic from denovo
+trio_files = ['combined.gatk38_slivar.trio_quad.all.xls', 'combined.intersect_slivar.trio_quad.all.xls']
+filter_parental_mosiac(working_dir, trio_files, '.parental_mosaic.xls')
+
+##combine duo_del files, need to run on all samples first
+combine_files(working_dir, var_types, 'duo_del.xls')
+
+##combine genic de novos
+combine_files(working_dir, var_types, 'genic_dn_analysis.xls')
+
+##split quads/quints etc
+##need to split ped and make ped analysis file  i.e. ped, ped split, ped split type
+# exome_ped_file = 'exome_split_1.txt'
+# exome_ped_file = 'exome_split_2.txt'
+# exome_ped_file = 'exome_split_3.txt'
+# exome_ped_file = 'exome_split_4.txt'
+# exome_ped_file = 'exome_split_5.txt'
+# exome_ped_file = 'exome_split_6.txt'
+##redo slivar with
+# slivar_analysis_split_ped(working_dir, exome_ped_file)
+
+
+
+
 ##dominant analysis on specific ped/peds
 # exome_ped_file = 'dom_analysis1.txt'
 exome_ped_file = 'dom_analysis2.txt'
-slivar_dominant_analysis(working_dir, exome_ped_file)
+# slivar_dominant_analysis(working_dir, exome_ped_file)
 
 

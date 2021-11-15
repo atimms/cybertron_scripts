@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -N cherry_call_peaks
-#PBS -l mem=80gb,ncpus=4
+#PBS -N cherry_picking
+#PBS -l mem=100gb,ncpus=5 
 #PBS -o /home/atimms/pbs_logs
 #PBS -j oe
 #PBS -M andrew.timms@seattlechildrens.org
@@ -8,6 +8,24 @@
 # Pick your appropriate project ID for ‘-P’ below: 
 #PBS -P 19833a08-f6fb-4bea-8526-8a79069da878
 
+
 ##run on cdbrmq queue i.e. qsub -q cdbrmq cherry_analysis.pbs
-source activate pyfasta
-cherry_lsgkm_subsets_0321_cyb.py
+# source activate pyfasta
+# cherry_lsgkm_subsets_0321_cyb.py
+
+
+##repeating a bunch of correltaion stuff 1020 for the reviwers/new data
+##sinto
+##mem=200gb,ncpus=20 
+# module load biobuilds
+# module load local_python/3.7.6
+# source activate sinto
+##macs2
+#mem=100gb,ncpus=5 
+# module load local_python/3.7.6 
+# source activate macs2
+##homer
+module load biobuilds
+module load homer/4.9.1
+cherry_scatac_corr_rpts_1021_cyb.py
+

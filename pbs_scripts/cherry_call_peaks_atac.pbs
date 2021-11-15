@@ -24,8 +24,8 @@
 
 ##for macs2
 ##PBS -l mem=100gb,ncpus=5
-module load local_python/3.7.6 
-source activate macs2
+# module load local_python/3.7.6 
+# source activate macs2
 
 ##for making bigwigs
 ##PBS -l mem=100gb,ncpus=5
@@ -41,15 +41,20 @@ source activate macs2
 # cherry_human_scatac_call_peaks_0720_cyb.py
 
 ##running a bunch of ways for correlation
-# cherry_scatac_call_peaks_0820_cyb.py
+##repeat correlation for all samples 1021
+# module load local_python/3.7.6 
+# source activate macs2
+module load biobuilds
+module load homer/4.9.1
+cherry_scatac_call_peaks_0820_cyb.py
 
 ##running on archr analysis files
 # cherry_scatac_archr_call_peaks_0920_cyb.py
 
 ##collapsed samples and rpts 0621
-cherry_scatac_collapse_corr_1020_cyb.py
-cd /home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_scatac_archr_collapse_corr_1020/
-cp *q0.000001_peaks.narrowPeak *q0.000001_summits.bed /active/cherry_t/OrgManuscript_SingleCell_Data/peak_calls/human_cell_class_macs2_0621
+# cherry_scatac_collapse_corr_1020_cyb.py
+# cd /home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_scatac_archr_collapse_corr_1020/
+# cp *q0.000001_peaks.narrowPeak *q0.000001_summits.bed /active/cherry_t/OrgManuscript_SingleCell_Data/peak_calls/human_cell_class_macs2_0621
 
 ##make bigwig from archr 1020
 # cherry_archr_make_bigwigs_1020_cyb.py

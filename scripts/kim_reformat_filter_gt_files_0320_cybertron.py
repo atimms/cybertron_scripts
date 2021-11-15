@@ -9,7 +9,8 @@ delim = '\t'
 def reformat_gt_file(in_file):
 	baf_out_file = in_file.rsplit('_', 1)[0] + '.baf.txt'
 	cnv_out_file = in_file.rsplit('_', 1)[0] + '.cnv.txt'
-	print(in_file, baf_out_file, cnv_out_file)
+	logr_out_file = in_file.rsplit('_', 1)[0] + '.lrr.txt'
+	print(in_file, baf_out_file, cnv_out_file, logr_out_file)
 	sample_list = []
 	gt_dict = {}
 
@@ -24,6 +25,7 @@ def reformat_gt_file(in_file):
 				cnv_value = line[7]
 				cnv_conf = line[8]
 				baf = line[9]
+				lrr = line[10]
 				sample = line[1]
 				if sample not in sample_list:
 					sample_list.append(sample)
@@ -31,22 +33,26 @@ def reformat_gt_file(in_file):
 					gt_dict[snp][1].append(cnv_value)
 					gt_dict[snp][2].append(cnv_conf)
 					gt_dict[snp][3].append(baf)
+					gt_dict[snp][4].append(lrr)
 				else:
-					gt_dict[snp] = [snp_info, [cnv_value], [cnv_conf], [baf]]
+					gt_dict[snp] = [snp_info, [cnv_value], [cnv_conf], [baf], [lrr]]
 	##check have all samples for all snps
 	for gt in gt_dict:
 	# 	print(gt, gt_dict[gt])
 		if len(gt_dict[gt][1]) != len(sample_list):
 			print('bugger.......', len(gt_dict[gt][1]), len(sample_list))
-	with open(baf_out_file, "w") as bout_fh, open(cnv_out_file, "w") as cout_fh:
+	with open(baf_out_file, "w") as bout_fh, open(cnv_out_file, "w") as cout_fh, open(logr_out_file, "w") as lout_fh:
 		header = ['SNP Name', 'Chr', 'Position', 'Allele1 - Forward', 'Allele2 - Forward']
 		baf_head = ['BAF_' + s for s in sample_list]
 		cnvv_head = ['CNV_value_' + s for s in sample_list]
 		cnvc_head = ['CNV_conf_' + s for s in sample_list]
+		lrr_head = ['LRR_' + s for s in sample_list]
 		bout_fh.write(delim.join(header + baf_head) + '\n')
+		lout_fh.write(delim.join(header + lrr_head) + '\n')
 		cout_fh.write(delim.join(header + cnvv_head + cnvc_head) + '\n')
 		for g in gt_dict:
 			bout_fh.write(delim.join([g] + gt_dict[g][0] + gt_dict[g][3]) + '\n')
+			lout_fh.write(delim.join([g] + gt_dict[g][0] + gt_dict[g][4]) + '\n')
 			cout_fh.write(delim.join([g] + gt_dict[g][0] + gt_dict[g][1] + gt_dict[g][2]) + '\n')
 
 
@@ -161,16 +167,29 @@ gt_files = ['glass_grc_genotyping_1_181029_FinalReport.txt', 'glass_grc_genotypi
 # gt_files = ['test_FinalReport.txt']
 
 ##working dir
-working_dir = '/home/atimms/ngs_data/misc/kim_genotyping_0320'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/misc/kim_genotyping_0320'
+# os.chdir(working_dir)
 
 ##make baf and cnv files
 # for gt_file in gt_files:
 # 	reformat_gt_file(gt_file)
 
 ##filter the cnv file and make table of when >=3 probes with conf >=35
+# for gt_file in gt_files:
+# 	cnv_file = gt_file.rsplit('_', 1)[0] + '.cnv.txt'
+# 	cnv_summary_file = gt_file.rsplit('_', 1)[0] + '.cnv_summary.xls'
+# 	get_cnv_region_by_sample(cnv_file, cnv_summary_file)
+
+##redo 1021 with previous 5 and 1 new, also extract lrr info
+working_dir = '/archive/millen_k/kims_data/kim_bdrlgenotypes'
+os.chdir(working_dir)
+gt_files = ['glass_grc_genotyping_1_181029_FinalReport.txt', 'glass_grc_genotyping_2_190730_FinalReport.txt', 
+		'glass_grc_genotyping_3_190813_FinalReport.txt', 'glass_grc_genotyping_4_200116_FinalReport.txt',
+		'glass_grc_genotyping_5_200219_FinalReport.txt', 'glass_grc_genotyping_6_211010_FinalReport.txt']
+##make baf and cnv files
 for gt_file in gt_files:
-	cnv_file = gt_file.rsplit('_', 1)[0] + '.cnv.txt'
-	cnv_summary_file = gt_file.rsplit('_', 1)[0] + '.cnv_summary.xls'
-	get_cnv_region_by_sample(cnv_file, cnv_summary_file)
+	reformat_gt_file(gt_file)
+
+
+
 

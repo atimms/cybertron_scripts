@@ -21,6 +21,7 @@ mm10_ref = '/home/atimms/ngs_data/references/10x/refdata-gex-mm10-2020-A'
 # grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A'
 grc38_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-GRCh38-2020-A-2.0.0'
 mm10_arc_ref = '/home/atimms/ngs_data/references/10x/refdata-cellranger-arc-mm10-2020-A-2.0.0'
+GRCz11_arc_ref = '/home/atimms/ngs_data/references/10x/GRCz11'
 
 ##methods
 def make_dict_from_info_file(in_file):
@@ -199,7 +200,7 @@ def make_arc_library_file_from_dict(sample_name, fq_dicts, out_file):
 		# print(line)
 		ge_fqs = fq_dicts[0]
 		ca_fqs = fq_dicts[1]
-		out_fh.write(','.join([ge_fqs,sample_name ,'Gene Expression']) + '\n')
+		out_fh.write(','.join([ge_fqs,sample_name,'Gene Expression']) + '\n')
 		out_fh.write(','.join([ca_fqs,sample_name,'Chromatin Accessibility']) + '\n')
 
 def make_arc_dict_from_info_file(in_file):
@@ -233,6 +234,22 @@ def cellranger_arc_master(work_dir, infile, ref_dir):
 	sample_dict = make_arc_dict_from_info_file(infile)
 	print(sample_dict)
 	run_cellranger_arc_count(sample_dict, ref_dir, library_file_suffix)
+
+def run_cellranger_arc_count_modified(sample_dict, refdir, lib_file_suffix, gex_umi, atac_umi):
+	for sample in sample_dict:
+		fq_list = sample_dict[sample]
+		lib_file = sample + lib_file_suffix
+		make_arc_library_file_from_dict(sample, fq_list, lib_file)
+		##cellranger-arc count --id=sample345 --reference=/opt/refdata-cellranger-arc-GRCh38-2020-A --libraries=/home/jdoe/runs/libraries.csv
+		cr_count = subprocess.Popen([cellranger_arc, 'count', '--id=' + sample, '--reference=' + refdir, '--libraries=' + lib_file, '--min-atac-count=' + atac_umi, '--min-gex-count=' + gex_umi])
+		cr_count.wait()
+
+def cellranger_arc_master_modified(work_dir, infile, ref_dir, gex_umi, atac_umi):
+	os.chdir(work_dir)
+	library_file_suffix = '.library.csv'
+	sample_dict = make_arc_dict_from_info_file(infile)
+	print(sample_dict)
+	run_cellranger_arc_count_modified(sample_dict, ref_dir, library_file_suffix, gex_umi, atac_umi)
 
 def run_cellranger_atac2_count(sample, fq_dir, refdir):
 	cr_count = subprocess.Popen([cellranger_atac2, 'count', '--id=' + sample, '--fastqs=' + fq_dir, '--reference=' + refdir])
@@ -464,6 +481,13 @@ working_dir = '/archive/millen_k/kims_data/kim_cbl_10X_atac_0821'
 info_file = 'kim_cbl_10X_atac.txt'
 # cellranger_atac2_master(working_dir, info_file)
 
+##dana atac data test 0821
+working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_0821'
+##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_atac_10x_0821.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+
 ##tim/eric scrna
 working_dir = '/active/cherry_t/OrgManuscript_SingleCell_Data/org_snp_multiome/28wk/'
 ##4x columns: sample, fqs, transciptome_ref, and if to include intronic reads (no header)
@@ -476,6 +500,43 @@ intronic_ref = 'yes'
 working_dir = '/active/cherry_t/OrgManuscript_SingleCell_Data/org_scATAC2/wk12_wt_vs_ko'
 ##info on the analysis, 3x columns with no header: sample/id fqs ref_file (atac now uses ARC ref)
 info_file = 'wk12_wt_vs_ko_atac_0921.txt'
-cellranger_atac2_master(working_dir, info_file)
+# cellranger_atac2_master(working_dir, info_file)
+
+##dana atac data test 0821
+working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_0921'
+##info on the analysis, 3x columns with a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_atac_10x_0921.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+##zebrafish multiome data for lisa/hank
+working_dir = '/home/atimms/ngs_data/cellranger/lisa_zf_multiome_1021/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'lisa_zf_multiome_1021.txt'
+transciptome_ref = GRCz11_arc_ref
+min_gex_umi = '500'
+min_atac_umi = '1000'
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+# cellranger_arc_master_modified(working_dir, info_file, transciptome_ref, min_gex_umi, min_atac_umi)
+
+##dana atac data test 0821
+working_dir = '/archive/bennett_j/210930_Bennett_ATAC/'
+##info on the analysis, 3x columns without a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_atac_10x_1021.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+##4 human multiome samples for kim
+working_dir = '/archive/millen_k/kims_data/kim_10x_multi_0921/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'kim_10x_multiome_0921.txt'
+transciptome_ref = grc38_arc_ref
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+##4 human multiome samples for kim
+working_dir = '/archive/millen_k/kims_data/kim_10x_multi_1021/'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'kim_10x_multiome_1021.txt'
+transciptome_ref = grc38_arc_ref
+cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
 
 

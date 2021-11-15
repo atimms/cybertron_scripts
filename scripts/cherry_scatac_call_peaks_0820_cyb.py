@@ -16,7 +16,7 @@ source activate sinto
 /home/atimms/programs/sinto/scripts/sinto
 
 ##for macs2
-qsub -Iq cdbrmq -l mem=100gb,ncpus=5,walltime=10:00:00 -P 19833a08-f6fb-4bea-8526-8a79069da878
+qsub -Iq cdbrmq -l mem=100gb,ncpus=5 -P 19833a08-f6fb-4bea-8526-8a79069da878
 module load local_python/3.7.6 
 source activate macs2
 
@@ -27,7 +27,7 @@ https://hbctraining.github.io/Intro-to-ChIPseq/lessons/07_handling-replicates-id
 
 ##homer
 load modules:
-qsub -Iq cdbrmq -l mem=100gb,ncpus=5,walltime=10:00:00 -P 19833a08-f6fb-4bea-8526-8a79069da87
+qsub -Iq cdbrmq -l mem=100gb,ncpus=5 -P 19833a08-f6fb-4bea-8526-8a79069da87
 module load biobuilds
 module load homer/4.9.1
 
@@ -61,12 +61,15 @@ def call_macs2_on_original_bams(sample_list):
 		out_bampe_keepdups_2 =  name + '.macs2.bampe_p1e-5_keepdups'
 		out_bampe_keepdups_3 =  name + '.macs2.bampe_p1e-10_keepdups'
 		out_bampe_keepdups_4 =  name + '.macs2.bampe_q0.01_keepdups'
+		out_bampe_keepdups_5 =  name + '.macs2.bampe_q0.000001_keepdups'
 		##run macs2 from bam files
 		# run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_2, '-g', 'hs', '-p', '1e-5', '--keep-dup', 'all'])
 		# run_macs2_2.wait()		
-		run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_3, '-g', 'hs', '-p', '1e-10', '--keep-dup', 'all', '--tempdir', '.'])
-		run_macs2_2.wait()
-		run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_4, '-g', 'hs', '-q', '0.01', '--keep-dup', 'all', '--tempdir', '.'])
+		# run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_3, '-g', 'hs', '-p', '1e-10', '--keep-dup', 'all', '--tempdir', '.'])
+		# run_macs2_2.wait()
+		# run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_4, '-g', 'hs', '-q', '0.01', '--keep-dup', 'all', '--tempdir', '.'])
+		# run_macs2_2.wait()
+		run_macs2_2 = subprocess.Popen(['macs2', 'callpeak', '-t', bam, '-f', 'BAMPE', '-n', out_bampe_keepdups_5, '-g', 'hs', '-q', '0.000001', '--keep-dup', 'all', '--tempdir', '.'])
 		run_macs2_2.wait()
 	# '''
 
@@ -150,15 +153,15 @@ def homer_correlation_on_original_bams(samples, d_values, size_values, bed_suffi
 			##merge peak files for annotating the peaks
 			peak_beds = [s + '_bulk' + bed_suffix  for s in samples]
 			merge_file_suffix = bed_suffix.rsplit('.', 1)[0] + '.txt'
-			# merge_peaks_original_bams(merge_prefix, d, peak_beds, merge_file_suffix)
+			merge_peaks_original_bams(merge_prefix, d, peak_beds, merge_file_suffix)
 			##annotate those peaks, and then make a correlation file
 			annotate_peaks_original_bams(samples, merge_prefix, merge_file_suffix, d, tag_dir_suffix, annotate_prefix, size_values)
 			##make file to use in r for heatmaps etc
 			compute_correlation_original_bams(annotate_prefix, merge_file_suffix, d, size_values, correlation_prefix)
 
 ##run methods
-working_dir = '/home/atimms/ngs_data/misc/cherry_scatac_call_peaks_0820'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/misc/cherry_scatac_call_peaks_0820'
+# os.chdir(working_dir)
 
 ##experiment one - correlation on original bams i.e. not split by cell class
 ##sample names
@@ -186,9 +189,26 @@ peak_bed_suffices = ['.macs2.bampe_p1e-10_keepdups_summits.bed', '.macs2.bampe_q
 
 ##use homer to look for correlation
 # homer_correlation_on_original_bams(combined_sample_list, d_values, size_values, peak_bed_suffices, 'yes')
+# homer_correlation_on_original_bams(combined_sample_list, d_values, size_values, peak_bed_suffices, 'no')
 
+##reanalysis 1021 with additional samples
+working_dir = '/home/atimms/ngs_data/misc/cherry_sc_org_project_20/cherry_scatac_corr_rpts_1021'
+os.chdir(working_dir)
+new_samples = ['12wk1', '12wk2', '12wk3']
+combined_sample_list = ['d53', 'd59', 'd74', 'd78', 'd113', 'd132', 'hu5', 'hu7', 'hu8', 
+		'IPSC_c4', 'IPSC_c5_1', '5wk', '5wk_c5_1', '20wk', '20wk_c5_1', '28-1', '28-2',
+		'12wk1', '12wk2', '12wk3']
+# peak_bed_suffices = ['.macs2.bampe_q0.01_keepdups_summits.bed', '.macs2.bampe_q0.000001_keepdups_summits.bed']
+# peak_bed_suffices = ['.macs2.bampe_q0.01_keepdups_summits.bed']
+peak_bed_suffices = ['.macs2.bampe_q0.000001_keepdups_summits.bed']
+
+##just call macs2 on 3 new samples, just using q0.01 a
+# call_macs2_on_original_bams(new_samples)
+##and on all bams using q0.000001
+# call_macs2_on_original_bams(combined_sample_list)
+
+##use homer to look for correlation
+# homer_correlation_on_original_bams(combined_sample_list, d_values, size_values, peak_bed_suffices, 'yes')
 homer_correlation_on_original_bams(combined_sample_list, d_values, size_values, peak_bed_suffices, 'no')
-
-
 
 

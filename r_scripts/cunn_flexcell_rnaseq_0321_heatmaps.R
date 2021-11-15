@@ -165,6 +165,30 @@ for(i in 1:length(filename)){
   save_pheatmap_png(a, gene_png)
 }
 
+##redo some graphs for deema 1021
+workingDir = "/home/atimms/ngs_data/rnaseq/deema_heatmaps_1021";
+setwd(workingDir);
+
+##function for making pngs
+save_pheatmap_png <- function(x, filename, width=1200, height=1000, res = 150) {
+  png(filename, width = width, height = height, res = res)
+  grid::grid.newpage()
+  grid::grid.draw(x$gtable)
+  dev.off()
+}
+##loop through file -- all samples combined, using ratios and +/- 3 as the max/min
+filename <- dir('/home/atimms/ngs_data/rnaseq/deema_heatmaps_1021', pattern ="heatmap.txt")
+for(i in 1:length(filename)){
+  print(filename[i])
+  norm_ratio_data <- read.csv(filename[i],  header=T, row.names=1, sep='\t')
+  norm_ratio_data = replace(norm_ratio_data, norm_ratio_data < -3,-3)
+  norm_ratio_data = replace(norm_ratio_data, norm_ratio_data > 3,3)
+  pheatmap(norm_ratio_data, fontsize_row=4, fontsize_col=8, cluster_cols = F)
+  gene_pdf <- gsub(".txt","_3.pdf",filename[i])
+  dev.copy2pdf(file=gene_pdf, width = 9, height = 6)
+}
+
+
 
 
 
