@@ -317,8 +317,8 @@ def slivar_analysis_master_0221(work_directory, infile):
 def combine_var_files(work_directory, info_file, analysis_types):
 	os.chdir(work_directory)
 	for analysis_type in analysis_types:
-		all_outfile = 'combined' + analysis_type + 'all.avinput'
-		trio_quad_outfile = 'combined' + analysis_type + 'trio_quad.avinput'
+		all_outfile = 'combined' + analysis_type + 'all_1121.avinput'
+		trio_quad_outfile = 'combined' + analysis_type + 'trio_quad_1121.avinput'
 		trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
 		# single_duo_types = ['duo', 'duo*', 'parent_sibship','singleton', 'singleton*', 'sibship']
 		# multiplex_types = ['multiplex']
@@ -370,9 +370,15 @@ var_types = ['.gatk38_slivar.', '.intersect_slivar.']
 
 ##combine avinput files, maybe in trios and all
 ped_info_file = 'all_exome_info.txt'
-combine_var_files(working_dir, ped_info_file, var_types)
+# combine_var_files(working_dir, ped_info_file, var_types)
 
 ##then manually make the 'solved' set of candidates
+
+
+##redo 1121
+##check which peds are being included
+ped_info_file = 'all_exome_info_1121.txt'
+combine_var_files(working_dir, ped_info_file, var_types)
 
 
 

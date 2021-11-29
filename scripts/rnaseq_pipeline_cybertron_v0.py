@@ -1003,7 +1003,14 @@ working_dir = '/home/atimms/ngs_data/rnaseq/vishal_rnaseq_0621'
 working_dir = '/home/atimms/ngs_data/rnaseq/sophie_carm1_splotch_redo_1121'
 conditions_to_use = []
 ##call all methods, so align, count and make files for deseq -- for all time points
-count_and_make_files_for_deseq(working_dir, 'carm1_e12_1121.txt', 'mm10', ['sample'])
-count_and_make_files_for_deseq(working_dir, 'splotch_e12_1121.txt', 'mm10', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'carm1_e12_1121.txt', 'mm10', ['sample'])
+# count_and_make_files_for_deseq(working_dir, 'splotch_e12_1121.txt', 'mm10', ['sample'])
+
+##sophie_carm1_splotch_redo_11210321
+working_dir = '/home/atimms/ngs_data/rnaseq/dlc_vaccine_1121'
+conditions_to_use = []
+##call all methods, so align, count and make files for deseq -- for all time points
+call_rnaseq_methods_for_deseq_analysis(working_dir, 'dlc_vaccine_1121.txt', 'mm10', ['sample'])
+
 
 

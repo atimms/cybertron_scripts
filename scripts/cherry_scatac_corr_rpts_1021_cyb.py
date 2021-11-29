@@ -483,6 +483,23 @@ def filter_and_make_beds_from_diff_peaks_file(homer_dp_files, cut_offs_list):
 							if logfc >= fc_wanted and adjp <= p_wanted:
 								out_fh.write(delim.join(line[1:4]) + '\n')
 
+
+
+def format_int_files_for_upset(infiles):
+	for infile in infiles:
+		outfile = infile.rsplit('.', 1)[0] + '.upset.txt'
+		with open(outfile, 'w') as out_fh, open(infile, 'r') as in_fh:
+			out_fh.write(delim.join(['peak', 'cell_class', 'count']) + '\n')
+			for line in in_fh:
+				line = line.strip('\n').split(delim)
+				peak = '_'.join(line[:3])
+				cc = line[3].rsplit('.',3)[0]
+				count = line[4]
+				if int(count) > 1:
+					count = '1'
+				out_fh.write(delim.join([peak, cc, count]) + '\n')
+
+
 ##run methods
 
 ##params etc
@@ -674,21 +691,6 @@ diff_peak_rep_beds = [i.rsplit('.', 1)[0] + '.bed' for i in diff_peak_rep_files]
 ##compare cell class peaks with getDifferentialPeaksReplicates results
 # bt_int_homer_beds_vs_cc_beds(diff_peak_rep_beds, mature_ccs, homer_peak_bed_suffix)
 
-def format_int_files_for_upset(infiles):
-	for infile in infiles:
-		outfile = infile.rsplit('.', 1)[0] + '.upset.txt'
-		with open(outfile, 'w') as out_fh, open(infile, 'r') as in_fh:
-			out_fh.write(delim.join(['peak', 'cell_class', 'count']) + '\n')
-			for line in in_fh:
-				line = line.strip('\n').split(delim)
-				peak = '_'.join(line[:3])
-				cc = line[3].rsplit('.',3)[0]
-				count = line[4]
-				if int(count) > 1:
-					count = '1'
-				out_fh.write(delim.join([peak, cc, count]) + '\n')
-
-
 ##filter background files by fc and adj pvalue and make bed
 files_to_filter = ['diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.txt', 'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.txt']
 #logfc/p value pairs, first is default
@@ -703,12 +705,137 @@ diff_peak_rep_beds_cutoffs = ['diff_peaks_rep.bg.28wk_organoid_adult_human.balan
 
 ##reformat for graphing
 files_to_reformat = ['diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc1_p0.05.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc2_p0.001.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc3_p0.001.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc1_p0.05.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc2_p0.001.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc3_p0.001.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.28wk_organoid_adult_human.all_peaks.balanced.bt_int.mature_cc.txt', 'diff_peaks_rep.bg.adult_human_28wk_organoid.all_peaks.balanced.bt_int.mature_cc.txt']
-format_int_files_for_upset(files_to_reformat)
+# format_int_files_for_upset(files_to_reformat)
 
 
+def combine_peak_info(int_files, ann_file):
+	##make dict from annfile
+	ann_dict = {}
+	with open(ann_file, 'r') as in_fh:
+		lc = 0
+		for line in in_fh:
+			line = line.strip('\n').split(delim)
+			lc += 1
+			if lc == 1:
+				ann_header = line
+			else:
+				peak = '_'.join(line[1:4])
+				ann_dict[peak] = line
+	for infile in int_files:
+		outfile = infile.rsplit('.', 5)[0] + '.peak_info.txt'
+		with open(outfile, 'w') as out_fh, open(infile, 'r') as in_fh:
+			lc = 0
+			for line in in_fh:
+				line = line.strip('\n').split(',')
+				lc += 1
+				if lc == 1:
+					int_header = [i.strip('"') for i in line[2:]]
+					print(int_header)
+					out_fh.write(delim.join(ann_header + int_header) + '\n')
+				else:
+					int_peak = line[1].strip('"')
+					line_out = ann_dict[int_peak] + line[2:]
+					out_fh.write(delim.join(line_out) + '\n')
+
+def filter_peak_file_prs(infiles, cc_wanted):
+	for infile in infiles:
+		outfile = infile.rsplit('.', 2)[0] + '.' + cc_wanted + '.homer_peak'
+		with open(outfile, 'w') as out_fh, open(infile, 'r') as in_fh:
+			lc = 0
+			for line in in_fh:
+				line = line.strip('\n').split(delim)
+				lc += 1
+				if lc >1:
+					# print(line[27:])
+					counts = [int(i) for i in line[27:39]]
+					if cc_wanted == 'org_rods_cones':
+						if counts[6] != 0 or counts[8] != 0:
+							counts.pop(8)
+							counts.pop(6)
+							# print(line[:5], counts)
+							if sum(counts) == 0:
+								out_fh.write(delim.join(line[:5]) + '\n')
+					elif cc_wanted == 'human_rods_cones':
+						if counts[2] != 0 or counts[5] != 0:
+							counts.pop(5)
+							counts.pop(2)
+							# print(line[:5], counts)
+							if sum(counts) == 0:
+								out_fh.write(delim.join(line[:5]) + '\n')
+					elif cc_wanted == 'human_rods':
+						if counts[5] != 0:
+							counts.pop(5)
+							# print(line[:5], counts)
+							if sum(counts) == 0:
+								out_fh.write(delim.join(line[:5]) + '\n')
+
+def findMotifsGenome_genomic_background(peak_files, size_values):
+	for peak_file in peak_files:
+		for size_req in size_values:
+			out_dir = peak_file.rsplit('.', 1)[0] + '.size_' + size_req + '.find_motifs'
+			#findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+			find_motifs = subprocess.Popen(['findMotifsGenome.pl', peak_file, 'hg38', out_dir, '-size', size_req, '-preparsedDir', './temp4'])
+			find_motifs.wait()
+
+def findMotifsGenome_human_org_comp(peak_pair_dict, size_values):
+	for peak_pair in peak_pair_dict:
+		for size_req in size_values:
+			peak_file = peak_pair_dict[peak_pair][0]
+			bg_peak_file = peak_pair_dict[peak_pair][1]
+			out_dir = 'diff_peaks_rep.bg.human_vs_org_rods_cones.size_' + size_req + '.' + peak_file.split('.')[4] + '.' + peak_file.split('.')[5] + '.find_motifs'
+			#findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+			find_motifs = subprocess.Popen(['findMotifsGenome.pl', peak_file, 'hg38', out_dir, '-size', size_req, '-bg', bg_peak_file, '-preparsedDir', './temp4'])
+			find_motifs.wait()
+
+def findMotifsGenome_org_human_comp(peak_pair_dict, size_values):
+	for peak_pair in peak_pair_dict:
+		for size_req in size_values:
+			peak_file = peak_pair_dict[peak_pair][1]
+			bg_peak_file = peak_pair_dict[peak_pair][0]
+			out_dir = 'diff_peaks_rep.bg.org_vs_human_rods_cones.size_' + size_req + '.' + peak_file.split('.')[4] + '.' + peak_file.split('.')[5] + '.find_motifs'
+			#findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+			find_motifs = subprocess.Popen(['findMotifsGenome.pl', peak_file, 'hg38', out_dir, '-size', size_req, '-bg', bg_peak_file, '-preparsedDir', './temp4'])
+			find_motifs.wait()
+
+##step 12 continuation of step11, combined peaks files, filter and then find motifs in diff peaks
+intersected_files_org_human = ['diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc1_p0.05.bt_int.mature_cc.upset.wide.txt', 
+		'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc2_p0.001.bt_int.mature_cc.upset.wide.txt', 
+		'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc3_p0.001.bt_int.mature_cc.upset.wide.txt']
+intersected_files_human_org = ['diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc1_p0.05.bt_int.mature_cc.upset.wide.txt', 
+		'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc2_p0.001.bt_int.mature_cc.upset.wide.txt', 
+		'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc3_p0.001.bt_int.mature_cc.upset.wide.txt']
+homer_ann_org_human = 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.txt'
+homer_ann_human_org = 'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.txt'
+peak_info_files_org_human = [i.rsplit('.', 5)[0] + '.peak_info.txt' for i in intersected_files_org_human]
+peak_info_files_human_org = [i.rsplit('.', 5)[0] + '.peak_info.txt' for i in intersected_files_human_org]
+homer_peaks_human_org = ['diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc1_p0.05.human_rods_cones.homer_peak', 
+	'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc1_p0.05.human_rods.homer_peak', 
+	'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc2_p0.001.human_rods_cones.homer_peak', 
+	'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc2_p0.001.human_rods.homer_peak', 
+	'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc3_p0.001.human_rods_cones.homer_peak', 
+	'diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc3_p0.001.human_rods.homer_peak']
+findmotifs_sizes = ['200', 'given']
+homer_peaks_human_org_dict = {'lfc1_p0.05': ['diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc1_p0.05.human_rods_cones.homer_peak', 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc1_p0.05.org_rods_cones.homer_peak'],
+		'lfc2_p0.001': ['diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc2_p0.001.human_rods_cones.homer_peak', 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc2_p0.001.org_rods_cones.homer_peak'],
+		'lfc3_p0.001': ['diff_peaks_rep.bg.adult_human_28wk_organoid.balanced.lfc3_p0.001.human_rods_cones.homer_peak', 'diff_peaks_rep.bg.28wk_organoid_adult_human.balanced.lfc3_p0.001.org_rods_cones.homer_peak']}
 
 
+##combine the annotated peak info from homer with the bt int data (from the filtered peaks)
+# combine_peak_info(intersected_files_org_human, homer_ann_org_human)
+# combine_peak_info(intersected_files_human_org, homer_ann_human_org)
 
+##filter peak files for those specific to photorecepters i.e. 3 ways human rods, human rods/cones, org rods/cones
+# filter_peak_file_prs(peak_info_files_org_human, 'org_rods_cones')
+# filter_peak_file_prs(peak_info_files_human_org, 'human_rods')
+# filter_peak_file_prs(peak_info_files_human_org, 'human_rods_cones')
+
+##run findMotifsGenome a few ways
+##compare against genomic background for the human data
+# findMotifsGenome_genomic_background(homer_peaks_human_org, findmotifs_sizes)
+##comapare human rods/cones vs org rods/cones
+# findMotifsGenome_human_org_comp(homer_peaks_human_org_dict, findmotifs_sizes)
+##comapare org rods/cones vs human rods/cones
+findMotifsGenome_org_human_comp(homer_peaks_human_org_dict, findmotifs_sizes)
 
 
 
