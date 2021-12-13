@@ -27,6 +27,9 @@ display.brewer.all(colorblindFriendly = TRUE)
 f2g <- read.table('factors_to_graph_070921.txt', header=T, sep='\t')
 f2g
 
+##just dx1 phenotypes
+ggplot(f2g,aes(y = reorder(DxGroup1, table(DxGroup1)[DxGroup1]), fill=DxGroup1)) + geom_bar() + scale_fill_brewer(palette = "RdYlBu") + theme_minimal() + ylab("DxGroup1")
+ggsave("DxGroup1.barchart.120821.pdf", width = 9, height = 6)
 
 ####classification i.e. ped types
 

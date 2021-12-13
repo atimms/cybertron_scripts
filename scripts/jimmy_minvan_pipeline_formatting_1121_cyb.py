@@ -16,8 +16,8 @@ av_genome = 'hg19'
 av_buildver = ['-buildver', av_genome]
 av_ref_dir = ['/home/atimms/ngs_data/references/annovar/' + av_genome]
 # av_protocol = ['-protocol', 'refGene,clinvar_20190305,cosmic90_coding,cosmic90_noncoding']
-av_protocol = ['-protocol', 'refGene,gnomad211_exome,gnomad211_genome,dbnsfp41a,cosmic90_coding,cosmic90_noncoding,bed', '-bedfile', 'minivan_hotspot_1121.bed']
-av_operation = ['-operation', 'g,f,f,f,f,f,r']
+av_protocol = ['-protocol', 'refGene,gnomad211_exome,gnomad211_genome,dbnsfp41a,cosmic90_coding,cosmic90_noncoding,bed,vcf', '-bedfile', 'minivan_hotspot_1121.bed', '-vcfdbfile', 'Illumina_somatic_hotspots_GRCh37.vcf']
+av_operation = ['-operation', 'g,f,f,f,f,f,r,f']
 av_options = ['-otherinfo', '-remove', '-nastring', '.']
 
 
@@ -59,19 +59,20 @@ def convert_tsv_avinput(infile_prefixes, in_suffix, out_suffix):
 						start = pos
 						end = str(int(start) + (len(ref) -1))
 						# end = pos
-						ref_out = ref
-						alt_out = alt
+						# ref_out = ref
+						# alt_out = alt
 					elif len(alt) > len(ref):
 						start = pos
 						end = pos
-						ref_out = '-'
-						alt_out = alt[1:]
+						# ref_out = ref
+						# alt_out = alt
 					elif len(ref) > len(alt):
-						start = str(int(pos) +1)
+						start = pos
 						end = str(int(pos) + (len(ref) - 1))
-						ref_out = ref[1:]
-						alt_out = '-'
-					out_fh.write(delim.join([chrom, start, end, ref_out, alt_out] + line) + '\n')
+						# ref_out = ref
+						# alt_out = alt
+					# out_fh.write(delim.join([chrom, start, end, ref_out, alt_out] + line) + '\n')
+					out_fh.write(delim.join([chrom, start, end, ref, alt] + line) + '\n')
 	return(header)
 
 def format_multianno(infile_prefixes, in_suffix, out_suffix, filt_out_suffix, original_header):
@@ -85,11 +86,18 @@ def format_multianno(infile_prefixes, in_suffix, out_suffix, filt_out_suffix, or
 				lc += 1
 				line = line.strip().split(delim)
 				if lc ==1:
-					header = original_header + line[5:10] + ['gnomad211_genome_AF', 'gnomad211_genome_AF_popmax'] + ['gnomad211_exome_AF', 'gnomad211_exome_AF_popmax'] + [line[69]] + [line[84]] + line[95:97] + ['hotspot']
+					header = original_header + line[5:10] + ['gnomad211_genome_AF', 'gnomad211_genome_AF_popmax'] + ['gnomad211_exome_AF', 'gnomad211_exome_AF_popmax'] + [line[69]] + [line[84]] + line[95:97] + ['sc_hotspot', 'illumina_hotspot']
 					out_fh.write(delim.join(header) + '\n')
 					fout_fh.write(delim.join(header) + '\n')
 				else:
-					out_fh.write(delim.join(line[98:] + line[5:12] + line[27:29] + [line[69]] + [line[84]] + line[95:98]) + '\n')
+					##change name from annovar input
+					hotspot_info1 = line[97]
+					if hotspot_info1 == 'Name=NA':
+						hotspot_info1 = 'flag_review'
+					hotspot_info2 = line[98]
+					if hotspot_info2 == 'NA':
+						hotspot_info2 = 'flag_review'
+					out_fh.write(delim.join(line[99:] + line[5:12] + line[27:29] + [line[69]] + [line[84]] + line[95:97] + [hotspot_info1,hotspot_info2]) + '\n')
 					genome_popmax = line[11]
 					exome_popmax = line[28]
 					if genome_popmax == '.':
@@ -97,7 +105,7 @@ def format_multianno(infile_prefixes, in_suffix, out_suffix, filt_out_suffix, or
 					if exome_popmax == '.':
 						exome_popmax = '0'
 					if float(genome_popmax) <= 0.05 and float(exome_popmax) <= 0.05:
-						fout_fh.write(delim.join(line[98:] + line[5:12] + line[27:29] + [line[69]] + [line[84]] + line[95:98]) + '\n')
+						fout_fh.write(delim.join(line[99:] + line[5:12] + line[27:29] + [line[69]] + [line[84]] + line[95:97]+ [hotspot_info1,hotspot_info2]) + '\n')
 
 def remove_int_files(suffixes_to_rm):
 	for suffix_to_rm in suffixes_to_rm:
@@ -115,24 +123,25 @@ def remove_int_files(suffixes_to_rm):
 working_dir = '/active/bennett_j/miniVAN/VANseq_BSSH_Pipeline_Development'
 os.chdir(working_dir)
 
-file_prefix_names = ['21H-164L0001.hard-filtered.annotations', '21H-267L0004.hard-filtered.annotations']
+file_prefix_names = ['21H-164L0001.hard-filtered.annotations', '21H-267L0004.hard-filtered.annotations', 
+		'21H-301L0003.hard-filtered.annotations']
+##21H-277L0003 309L0001 didn't work
+# file_prefix_names = ['21H-164L0001.hard-filtered.annotations']
 json_suffix = '.json.gz'
 tsv_suffix = '.tsv'
 av_suffix = '.avinput'
 multi_suffix = '.hg19_multianno.txt'
 anno_suffix = '.all_variants.xls'
 filtered_anno_suffix = '.0.05af_variants.xls'
+
+##changing json to annotated file
 ##convert gzip json to tsv
 # convert_json_tsv(file_prefix_names, json_suffix, tsv_suffix)
-
 ##convert tsv to avinput
-tsv_header = convert_tsv_avinput(file_prefix_names, tsv_suffix, av_suffix)
-
+# tsv_header = convert_tsv_avinput(file_prefix_names, tsv_suffix, av_suffix)
 ##run annovar
-# run_annovar(file_prefix_names, av_suffix)
-
+# run_annovar_vcf(file_prefix_names, av_suffix)
 ##format multianno
-format_multianno(file_prefix_names, multi_suffix, anno_suffix, filtered_anno_suffix, tsv_header)
-
+# format_multianno(file_prefix_names, multi_suffix, anno_suffix, filtered_anno_suffix, tsv_header)
 ##rm intermediate files
 remove_int_files([tsv_suffix, av_suffix, multi_suffix])

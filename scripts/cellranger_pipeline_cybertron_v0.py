@@ -536,7 +536,20 @@ working_dir = '/archive/millen_k/kims_data/kim_10x_multi_1021/'
 ##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
 info_file = 'kim_10x_multiome_1021.txt'
 transciptome_ref = grc38_arc_ref
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+##dana atac data from miseq 1221
+working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_1221'
+##info on the analysis, 3x columns without a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_mouse_kidney_atac_10x_1221.txt'
+# cellranger_atac2_master(working_dir, info_file)
+info_file = 'dana_avm_10x_atac_1221.txt'
+# cellranger_atac2_master(working_dir, info_file)
+
+##extra sequenceing for previous human multiome samples for kim
+working_dir = '/archive/millen_k/kims_data/kim_10x_multi_1021_embredo'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'kim_10x_multi_1021_embredo.txt'
+transciptome_ref = grc38_arc_ref
 cellranger_arc_master(working_dir, info_file, transciptome_ref)
-
-
 

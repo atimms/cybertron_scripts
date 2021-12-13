@@ -342,4 +342,31 @@ write.csv(cluster_sample_counts, file='counts.cluster_sample.csv')
 cluster_genotype_counts = table(comb$seurat_clusters, comb$genotype)
 write.csv(cluster_genotype_counts, file='counts.cluster_genotype.csv')
 
+##120912
+##load seurat object
+comb <- readRDS(file ="combined.rds")
 
+##load and renormalize RNA data
+DefaultAssay(comb) = 'RNA'
+comb=NormalizeData(comb)
+
+##graph known markers
+#Dot plot - the size of the dot = % of cells and color represents the average expression
+markers <- c('myod1', 'dmd')
+DotPlot(comb, features = markers) + RotatedAxis()
+dev.copy2pdf(file="RNA.myod1_dmd.DotPlot.pdf", width = 7, height =7)
+##others
+FeaturePlot(comb, features = c('myod1', 'dmd'))
+dev.copy2pdf(file="RNA.myod1_dmd.FeaturePlot.pdf", width = 12, height =7)
+VlnPlot(comb,c("myod1", 'dmd'), pt.size = 0.01)
+dev.copy2pdf(file="RNA.myod1_dmd.VlnPlot.pdf", width = 12, height =7)
+RidgePlot(comb,c("myod1", 'dmd'))
+dev.copy2pdf(file="RNA.myod1_dmd.RidgePlot.pdf", width = 7, height =7)
+
+##subset clusters 1,8 and 11 and then run DE
+Idents(comb) = 'seurat_clusters'
+comb_c1811 <- subset(comb, idents = c(1,8,11))
+##DE by genotype
+Idents(comb_c1811) = 'genotype'
+comb_c1811.de = FindAllMarkers(comb_c1811, only.pos = TRUE, logfc.threshold = 0.25)
+write.csv(comb_c1811.de, file = 'RNA.clusters1811.DE_genotype.csv')

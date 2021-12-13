@@ -40,4 +40,7 @@ module load java/1.8.0_121
 # daniela_genomes_0219_uw_coverage_1020_cyb.py
 
 ##slivar analysis 0221
-daniela_slivar_analysis_0221_cyb.py
+# daniela_slivar_analysis_0221_cyb.py
+
+##slivar analysis 1221
+daniela_slivar_analysis_1221_cyb.py
