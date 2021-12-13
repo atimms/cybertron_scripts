@@ -1,4 +1,4 @@
-qcatch all for scripts on cybertron:
+catch all for scripts on cybertron:
 
 biweekly copy scripts to /home/atimms/git/cybertron_scripts:
 
