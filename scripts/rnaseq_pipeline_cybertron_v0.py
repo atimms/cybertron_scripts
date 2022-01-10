@@ -1010,7 +1010,8 @@ conditions_to_use = []
 working_dir = '/home/atimms/ngs_data/rnaseq/dlc_vaccine_1121'
 conditions_to_use = []
 ##call all methods, so align, count and make files for deseq -- for all time points
-call_rnaseq_methods_for_deseq_analysis(working_dir, 'dlc_vaccine_1121.txt', 'mm10', ['sample'])
+# call_rnaseq_methods_for_deseq_analysis(working_dir, 'dlc_vaccine_1121.txt', 'mm10', ['sample'])
 
-
-
+##jimmy_rnaseq_0122
+working_dir = '/home/atimms/ngs_data/rnaseq/jimmy_rnaseq_0122'
+call_rnaseq_methods_for_deseq_analysis(working_dir, 'jimmy_rnaseq_0122.txt', 'GRCh38', ['sample'])

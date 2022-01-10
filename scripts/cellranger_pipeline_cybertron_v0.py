@@ -551,5 +551,13 @@ working_dir = '/archive/millen_k/kims_data/kim_10x_multi_1021_embredo'
 ##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
 info_file = 'kim_10x_multi_1021_embredo.txt'
 transciptome_ref = grc38_arc_ref
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+
+##multiome data for tim's collabarotor jen chao
+working_dir = '/active/cherry_t/chao_multiome_0122'
+##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
+info_file = 'chao_multiome_data_0122.txt'
+transciptome_ref = grc38_arc_ref
 cellranger_arc_master(working_dir, info_file, transciptome_ref)
 

@@ -168,7 +168,7 @@ file_prefix_dict = {'21H-164L0001.hard-filtered': ['21H-164L0001.hard-filtered.a
 		'21H-309L0001.hard-filtered': ['21H-309L0001.hard-filtered.annotations.json.gz','21H-309L0001.hard-filtered.vcf.gz']}
 # file_prefix_dict = {'21H-164L0001.hard-filtered': ['21H-164L0001.hard-filtered.annotations.json.gz', '21H-164L0001.hard-filtered.vcf.gz']}
 ##changing json to annotated file
-# make_tsv_add_extra_annotation(file_prefix_dict)
+make_tsv_add_extra_annotation(file_prefix_dict)
 
 
 ##get mappng stats
@@ -183,7 +183,7 @@ samples_stats_wanted = ['21H-277L0003', '21H-301L0003', '21H-306L0006', '21H-309
 
 
 
-get_mapping_stats(samples_stats_wanted, mapping_stats_wanted, bed_stats_wanted)
+# get_mapping_stats(samples_stats_wanted, mapping_stats_wanted, bed_stats_wanted)
 
 
 
