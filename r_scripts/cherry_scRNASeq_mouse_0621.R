@@ -112,6 +112,32 @@ write.csv(counts_cluster_sample, file='mouse_scrnaseq.harmony.counts_cluster_sam
 mouse_harmony.markers <- FindAllMarkers(mouse_harmony, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 write.csv(mouse_harmony.markers, file='mouse_scrnaseq_all_0620.harmony.markers.res0.3.csv')
 
+##save
+saveRDS(mouse_harmony, file = "mouse_harmony.rds")
+##and load if needed
+mouse_harmony <- readRDS(file = "mouse_harmony.rds")
+
+##add cell classes
+levels(mouse_harmony)
+new.cluster.ids <- c('Early Primary Progenitors', 'Early Primary Progenitors', 'Rods', 'Late Primary Progenitors', 'Horizontals', 'Late Neurogenic Progenitors', 'Progenitors', 'Amacrines', 'Cones', 'Bipolars', 'Ganglions', 'Bipolars')
+names(new.cluster.ids) <- levels(mouse_harmony)
+mouse_harmony <- RenameIdents(mouse_harmony, new.cluster.ids)
+DimPlot(mouse_harmony, reduction = "umap", pt.size = 0.1, label = TRUE)
+dev.copy2pdf(file="mouse_scrnaseq_all_0620.harmony.UMAP_celltypes.res0.3.pdf", width=10, height=10)
+
+
+##get dotplots for marker genes 0122
+markers_0122 = c('Slc16a1', 'Slc16a3', 'Slc16a7', 'Slc16a8')
+DotPlot(mouse_harmony, features = markers_0122) + RotatedAxis()
+dev.copy2pdf(file="mouse_scrnaseq_all_0620.SLC16_genes_0122.dotplot.pdf", width = 12, height = 6)
+
+##save
+saveRDS(mouse_harmony, file = "mouse_harmony_0122.rds")
+mouse_harmony <- readRDS(file = "mouse_harmony_0122.rds")
+
+
+
+
 
 
 
@@ -126,6 +152,7 @@ DimPlot(human_harmony, reduction = "umap", pt.size = 0.1, label = TRUE)
 DimPlot(human_harmony_subset, reduction = "umap", pt.size = 0.1, label = TRUE)
 
 ##make marked umap
+levels(mouse_harmony)
 new.cluster.ids <- c('Rods', 'Progenitors', 'Ganglions', 'Amacrines', 'Ganglions', 'Progenitors', 'Horizontals', 'Cones', 'Mullers', 'Progenitors', 'Ganglions', 'Ganglion precursors', 'BC/Photoreceptor precursors', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Bipolars', 'Progenitors', 'Progenitors', 'Ganglions', 'Amacrines', 'Astrocytes', 'Microglia', 'Progenitors')
 names(new.cluster.ids) <- levels(human_harmony_subset)
 human_harmony_subset <- RenameIdents(human_harmony_subset, new.cluster.ids)
@@ -154,9 +181,6 @@ write.csv(sample.celltype.info, file='./seurat_analysis/all/human_scrnaseq_all_0
 
 
 
-##save
-saveRDS(mouse_harmony, file = "mouse_harmony.rds")
-##and load if needed
-#mouse_harmony <- readRDS(file = "mouse_harmony.rds")
+
 
 
