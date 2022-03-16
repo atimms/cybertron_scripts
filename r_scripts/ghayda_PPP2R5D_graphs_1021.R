@@ -183,3 +183,43 @@ ggplot(data=pheno_count_data, aes(x=Condition, y=count, fill=Type)) +
   geom_bar(stat="identity", position=position_dodge(), colour="black") + theme_classic()  + theme(axis.text.x = element_text(angle = 45, hjust=1)) +  scale_fill_manual(values=cbPalette)
 ggsave("pheno_barchart.101821.pdf", width = 18, height = 12)
 
+
+##format differently 0222
+
+##vineland
+data_wide <- read.table('vineland.txt', header=T, sep='\t')
+##convert to long format
+keycol <- "score_type"
+valuecol <- "score"
+gathercols <- c('Communication_domain', 'Daily_living_skills_domain', 'Socialization_domain', 'Motor_skills_domain', 'Adaptive_Behavior_Composite')
+data_long <- gather_(data_wide, keycol, valuecol, gathercols)
+data_long
+##have same order as input
+#Turn your 'treatment' column into a character vector
+data_long$score_type <- as.character(data_long$score_type)
+#Then turn it back into a factor with the levels in the correct order
+data_long$score_type <- factor(data_long$score_type, levels=unique(data_long$score_type))
+##graph as dotplot, no color i.e. removed fill=score_type
+dp <-ggplot(data_long, aes(x=score_type, y=score, binwidth = 1)) + 
+  geom_dotplot(binaxis='y', stackdir='center', binwidth = 1,show.legend = FALSE)+
+  labs(y = "score")
+dp + theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust=1)) + geom_hline(yintercept = c(70,85,114))+ expand_limits(y=c(0,120)) +
+  stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.5, color = 'red') +
+  scale_x_discrete(breaks=c('Communication_domain', 'Daily_living_skills_domain', 'Socialization_domain', 'Motor_skills_domain', 'Adaptive_Behavior_Composite'),
+                   labels=c('Communication domain', 'Daily living skills domain', 'Socialization domain', 'Motor skills domain', 'Adaptive Behavior Composite'))
+ggsave("vineland.020922.pdf", width = 9, height = 6)
+
+
+##bar charts for counts
+pheno_count_data <- read.table('pheno_data_020921.txt', header=T, sep='\t')
+head(pheno_count_data)
+##to have same order as input df... https://stackoverflow.com/questions/12774210/how-do-you-specifically-order-ggplot2-x-axis-instead-of-alphabetical-order
+#Turn your 'treatment' column into a character vector
+pheno_count_data$Condition <- as.character(pheno_count_data$Condition)
+#Then turn it back into a factor with the levels in the correct order
+pheno_count_data$Condition <- factor(pheno_count_data$Condition, levels=unique(pheno_count_data$Condition))
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+##graph
+ggplot(data=pheno_count_data, aes(x=Condition, y=Percentage, fill=Type)) +
+  geom_bar(stat="identity", position=position_dodge(), colour="black") + theme_classic()  + theme(axis.text.x = element_text(angle = 45, hjust=1)) +  scale_fill_manual(values=cbPalette)
+ggsave("pheno_barchart.020921.pdf", width = 18, height = 12)

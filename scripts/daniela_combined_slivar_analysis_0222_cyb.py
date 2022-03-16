@@ -20,7 +20,8 @@ threads = '5'
 ##programs
 bcftools = '/home/atimms/programs/bcftools-1.11/bcftools'
 slivar = '/home/atimms/programs/slivar_1221/slivar'
-slivar_functions = '/home/atimms/programs/slivar_1221/slivar-0.2.7/js/slivar-functions_adj.js'
+# slivar_functions = '/home/atimms/programs/slivar_1221/slivar-0.2.7/js/slivar-functions_adj.js'
+slivar_functions = '/home/atimms/programs/slivar_1221/slivar-0.2.7/js/slivar-functions.js'
 table_annovar = '/home/atimms/programs/annovar_1019/table_annovar.pl'
 gatk = '/home/atimms/programs/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar'
 freebayes = '/home/atimms/programs/freebayes-1.3.4-linux-static-AMD64'
@@ -73,11 +74,11 @@ def merge_std_silvar_annovar(std_tsv, cp_tsv, multianno, outfile, std_vcf):
 			lc += 1
 			if lc == 1:
 				##add header info
-				extra_header = line[8:10] + line[96:100] + ['Geno2MP'] + [line[69]] + line[83:85] + line[47:49] + line[50:52] + [line[58]] + line[10:44] + ['vcf_format'] + vcf_samples
+				extra_header = line[8:10] + line[96:100] + ['Geno2MP'] + [line[69]] + line[83:85] + line[47:49] + line[50:52] + [line[58]] + line[10:44] + ['vcf_info', 'vcf_format'] + vcf_samples
 			else:
 				chr_pos_ref_alt = ':'.join(line[104:106] + line[107:109])
-				##keep refgene, clivar/Geno2MP, cadd, gerp, polyphe, mutataster/mutass,REVEL, extra gnomad, vcf info
-				info_to_keep = line[8:10] + line[96:101] + [line[69]] + line[83:85] + line[47:49]  + line[50:52] + [line[58]] + line[10:44] + line[112:]
+				##keep refgene, clivar/Geno2MP, cadd, gerp, polyphen, mutataster/mutass,REVEL, extra gnomad, vcf info
+				info_to_keep = line[8:10] + line[96:101] + [line[69]] + line[83:85] + line[47:49]  + line[50:52] + [line[58]] + line[10:44] + line[111:]
 				multianno_dict[chr_pos_ref_alt] = info_to_keep
 	with open(outfile, "w") as out_fh:
 		with open(std_tsv, "r") as std_fh:
@@ -290,15 +291,16 @@ def split_ped_file_into_ped_types(infile, ped_dict, out_prefix):
 
 
 def standard_slivar_protocol(ped_info_file, project_name, combined_vcf, combined_ped):
-	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
-	duo_types = ['duo', 'duo*', 'parent_sibship']
-	single_types = ['singleton', 'singleton*', 'sibship']
-	duo_single_types = duo_types + single_types
+	##ped types for slivar analysis
+	trio_types = ['trio', 'quad', 'trio_with_sib', 'trio_ms', 'quint']
+	duo_single_types = ['duo', 'duo_ms', 'parent_sibship', 'singleton', 'singleton_ms', 'sibship']
 	multiplex_types = ['multiplex']
 	##annoate the combined vcf
 	vcf_prefix = combined_vcf.rsplit('.',2)[0]
 	annotated_vcf = vcf_prefix + '.bcftools.GRCh37_87.vcf.gz'
+	'''
 	process_annotate_vcf(annotated_vcf, combined_vcf, vcf_prefix)
+	'''
 	##get ped ids for the three groups
 	ped_type_dict = {'trios': [], 'single_duos': [], 'multiplex':[]}
 	with open(ped_info_file, 'r') as pi_fh:
@@ -320,7 +322,7 @@ def standard_slivar_protocol(ped_info_file, project_name, combined_vcf, combined
 	for ped_type in ped_type_dict:
 		ped_file = project_name + '.' + ped_type + '.ped' 
 		# print(annotated_vcf, ped_file, formatted_ped_type)
-		# '''
+		'''
 		if ped_type == 'trios':
 			if len(ped_type_dict['trios']) > 0:
 				slivar_std_analysis_on_trio(annotated_vcf, ped_file)
@@ -332,7 +334,11 @@ def standard_slivar_protocol(ped_info_file, project_name, combined_vcf, combined
 				slivar_std_analysis_on_multiplex(annotated_vcf, ped_file)
 		else:
 			print(ptype, ' ped type not recognized')
-		# '''
+		'''
+		##temp for just analyzing multiplex ped
+		if ped_type == 'multiplex':
+			if len(ped_type_dict['multiplex']) > 0:
+				slivar_std_analysis_on_multiplex(annotated_vcf, ped_file)
 		# if ped_type.lower() in trio_types or ped_type.lower() in multiplex_types or ped_type.lower() in duo_types:
 		# 	slivar_duo_del(annotated_vcfs, ped_file, formatted_ped_type)
 
@@ -351,31 +357,93 @@ def somalier_check(vcf, ped):
 	som_relate = subprocess.Popen([somalier, 'relate', '--infer', '--ped', ped, 'somalier_extract/*.somalier'])
 	som_relate.wait()
 
+
+
+def get_var_counts_per_ped(info_file, in_files):
+	##make dict from info file
+	info_dict = {}
+	with open(info_file, "r") as in_fh:
+		for line in in_fh:
+			line = line.rstrip().split(delim)
+			ped = line[0]
+			ped_info = line[1:]
+			if ped in info_dict:
+				print('ped seen multiple times')
+			else:
+				info_dict[ped] = ped_info
+
+	for in_file in in_files:
+		outfile = in_file.rsplit(".", 1)[0] + '.counts.xls'
+		##make counts dict
+		var_count_dict = {}
+		with open(in_file, "r") as std_fh:
+			lc2 = 0
+			for line2 in std_fh:
+				line2 = line2.rstrip().split(delim)
+				lc2 += 1
+				if lc2 > 1:
+					var_type = line2[0]
+					ped = line2[1]
+					if var_type.startswith('slivar_comphet'):
+						var_type = 'slivar_comphet'
+					if ped in var_count_dict:
+						var_count_dict[ped].append(var_type)
+					else:
+						var_count_dict[ped] = [var_type]
+		##get list of all var types we see with these std files
+		all_var_types = []
+		for p in var_count_dict:
+			all_var_types.extend(var_count_dict[p])
+		all_var_types = list(set(all_var_types))
+		# print(in_file_suffix, all_var_types)
+		##count var types and print out
+		with open(outfile, "w") as out_fh:
+			out_fh.write(delim.join(['ped', 'ped_type', 'seq_batch'] + all_var_types) + '\n')
+			for ped in var_count_dict:
+				ped_tb = info_dict[ped]
+				counts = []
+				for var in all_var_types:
+					count = var_count_dict[ped].count(var)
+					counts.append(count)
+				counts = [str(i) for i in counts]
+				# print(ped, ped_tb, all_var_types, counts)
+				# print(var_count_dict[ped][0])
+				out_fh.write(delim.join([ped] + ped_tb + counts) + '\n')
+
+
 ##run methods
-working_dir = '/home/atimms/ngs_data/exomes/working/daniela_exomes_1221'
+working_dir = '/home/atimms/ngs_data/exomes/working/daniela_combined_analysis_0222'
 os.chdir(working_dir)
 
-##ped types for slivar analysis
-trio_types = ['trio', 'quad', 'trio_with_sib', 'trio*', 'quint']
-duo_single_types = ['duo', 'duo*', 'parent_sibship', 'singleton', 'singleton*', 'sibship']
-multiplex_types = ['multiplex']
 
-##exomes 1221
-exome_original_vcf = 'luquetti_grc_exome_3.HF.final.vcf.gz'
-vcf_sample_names = 'luquetti_grc_exome_3.sample_names.txt'
-exome_vcf = 'luquetti_grc_exome_3.HF.sample_ids.vcf.gz'
-exome_ped = 'exomes_1221.ped'
-exome_prefix = 'exomes_1221'
-exome_ped_info = 'exomes_1221.ped_info.txt'
+
+##names etc
+original_vcf = 'luquetti_grc_combined_2.HF.final.vcf.gz'
+vcf_sample_names = 'luquetti_grc_combined_2.sample_names.txt'
+combined_vcf = 'luquetti_grc_combined_2.HF.sample_ids.vcf.gz'
+combined_prefix = 'cfm_combined_0222'
+combined_ped = combined_prefix + '.ped'
+## 3 columns: ped id, ped type, batch
+combined_ped_info = combined_prefix + '.ped_info.txt'
+##result files 
+combined_var_files = 'cfm_combined_0222.multiplex.std_analysis.xls', 'cfm_combined_0222.single_duos.std_analysis.xls', 'cfm_combined_0222.trios.std_analysis.xls'
+
 
 ##change sample names in original vcf
-# reheader_vcf(exome_original_vcf, exome_vcf, vcf_sample_names)
-
-##run slivar after splitting ped and vcf file
-standard_slivar_protocol(exome_ped_info, exome_prefix, exome_vcf, exome_ped)
+# reheader_vcf(original_vcf, combined_vcf, vcf_sample_names)
 
 ##check sex and ibd sharing using somalier
-somalier_check(exome_vcf, exome_ped)
+# somalier_check(combined_vcf, combined_ped)
+
+##run slivar after splitting ped and vcf file
+standard_slivar_protocol(combined_ped_info, combined_prefix, combined_vcf, combined_ped)
+
+##counts per ped
+get_var_counts_per_ped(combined_ped_info, combined_var_files)
+
+##additional filtering etc
+
+
 
 
 

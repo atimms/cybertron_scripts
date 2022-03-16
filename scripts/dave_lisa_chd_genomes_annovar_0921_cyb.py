@@ -139,7 +139,8 @@ def format_vars_by_proband(in_file, out_file):
 			out_fh.write(delim.join([p, genes, variants]) + '\n')
 
 ##run methods
-working_dir = '/home/atimms/ngs_data/genomes/dave_lisa_chd_genomes_0921'
+# working_dir = '/home/atimms/ngs_data/genomes/dave_lisa_chd_genomes_0921'
+working_dir = '/home/atimms/ngs_data/genomes/dave_lisa_chd_genomes_0222' ## look for grebl1 vars for dave
 os.chdir(working_dir)
 project_name = 'chd_genomes_0921'
 combined_vcf = 'PCGC_CHD_phs001735_TOPMed_WGS_freeze.9b.combined.hg38.c1.vcf.gz'
@@ -155,10 +156,10 @@ exonic_rare_vars = project_name + '.exonic_rare.txt'
 
 ##step2. annotate with annovar and sormat
 # annotate_vcf_with_annovar(proband_vcf, project_name)
-multi_to_ann(multianno, annotated)
+# multi_to_ann(multianno, annotated)
 
 ##step3. filter exonic rare vars
-filter_exon_rare_vars(annotated, exonic_rare_vars)
+# filter_exon_rare_vars(annotated, exonic_rare_vars)
 
 ##step4. filter by gene
 lisa_genes = ['POMP', 'PSMD6', 'PSMA6', 'PSMD3', 'PSMA7']
@@ -171,16 +172,22 @@ chd_genes = ['ABL1', 'ACTC1', 'ACVR1', 'ACVR2B', 'ADAMTS10', 'AFF4', 'ANKRD11', 
 		'NKX2-5', 'NKX2-6', 'NODAL', 'NONO', 'NOTCH1', 'NOTCH2', 'NPHP3', 'NPHP4', 'NR2F2', 'NRAS', 'NSD1', 'NUP188', 
 		'PBX1', 'PIGL', 'PIGV', 'PITX2', 'PKD1L1', 'PRDM6', 'PRKD1', 'PTPN11', 'RAB23', 'RAD21', 'RAF1', 'RBFOX2', 'RERE', 'RIT1', 'SALL1', 'SALL4', 'SF3B4', 'SHOC2', 'SMAD2', 'SMAD3', 'SMAD4', 'SMAD6', 'SMARCA4', 'SMARCB1', 'SMARCE1', 'SMC1A', 'SMC3', 'SMG9', 'SON', 'SOS1', 'STRA6', 'TAB2', 'TBX1', 'TBX20', 'TBX5', 'TFAP2B', 'TGFBR1', 'TGFBR2', 'TLL1', 'TRAF7', 'TXNL4A', 'UBR1', 'WASHC5', 'ZEB2', 'ZFPM2', 'ZIC3']
 carm1 = ['CARM1']
+greb1l = ['GREB1L']
 lisa_genes_vars = project_name + '.exonic_rare.lisa_genes.xls'
 chd_genes_vars = project_name + '.exonic_rare.chd_genes.xls'
 carm1_vars = project_name + '.exonic_rare.carm1.xls'
-filter_by_genenames(exonic_rare_vars, lisa_genes, lisa_genes_vars)
-filter_by_genenames(exonic_rare_vars, chd_genes, chd_genes_vars)
-filter_by_genenames(exonic_rare_vars, carm1, carm1_vars)
+greb1l_vars = project_name + '.exonic_rare.greb1l.xls'
+# filter_by_genenames(exonic_rare_vars, lisa_genes, lisa_genes_vars)
+# filter_by_genenames(exonic_rare_vars, chd_genes, chd_genes_vars)
+# filter_by_genenames(exonic_rare_vars, carm1, carm1_vars)
+filter_by_genenames(exonic_rare_vars, greb1l, greb1l_vars)
 
 ##step5. modify chd vars file to gene/var by sample
-chd_genes_vars_formatted = project_name + '.exonic_rare.chd_genes.by_proband.xls'
-format_vars_by_proband(chd_genes_vars, chd_genes_vars_formatted)
+# chd_genes_vars_formatted = project_name + '.exonic_rare.chd_genes.by_proband.xls'
+# format_vars_by_proband(chd_genes_vars, chd_genes_vars_formatted)
+
+greb1l_vars_formatted = project_name + '.exonic_rare.greb1l.by_proband.xls'
+format_vars_by_proband(greb1l_vars, greb1l_vars_formatted)
 
 
 

@@ -488,10 +488,20 @@ error_correction_wanted = ['a', 'b', 'c', 'd']
 
 
 ##new run 0921
-working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0921'
-os.chdir(working_dir)
+# working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0921'
+# os.chdir(working_dir)
 ##3 columns, sample name, fq1, fq2
 info_file = 'minivan_0921.txt'
+project = info_file.split('.')[0]
+error_correction_wanted = ['a', 'b', 'c', 'd']
+# minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)
+
+
+##new run 0921
+working_dir = '/home/atimms/ngs_data/targetted/jimmy_minivan_0122'
+os.chdir(working_dir)
+##3 columns, sample name, fq1, fq2
+info_file = 'minivan_0122.txt'
 project = info_file.split('.')[0]
 error_correction_wanted = ['a', 'b', 'c', 'd']
 minivan_analysis_master_v2(info_file, project, minvan_bed, hotspot_bed, error_correction_wanted)

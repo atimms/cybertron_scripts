@@ -559,5 +559,13 @@ working_dir = '/active/cherry_t/chao_multiome_0122'
 ##info on the analysis, 4x columns with a header: sample fq_ge fq_atac
 info_file = 'chao_multiome_data_0122.txt'
 transciptome_ref = grc38_arc_ref
-cellranger_arc_master(working_dir, info_file, transciptome_ref)
+# cellranger_arc_master(working_dir, info_file, transciptome_ref)
+
+
+
+##dana atac data from miseq 0222
+working_dir = '/home/atimms/ngs_data/cellranger/dana_atac_10x_0222'
+##info on the analysis, 3x columns without a header: sample/id fqs ref_file (atac now uses ARC ref)
+info_file = 'dana_atac_10x_0222.txt'
+cellranger_atac2_master(working_dir, info_file)
 
